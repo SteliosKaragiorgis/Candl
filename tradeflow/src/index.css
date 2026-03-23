@@ -52,18 +52,56 @@
 
 /* ── Dark mode ── */
 [data-theme="dark"] {
-  --bg: #0d0d0f;
-  --surface: #18181b;
-  --surface-2: #1f1f24;
-  --border: #2a2a30;
-  --border-2: #222228;
+  --bg:       #0f0f12;
+  --surface:  #1a1a1f;
+  --surface-2: #222228;
+  --surface2:  #222228;
+  --surface-3: #2a2a30;
+  --surface3:  #2a2a30;
+  --border:   #2e2e36;
+  --border-2: #262630;
+  --border2:  #262630;
 
-  --text: #f0f0f0;
-  --text-2: #aaa;
-  --text-3: #555;
+  --text:   #f0f0f5;
+  --text-2: #b0b0c0;
+  --text2:  #b0b0c0;
+  --text-3: #686878;
+  --text3:  #686878;
+  --text4:  #404050;
 
-  --blue-dim: rgba(0,71,255,0.12);
-  --blue-border: rgba(0,71,255,0.3);
+  --blue-dim:    rgba(0,71,255,0.15);
+  --blue-bg:     rgba(0,71,255,0.12);
+  --blue-border: rgba(0,71,255,0.25);
+
+  --green-bg:     rgba(22,163,74,0.12);
+  --green-border: rgba(22,163,74,0.25);
+  --red-bg:       rgba(220,38,38,0.12);
+  --red-border:   rgba(220,38,38,0.25);
+  --gold-bg:      rgba(202,138,4,0.12);
+  --gold-border:  rgba(202,138,4,0.25);
+  --amber-bg:     rgba(217,119,6,0.12);
+}
+
+/* Dark mode — card borders */
+[data-theme="dark"] .trade-card {
+  border-color: var(--border) !important;
+}
+[data-theme="dark"] .trade-card:hover {
+  border-color: var(--blue-border) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+}
+
+/* Dark mode — inputs */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: var(--surface2) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text4) !important;
 }
 
 /* ── Reset ── */
@@ -238,3 +276,14 @@ a { text-decoration: none; color: inherit; }
   transition: background 0.12s;
 }
 .post-btn:hover { background: #0035cc; }
+
+/* ── Mobile breakpoints ── */
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only  { display: flex !important; }
+}
+
+@media (min-width: 769px) {
+  .desktop-only { display: flex; }
+  .mobile-only  { display: none !important; }
+}

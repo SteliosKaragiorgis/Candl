@@ -14,7 +14,17 @@
       "Bash(curl -s http://localhost:3001)",
       "Bash(npm create:*)",
       "Bash(npm install:*)",
-      "Bash(curl -s http://localhost:5173)"
+      "Bash(curl -s http://localhost:5173)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(find /c/Users/steli/Documents/TradeFlow -type d -not -path */node_modules/* -not -path */.git/* -not -path */.next/*)",
+      "Bash(taskkill /PID 16980 /F)",
+      "Bash(taskkill /PID 10516 /F)",
+      "Bash(cmd /c \"taskkill /PID 16980 /F\")",
+      "Bash(cmd /c \"taskkill /PID 10516 /F\")",
+      "Bash(powershell -Command \"Stop-Process -Id 16980 -Force; Stop-Process -Id 10516 -Force\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr :5173)"
     ]
   }
 }

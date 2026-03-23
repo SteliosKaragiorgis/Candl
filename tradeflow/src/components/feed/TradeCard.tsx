@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { TradePost } from '../../types';
+import { useMobile } from '../../hooks/useMobile';
 
 const BLOCK_STYLE: Record<string, React.CSSProperties> = {
-  BUY:   { background: 'linear-gradient(135deg, rgba(0,71,255,0.04), rgba(0,71,255,0.08))', border: '1px solid var(--blue-border)' },
-  SELL:  { background: 'linear-gradient(135deg, rgba(220,38,38,0.04), rgba(220,38,38,0.08))', border: '1px solid rgba(220,38,38,0.2)' },
-  SHORT: { background: 'linear-gradient(135deg, rgba(220,38,38,0.04), rgba(220,38,38,0.08))', border: '1px solid rgba(220,38,38,0.2)' },
+  BUY:   { background: 'var(--surface2)', border: '1px solid var(--border)' },
+  SELL:  { background: 'var(--surface2)', border: '1px solid var(--border)' },
+  SHORT: { background: 'var(--surface2)', border: '1px solid var(--border)' },
 };
 const ACCENT: Record<string, string> = { BUY: 'var(--green)', SELL: 'var(--red)', SHORT: 'var(--red)' };
 
 export default function TradeCard({ post }: { post: TradePost }) {
   const navigate = useNavigate();
+  const isMobile = useMobile();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [animating, setAnimating] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [thesisOpen, setThesisOpen] = useState(false);
 
   function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
@@ -64,7 +67,7 @@ export default function TradeCard({ post }: { post: TradePost }) {
             </span>
             <span style={{
               fontSize: '8px', fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px',
-              borderRadius: '20px', background: '#fff7ed', color: '#ea580c', border: '1px solid #fed7aa',
+              borderRadius: '20px', background: 'var(--amber-bg)', color: 'var(--amber)', border: '1px solid rgba(217,119,6,0.25)',
             }}>
               TRADE
             </span>
@@ -110,14 +113,14 @@ export default function TradeCard({ post }: { post: TradePost }) {
           <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '15px', fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.5px' }}>
             {post.ticker}
           </span>
-          <span style={{ fontSize: '9px', color: 'var(--text3)', padding: '1px 7px', borderRadius: '20px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--border)' }}>
+          <span style={{ fontSize: '9px', color: 'var(--text3)', padding: '1px 7px', borderRadius: '20px', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
             {post.strategy}
           </span>
-          <span style={{ fontSize: '9px', color: 'var(--text3)', padding: '1px 7px', borderRadius: '20px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--border)' }}>
+          <span style={{ fontSize: '9px', color: 'var(--text3)', padding: '1px 7px', borderRadius: '20px', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
             {post.timeframe}
           </span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '5px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '5px' }}>
           {[
             { label: 'ENTRY',  value: `$${post.entry.toFixed(2)}`,  color: 'var(--text)' },
             { label: 'TARGET', value: `$${post.target.toFixed(2)}`, color: 'var(--green)' },
@@ -125,8 +128,8 @@ export default function TradeCard({ post }: { post: TradePost }) {
             { label: 'R:R',    value: post.rrRatio,                  color: 'var(--blue)' },
           ].map(({ label, value, color }) => (
             <div key={label} style={{
-              background: 'rgba(255,255,255,0.8)', border: '1px solid var(--border)',
-              borderRadius: '7px', padding: '6px 8px', display: 'flex', flexDirection: 'column',
+              background: 'var(--surface2)', border: '1px solid var(--border)',
+              borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column',
             }}>
               <span style={{ fontSize: '7px', fontWeight: 700, letterSpacing: '1px', color: 'var(--text4)', textTransform: 'uppercase', marginBottom: '2px' }}>
                 {label}
@@ -141,7 +144,24 @@ export default function TradeCard({ post }: { post: TradePost }) {
 
       {/* Thesis */}
       <div style={{ margin: '0 14px 10px' }}>
-        {[
+        {isMobile && (
+          <div
+            onClick={e => { e.stopPropagation(); setThesisOpen(o => !o); }}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'var(--surface2)', border: '1px solid var(--border)',
+              borderRadius: 8, padding: '8px 11px', marginBottom: 8, cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text3)', textTransform: 'uppercase' }}>
+              Trade Thesis
+            </span>
+            <span style={{ fontSize: 10, color: 'var(--text4)' }}>
+              {thesisOpen ? '▲ hide' : '▼ show'}
+            </span>
+          </div>
+        )}
+        {(!isMobile || thesisOpen) && [
           { label: 'WHY NOW',      value: post.whyNow,      dot: 'var(--blue)' },
           { label: 'RISK',         value: post.risk,         dot: 'var(--red)' },
           { label: 'INVALIDATION', value: post.invalidation, dot: 'var(--gold)' },
@@ -163,7 +183,7 @@ export default function TradeCard({ post }: { post: TradePost }) {
         href={tvUrl} target="_blank" rel="noopener noreferrer"
         onClick={e => e.stopPropagation()}
         style={{ margin: '0 14px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '7px', padding: '7px 10px', textDecoration: 'none', transition: 'all 0.15s' }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#eef2ff'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--blue-border)'; }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--blue-bg)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--blue-border)'; }}
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'; (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

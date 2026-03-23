@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { DEMO_USERS } from '@/lib/demo-data';
 
