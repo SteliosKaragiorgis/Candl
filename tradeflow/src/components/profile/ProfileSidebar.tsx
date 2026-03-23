@@ -34,9 +34,9 @@ export default function ProfileSidebar({ user }: { user: User }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
           {user.mostActive.split(' · ').map(tag => (
             <span key={tag} style={{
-              fontSize: '10px', fontWeight: 600, padding: '2px 8px',
-              borderRadius: '20px', background: 'var(--blue-bg)',
-              color: 'var(--blue)', border: '1px solid var(--blue-border)',
+              fontSize: '10px', padding: '2px 9px',
+              borderRadius: '20px', background: 'var(--surface2)',
+              color: 'var(--text3)', border: '1px solid var(--border)',
             }}>
               {tag}
             </span>

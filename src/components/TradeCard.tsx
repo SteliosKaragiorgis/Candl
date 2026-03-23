@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import type { Post, TradePost, InvestmentPost } from "@/lib/demo-data";
 

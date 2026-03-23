@@ -21,13 +21,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function getHeatStyle(changeNum: number): React.CSSProperties {
   const abs = Math.abs(changeNum);
   if (changeNum > 0) {
-    if (abs >= 3) return { background: 'rgba(22,163,74,0.20)', border: '1px solid rgba(22,163,74,0.28)' };
-    if (abs >= 1) return { background: 'rgba(22,163,74,0.11)', border: '1px solid rgba(22,163,74,0.18)' };
-    return { background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.12)' };
+    if (abs >= 3) return { background: 'rgba(22,163,74,0.20)', border: '1px solid rgba(22,163,74,0.28)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
+    if (abs >= 1) return { background: 'rgba(22,163,74,0.11)', border: '1px solid rgba(22,163,74,0.18)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
+    return { background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.12)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
   } else {
-    if (abs >= 3) return { background: 'rgba(220,38,38,0.18)', border: '1px solid rgba(220,38,38,0.25)' };
-    if (abs >= 1) return { background: 'rgba(220,38,38,0.10)', border: '1px solid rgba(220,38,38,0.16)' };
-    return { background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.10)' };
+    if (abs >= 3) return { background: 'rgba(220,38,38,0.18)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
+    if (abs >= 1) return { background: 'rgba(220,38,38,0.10)', border: '1px solid rgba(220,38,38,0.16)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
+    return { background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.10)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
   }
 }
 
@@ -100,16 +100,12 @@ export default function RightPanel() {
             See all →
           </span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5, marginBottom: 14 }}>
           {DEMO_TRENDING.map(t => (
             <div
               key={t.ticker}
-              style={{
-                ...getHeatStyle(t.changeNum),
-                borderRadius: 9, padding: '9px 10px',
-                cursor: 'pointer', transition: 'opacity 0.15s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
+              style={getHeatStyle(t.changeNum)}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             >
               <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>

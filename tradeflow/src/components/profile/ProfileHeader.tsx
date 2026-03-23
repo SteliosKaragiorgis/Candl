@@ -1,34 +1,58 @@
 import { useState } from 'react';
 import type { User } from '../../types';
 import { currentUser } from '../../data/demo';
+import { useMobile } from '../../hooks/useMobile';
 
 export default function ProfileHeader({ user }: { user: User }) {
   const isOwn = user.id === currentUser.id;
   const [following, setFollowing] = useState(false);
+  const isMobile = useMobile();
 
   return (
     <div style={{
       background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 'var(--radius-lg)', marginBottom: '14px', overflow: 'hidden',
+      borderRadius: isMobile ? 0 : 'var(--radius-lg)',
+      marginBottom: '14px', overflow: 'hidden',
     }}>
-      {/* Cover */}
+      {/* Cover — dark on mobile, gradient on desktop */}
       <div style={{
-        height: '100px',
-        background: user.coverColor
-          ? `linear-gradient(135deg, ${user.coverColor}, ${user.avatarGradient[0]})`
-          : `linear-gradient(135deg, ${user.avatarGradient[0]}, ${user.avatarGradient[1]})`,
-      }} />
+        height: isMobile ? '80px' : '100px',
+        position: 'relative',
+        background: isMobile
+          ? '#0a0a0a'
+          : (user.coverColor
+            ? `linear-gradient(135deg, ${user.coverColor}, ${user.avatarGradient[0]})`
+            : `linear-gradient(135deg, ${user.avatarGradient[0]}, ${user.avatarGradient[1]})`),
+      }}>
+        {isMobile && (
+          <>
+            {/* Dot pattern overlay */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
+              backgroundSize: '18px 18px',
+            }} />
+            {/* Blue accent line at bottom */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0,
+              height: '2px', background: 'var(--blue)',
+            }} />
+          </>
+        )}
+      </div>
 
       {/* Info row */}
-      <div style={{ padding: '0 20px 18px', position: 'relative' }}>
+      <div style={{ padding: isMobile ? '0 16px 16px' : '0 20px 18px', position: 'relative' }}>
         {/* Avatar */}
         <div style={{
-          width: '64px', height: '64px', borderRadius: '50%',
+          width: isMobile ? '54px' : '64px',
+          height: isMobile ? '54px' : '64px',
+          borderRadius: '50%',
           background: `linear-gradient(135deg, ${user.avatarGradient[0]}, ${user.avatarGradient[1]})`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontSize: '22px', fontWeight: 800,
+          color: '#fff', fontSize: isMobile ? '18px' : '22px', fontWeight: 800,
           border: '3px solid var(--surface)',
-          position: 'absolute', top: '-32px',
+          position: 'absolute', top: isMobile ? '-27px' : '-32px',
         }}>
           {user.initials}
         </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { InvestmentPost } from '../../types';
+import { useMobile } from '../../hooks/useMobile';
 
 const CONVICTION_COLOR: Record<string, string> = {
   High: 'var(--green)', Medium: 'var(--gold)', Speculative: 'var(--red)',
@@ -8,10 +9,12 @@ const CONVICTION_COLOR: Record<string, string> = {
 
 export default function InvestCard({ post }: { post: InvestmentPost }) {
   const navigate = useNavigate();
+  const isMobile = useMobile();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [animating, setAnimating] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [thesisOpen, setThesisOpen] = useState(false);
 
   function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
@@ -92,8 +95,8 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
       {/* Conviction block */}
       <div style={{
         margin: '0 14px 10px',
-        background: 'linear-gradient(135deg, rgba(0,71,255,0.04), rgba(0,71,255,0.08))',
-        border: '1px solid var(--blue-border)',
+        background: 'var(--surface2)',
+        border: '1px solid var(--border)',
         borderRadius: '10px', padding: '10px 12px',
         display: 'flex', alignItems: 'center', gap: '14px',
       }}>
@@ -124,7 +127,24 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
 
       {/* Thesis */}
       <div style={{ margin: '0 14px 10px' }}>
-        {[
+        {isMobile && (
+          <div
+            onClick={e => { e.stopPropagation(); setThesisOpen(o => !o); }}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'var(--surface2)', border: '1px solid var(--border)',
+              borderRadius: 8, padding: '8px 11px', marginBottom: 8, cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text3)', textTransform: 'uppercase' }}>
+              Investment Thesis
+            </span>
+            <span style={{ fontSize: 10, color: 'var(--text4)' }}>
+              {thesisOpen ? '▲ hide' : '▼ show'}
+            </span>
+          </div>
+        )}
+        {(!isMobile || thesisOpen) && [
           { label: 'CATALYST',  value: post.catalyst,  dot: 'var(--blue)' },
           { label: 'VALUATION', value: post.valuation, dot: 'var(--green)' },
           { label: 'RISK',      value: post.risk,       dot: 'var(--red)' },
