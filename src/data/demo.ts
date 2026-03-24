@@ -210,3 +210,106 @@ export const DEMO_NOTIFICATIONS: Notification[] = [
   { id: 'n4', type: 'mention', user: kayL,    content: 'mentioned you in a commentary',     time: '2h ago',  read: true },
   { id: 'n5', type: 'like',    user: jamieT,  content: 'liked your TSLA trade',             time: '3h ago',  read: true },
 ];
+
+// ── Comments ───────────────────────────────────────────────────────────────────
+
+export interface Comment {
+  id: string;
+  userId: string;
+  user: {
+    name: string;
+    handle: string;
+    initials: string;
+    avatarGradient: string;
+    verified: boolean;
+  };
+  body: string;
+  createdAt: string;
+  likes: number;
+  liked: boolean;
+  replies?: Comment[];
+}
+
+export const COMMENTS: Record<string, Comment[]> = {
+  'p1': [
+    {
+      id: 'c1',
+      userId: 'sara-r',
+      user: {
+        name: 'Sara R.',
+        handle: '@macro_sara',
+        initials: 'SR',
+        avatarGradient: 'linear-gradient(135deg,#b45309,#f59e0b)',
+        verified: true,
+      },
+      body: 'Agree on the setup. Watching $870 as the key level — if that holds post-earnings the move to $940 looks very clean.',
+      createdAt: '8m ago',
+      likes: 24,
+      liked: false,
+      replies: [
+        {
+          id: 'c1r1',
+          userId: 'alex-kim',
+          user: {
+            name: 'Alex Kim',
+            handle: '@swingkingAK',
+            initials: 'AK',
+            avatarGradient: 'linear-gradient(135deg,#1d4ed8,#60a5fa)',
+            verified: true,
+          },
+          body: 'Exactly — $870 is the line in the sand for me too. Below that and the thesis is off.',
+          createdAt: '6m ago',
+          likes: 11,
+          liked: false,
+        },
+      ],
+    },
+    {
+      id: 'c2',
+      userId: 'mike-w',
+      user: {
+        name: 'Mike W.',
+        handle: '@optionsmike',
+        initials: 'MW',
+        avatarGradient: 'linear-gradient(135deg,#5b21b6,#7c3aed)',
+        verified: false,
+      },
+      body: 'Implied vol is elevated going into earnings — worth considering a spread instead of outright long to reduce the theta burn.',
+      createdAt: '15m ago',
+      likes: 18,
+      liked: false,
+    },
+    {
+      id: 'c3',
+      userId: 'jamie-t',
+      user: {
+        name: 'Jamie T.',
+        handle: '@longonlyjt',
+        initials: 'JT',
+        avatarGradient: 'linear-gradient(135deg,#065f46,#059669)',
+        verified: false,
+      },
+      body: 'Great R:R on this. The AI capex narrative is strong — every major cloud player is guiding up. Hard to bet against NVDA here.',
+      createdAt: '22m ago',
+      likes: 31,
+      liked: false,
+    },
+  ],
+  'p2': [
+    {
+      id: 'c4',
+      userId: 'alex-kim',
+      user: {
+        name: 'Alex Kim',
+        handle: '@swingkingAK',
+        initials: 'AK',
+        avatarGradient: 'linear-gradient(135deg,#1d4ed8,#60a5fa)',
+        verified: true,
+      },
+      body: 'The "uncertainty has increased" language was the tell. Powell is laying the groundwork for June.',
+      createdAt: '45m ago',
+      likes: 87,
+      liked: false,
+    },
+  ],
+};
