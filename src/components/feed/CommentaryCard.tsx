@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CommentaryPost } from '../../types';
-import { useMobile } from '../../hooks/useMobile';
 
 export default function CommentaryCard({ post }: { post: CommentaryPost }) {
   const navigate = useNavigate();
-  const isMobile = useMobile();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [animating, setAnimating] = useState(false);
