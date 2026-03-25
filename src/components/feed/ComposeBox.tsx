@@ -4,9 +4,9 @@ import { currentUser } from '../../data/demo';
 type Tab = 'trade' | 'investment' | 'commentary';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'trade', label: '📈 Trade' },
-  { id: 'investment', label: '💼 Investment' },
-  { id: 'commentary', label: '💬 Commentary' },
+  { id: 'trade', label: 'Trade' },
+  { id: 'investment', label: 'Investment' },
+  { id: 'commentary', label: 'Commentary' },
 ];
 
 const TAGS: Record<Tab, string[]> = {
@@ -21,7 +21,7 @@ const PLACEHOLDERS: Record<Tab, string> = {
   commentary: 'Market commentary — macro events, rate moves, sector rotation…',
 };
 
-export default function ComposeBox() {
+export default function ComposeBox({ onOpen }: { onOpen?: (tab: Tab) => void }) {
   const [tab, setTab] = useState<Tab>('trade');
 
   return (
@@ -65,10 +65,12 @@ export default function ComposeBox() {
           <textarea
             placeholder={PLACEHOLDERS[tab]}
             rows={2}
+            onClick={e => { e.stopPropagation(); onOpen?.(tab); }}
+            readOnly
             style={{
               width: '100%', resize: 'none', border: 'none', outline: 'none',
               fontSize: '13px', color: 'var(--text)', fontFamily: 'Inter, sans-serif',
-              background: 'transparent', lineHeight: 1.6,
+              background: 'transparent', lineHeight: 1.6, cursor: 'pointer',
             }}
           />
           <div style={{
@@ -80,12 +82,15 @@ export default function ComposeBox() {
                 <button key={tag} className="compose-tag">{tag}</button>
               ))}
             </div>
-            <button style={{
-              background: 'var(--blue)', color: '#fff', border: 'none',
-              borderRadius: 'var(--radius-sm)', padding: '7px 20px',
-              fontSize: '11px', fontWeight: 700, fontFamily: 'Inter, sans-serif',
-              letterSpacing: '0.3px', cursor: 'pointer',
-            }}>
+            <button
+              onClick={e => { e.stopPropagation(); onOpen?.(tab); }}
+              style={{
+                background: 'var(--blue)', color: '#fff', border: 'none',
+                borderRadius: 'var(--radius-sm)', padding: '7px 20px',
+                fontSize: '11px', fontWeight: 700, fontFamily: 'Inter, sans-serif',
+                letterSpacing: '0.3px', cursor: 'pointer',
+              }}
+            >
               Publish
             </button>
           </div>

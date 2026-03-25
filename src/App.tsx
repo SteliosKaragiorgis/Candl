@@ -12,8 +12,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<AppShell />}>
             <Route index element={<FeedPage />} />
-            <Route path="profile/:userId" element={<ProfilePage />} />
             <Route path="post/:postId" element={<PostDetailPage />} />
+            <Route path="profile/:userId" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

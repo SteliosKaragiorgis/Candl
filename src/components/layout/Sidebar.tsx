@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DEMO_WATCHLIST } from '../../data/demo';
+import ComposerModal from '../feed/ComposerModal';
 
 const navItems = [
   { label: 'Feed', path: '/', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
@@ -29,7 +30,7 @@ function Sparkline({ points, positive }: { points: string; positive: boolean }) 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [, setPostOpen] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
 
   return (
     <div style={{
@@ -59,7 +60,7 @@ export default function Sidebar() {
       </div>
 
       {/* Post trade button */}
-      <button className="post-btn" onClick={() => setPostOpen(true)} style={{ marginBottom: '16px' }}>
+      <button className="post-btn" onClick={() => setComposerOpen(true)} style={{ marginBottom: '16px' }}>
         + POST TRADE
       </button>
 
@@ -93,6 +94,8 @@ export default function Sidebar() {
           </div>
         ))}
       </div>
+
+      <ComposerModal open={composerOpen} onClose={() => setComposerOpen(false)} />
     </div>
   );
 }

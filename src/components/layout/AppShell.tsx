@@ -7,10 +7,12 @@ import RightPanel from './RightPanel';
 import NotifPanel from './NotifPanel';
 import MobileTopbar from './MobileTopbar';
 import BottomNav from './BottomNav';
+import ComposerModal from '../feed/ComposerModal';
 
 export default function AppShell() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [mobilePage, setMobilePage] = useState('feed');
+  const [composerOpen, setComposerOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -67,7 +69,7 @@ export default function AppShell() {
             if (page === 'explore') navigate('/explore');
             if (page === 'profile') navigate('/profile/u0');
           }}
-          onPostClick={() => alert('Composer coming soon!')}
+          onPostClick={() => setComposerOpen(true)}
         />
 
         {notifOpen && (
@@ -75,6 +77,8 @@ export default function AppShell() {
             <NotifPanel />
           </div>
         )}
+
+        <ComposerModal open={composerOpen} onClose={() => setComposerOpen(false)} />
       </div>
     );
   }
