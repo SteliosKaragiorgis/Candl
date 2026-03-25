@@ -14,14 +14,67 @@ export interface EconomicEvent {
   time: string;
   timezone: string;
   category: 'fomc' | 'cpi' | 'nfp' | 'gdp' | 'earnings' | 'pce';
+  importance: 'High' | 'Med' | 'Low';
+}
+
+export interface NewsItem {
+  id: string;
+  source: string;
+  sourceColor: string;
+  headline: string;
+  time: string;
+  category: string;
+  ticker: string;
+  priceBefore: number;
+  priceAfter: number;
+  changePct: string;
+  up: boolean;
+  timeAgo: string;
+  sparkline: string;
+  relatedPostId: string;
 }
 
 export const ECONOMIC_EVENTS: EconomicEvent[] = [
-  { id: 'fomc-mar-2026', name: 'FOMC Interest Rate Decision', shortName: 'FOMC', icon: '🏦', date: new Date('2026-03-19T19:00:00Z'), time: '14:00 EST', timezone: 'EST', category: 'fomc' },
-  { id: 'cpi-mar-2026',  name: 'CPI Inflation Report',        shortName: 'CPI',  icon: '📊', date: new Date('2026-03-22T12:30:00Z'), time: '08:30 EST', timezone: 'EST', category: 'cpi' },
-  { id: 'nfp-apr-2026',  name: 'NFP Jobs Report',             shortName: 'NFP',  icon: '💼', date: new Date('2026-04-03T12:30:00Z'), time: '08:30 EST', timezone: 'EST', category: 'nfp' },
-  { id: 'gdp-mar-2026',  name: 'GDP Growth Release',          shortName: 'GDP',  icon: '📈', date: new Date('2026-04-29T12:30:00Z'), time: '08:30 EST', timezone: 'EST', category: 'gdp' },
-  { id: 'nvda-earnings', name: 'NVDA Earnings',               shortName: 'NVDA', icon: '💡', date: new Date('2026-05-21T20:00:00Z'), time: 'After Close', timezone: 'EST', category: 'earnings' },
+  { id: 'fomc-mar-2026', name: 'FOMC Interest Rate Decision', shortName: 'FOMC', icon: '🏦', date: new Date('2026-03-19T19:00:00Z'), time: '14:00 EST', timezone: 'EST', category: 'fomc',     importance: 'High' },
+  { id: 'cpi-mar-2026',  name: 'CPI Inflation Report',        shortName: 'CPI',  icon: '📊', date: new Date('2026-03-22T12:30:00Z'), time: '08:30 EST', timezone: 'EST', category: 'cpi',      importance: 'High' },
+  { id: 'nfp-apr-2026',  name: 'NFP Jobs Report',             shortName: 'NFP',  icon: '💼', date: new Date('2026-04-03T12:30:00Z'), time: '08:30 EST', timezone: 'EST', category: 'nfp',      importance: 'High' },
+  { id: 'gdp-mar-2026',  name: 'GDP Growth Release',          shortName: 'GDP',  icon: '📈', date: new Date('2026-04-29T12:30:00Z'), time: '08:30 EST', timezone: 'EST', category: 'gdp',      importance: 'Med'  },
+  { id: 'nvda-earnings', name: 'NVDA Earnings',               shortName: 'NVDA', icon: '💡', date: new Date('2026-05-21T20:00:00Z'), time: 'After Close', timezone: 'EST', category: 'earnings', importance: 'High' },
+];
+
+export const NEWS_ITEMS: NewsItem[] = [
+  {
+    id: 'news1',
+    source: 'REUTERS',
+    sourceColor: '#16a34a',
+    headline: 'Jensen Huang confirms Blackwell GPU demand "staggering" — hyperscaler orders up 3× heading into Q2',
+    time: 'Today, 09:14 EST',
+    category: 'Earnings pre-announcement',
+    ticker: 'NVDA',
+    priceBefore: 854.20,
+    priceAfter: 882.60,
+    changePct: '+3.17%',
+    up: true,
+    timeAgo: '38 min',
+    sparkline: '0,22 20,22 40,22 60,21 75,18 82,12 90,6 105,4 120,3',
+    relatedPostId: 'p1',
+  },
+  {
+    id: 'news2',
+    source: 'NHTSA',
+    sourceColor: '#dc2626',
+    headline: 'Tesla faces NHTSA probe into FSD software — recall of 280k vehicles under review',
+    time: 'Today, 08:52 EST',
+    category: 'Regulatory filing',
+    ticker: 'TSLA',
+    priceBefore: 179.40,
+    priceAfter: 172.00,
+    changePct: '-4.16%',
+    up: false,
+    timeAgo: '55 min',
+    sparkline: '0,10 20,10 40,10 60,11 75,14 82,20 90,26 105,29 120,30',
+    relatedPostId: 'p2',
+  },
 ];
 
 // ── Users ──────────────────────────────────────────────────────────────────────
@@ -95,7 +148,7 @@ export const DEMO_POSTS: Post[] = [
   {
     id: 'p1', postType: 'trade',
     user: alexKim, createdAt: '12m ago',
-    body: 'Blackwell ramp accelerating into Q2. Every hyperscaler guided up last cycle. AI capex isn\'t slowing — it\'s inflecting. This pre-earnings dip is a gift. R/R is the best I\'ve seen in months.',
+    body: 'Blackwell ramp accelerating into Q2. Every hyperscaler guided up last cycle. AI capex isn\'t slowing — it\'s inflecting. This pre-earnings dip was a gift.',
     ticker: 'NVDA', tvSymbol: 'NASDAQ:NVDA',
     direction: 'BUY', strategy: 'Momentum', timeframe: 'Daily',
     entry: 882.60, target: 940, stop: 860, rrRatio: '3.1×',
@@ -107,18 +160,14 @@ export const DEMO_POSTS: Post[] = [
     likes: 284, comments: 47, shares: 91,
   },
   {
-    id: 'p2', postType: 'trade',
+    id: 'p2', postType: 'commentary',
     user: saraR, createdAt: '38m ago',
-    body: 'Sentiment has gotten too bearish. Yes, deliveries missed — but margin stabilization is showing early signs and the Cybertruck ramp is underestimated. Contrarian long with defined risk.',
-    ticker: 'TSLA', tvSymbol: 'NASDAQ:TSLA',
-    direction: 'BUY', strategy: 'Swing', timeframe: 'Daily',
-    entry: 172, target: 195, stop: 165, rrRatio: '3.3×',
-    isOpen: true,
-    whyNow: 'Extreme bearish sentiment + insider buying signals visible',
-    risk: 'Deliveries continue declining, macro headwinds intensify',
-    invalidation: 'Weekly close below $155 negates the thesis',
-    hashtags: ['#Contrarian', '#EV', '#ValuePlay'],
-    likes: 156, comments: 38, shares: 22,
+    ticker: 'TSLA',
+    body: 'NHTSA probe isn\'t new risk — it\'s the market re-pricing it. FSD was priced as solved. Watching $168 as real support. Below that and the robotaxi story unravels near-term.',
+    newsEvent: 'Tesla NHTSA FSD Probe',
+    newsDate: 'Today, 08:52 EST',
+    hashtags: ['#TSLA', '#Regulatory', '#FSD'],
+    likes: 512, comments: 139, shares: 204,
   },
   {
     id: 'p3', postType: 'investment',
@@ -210,3 +259,69 @@ export const DEMO_NOTIFICATIONS: Notification[] = [
   { id: 'n4', type: 'mention', user: kayL,    content: 'mentioned you in a commentary',     time: '2h ago',  read: true },
   { id: 'n5', type: 'like',    user: jamieT,  content: 'liked your TSLA trade',             time: '3h ago',  read: true },
 ];
+
+// ── Comments ───────────────────────────────────────────────────────────────────
+
+export interface Comment {
+  id: string;
+  userId: string;
+  user: {
+    name: string;
+    handle: string;
+    initials: string;
+    avatarGradient: string;
+    verified: boolean;
+  };
+  body: string;
+  createdAt: string;
+  likes: number;
+  liked: boolean;
+  replies?: Comment[];
+}
+
+export const COMMENTS: Record<string, Comment[]> = {
+  'p1': [
+    {
+      id: 'c1', userId: 'u2',
+      user: { name: 'Sara R.', handle: '@macro_sara', initials: 'SR', avatarGradient: 'linear-gradient(135deg,#b45309,#f59e0b)', verified: true },
+      body: 'Agree on the setup. Watching $870 as the key level — if that holds post-earnings the move to $940 looks very clean.',
+      createdAt: '8m ago', likes: 24, liked: false,
+      replies: [
+        {
+          id: 'c1r1', userId: 'u1',
+          user: { name: 'Alex Kim', handle: '@swingkingAK', initials: 'AK', avatarGradient: 'linear-gradient(135deg,#1d4ed8,#60a5fa)', verified: true },
+          body: 'Exactly — $870 is the line in the sand for me too. Below that and the thesis is off.',
+          createdAt: '6m ago', likes: 11, liked: false,
+        },
+      ],
+    },
+    {
+      id: 'c2', userId: 'u3',
+      user: { name: 'Mike W.', handle: '@optionsmike', initials: 'MW', avatarGradient: 'linear-gradient(135deg,#5b21b6,#7c3aed)', verified: false },
+      body: 'Implied vol is elevated going into earnings — worth considering a spread instead of outright long to reduce the theta burn.',
+      createdAt: '15m ago', likes: 18, liked: false,
+    },
+    {
+      id: 'c3', userId: 'u4',
+      user: { name: 'Jamie T.', handle: '@longonlyjt', initials: 'JT', avatarGradient: 'linear-gradient(135deg,#065f46,#059669)', verified: false },
+      body: 'Great R:R on this. The AI capex narrative is strong — every major cloud player is guiding up. Hard to bet against NVDA here.',
+      createdAt: '22m ago', likes: 31, liked: false,
+    },
+  ],
+  'p2': [
+    {
+      id: 'c4', userId: 'u1',
+      user: { name: 'Alex Kim', handle: '@swingkingAK', initials: 'AK', avatarGradient: 'linear-gradient(135deg,#1d4ed8,#60a5fa)', verified: true },
+      body: 'The "uncertainty has increased" language was the tell. Powell is laying the groundwork for June.',
+      createdAt: '45m ago', likes: 87, liked: false,
+    },
+  ],
+  'p3': [
+    {
+      id: 'c5', userId: 'u4',
+      user: { name: 'Jamie T.', handle: '@longonlyjt', initials: 'JT', avatarGradient: 'linear-gradient(135deg,#065f46,#059669)', verified: false },
+      body: 'The rate cut cycle thesis is compelling but I\'d watch credit spreads closely — they\'re the canary in the coal mine.',
+      createdAt: '30m ago', likes: 44, liked: false,
+    },
+  ],
+};

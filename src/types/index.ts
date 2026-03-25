@@ -66,6 +66,7 @@ export interface InvestmentPost extends BasePost {
 
 export interface CommentaryPost extends BasePost {
   postType: 'commentary';
+  ticker?: string;
   newsEvent: string;
   newsDate: string;
 }

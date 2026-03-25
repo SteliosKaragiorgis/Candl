@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import StatBar from '../components/feed/StatBar';
+import MarketsPanel from '../components/feed/MarketsPanel';
 import ComposeBox from '../components/feed/ComposeBox';
+import ComposerModal from '../components/feed/ComposerModal';
 import TradeCard from '../components/feed/TradeCard';
 import InvestCard from '../components/feed/InvestCard';
 import CommentaryCard from '../components/feed/CommentaryCard';
 import SkeletonCard from '../components/feed/SkeletonCard';
-import { DEMO_POSTS, currentUser } from '../data/demo';
+import NewsCard from '../components/feed/NewsCard';
+import { DEMO_POSTS, NEWS_ITEMS, currentUser } from '../data/demo';
 import type { Post } from '../types';
 import { useMobile } from '../hooks/useMobile';
 
@@ -34,6 +36,15 @@ function PostCard({ post }: { post: Post }) {
 export default function FeedPage() {
   const isMobile = useMobile();
   const [tab, setTab] = useState<FeedTab>('all');
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [composerKey, setComposerKey] = useState(0);
+  const [composerTab, setComposerTab] = useState<'trade' | 'invest' | 'commentary'>('trade');
+
+  function openComposer(tab: 'trade' | 'invest' | 'commentary' = 'trade') {
+    setComposerTab(tab);
+    setComposerOpen(true);
+    setComposerKey(k => k + 1);
+  }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,17 +54,24 @@ export default function FeedPage() {
 
   const posts = filterPosts(DEMO_POSTS, tab);
 
+  // Build a map of postId → NewsItem for quick lookup
+  const newsMap = Object.fromEntries(NEWS_ITEMS.map(n => [n.relatedPostId, n]));
+
   return (
     <div style={{ maxWidth: '740px', margin: '0 auto', padding: isMobile ? '12px 10px 0' : undefined, background: 'var(--bg)', minHeight: '100%' }}>
-      <StatBar />
+      <MarketsPanel />
 
       {/* Compose box — simplified on mobile */}
       {isMobile ? (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          background: 'var(--surface)', border: '1px solid var(--border)',
-          borderRadius: 12, padding: '10px 12px', marginBottom: 12,
-        }}>
+        <div
+          onClick={() => openComposer()}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 12, padding: '10px 12px', marginBottom: 12,
+            cursor: 'pointer',
+          }}
+        >
           <div style={{
             width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
             background: `linear-gradient(135deg, ${currentUser.avatarGradient[0]}, ${currentUser.avatarGradient[1]})`,
@@ -65,16 +83,19 @@ export default function FeedPage() {
           <span style={{ flex: 1, fontSize: 12, color: 'var(--text4)' }}>
             Share a trade or idea…
           </span>
-          <button style={{
-            background: 'var(--blue)', color: '#fff', border: 'none',
-            borderRadius: 8, padding: '6px 14px',
-            fontSize: 11, fontWeight: 700, cursor: 'pointer',
-          }}>
+          <button
+            onClick={e => { e.stopPropagation(); openComposer(); }}
+            style={{
+              background: 'var(--blue)', color: '#fff', border: 'none',
+              borderRadius: 8, padding: '6px 14px',
+              fontSize: 11, fontWeight: 700, cursor: 'pointer',
+            }}
+          >
             Post
           </button>
         </div>
       ) : (
-        <ComposeBox />
+        <ComposeBox onOpen={t => openComposer(t === 'investment' ? 'invest' : t)} />
       )}
 
       {/* Feed tabs */}
@@ -93,7 +114,7 @@ export default function FeedPage() {
         ))}
       </div>
 
-      {/* Posts */}
+      {/* Posts with interleaved news cards */}
       {loading ? (
         <>
           <SkeletonCard />
@@ -101,8 +122,17 @@ export default function FeedPage() {
           <SkeletonCard />
         </>
       ) : (
-        posts.map(post => <PostCard key={post.id} post={post} />)
+        posts.map(post => (
+          <div key={post.id}>
+            {tab === 'all' && newsMap[post.id] && (
+              <NewsCard item={newsMap[post.id]} />
+            )}
+            <PostCard post={post} />
+          </div>
+        ))
       )}
+
+      <ComposerModal key={composerKey} open={composerOpen} initialTab={composerTab} onClose={() => setComposerOpen(false)} />
     </div>
   );
 }
