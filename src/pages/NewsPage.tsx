@@ -32,7 +32,7 @@ export default function NewsPage() {
   const moreStories = filtered.filter(a => !a.featured && !a.body)
 
   return (
-    <div>
+    <div style={{ padding: isMobile ? '16px 16px 100px' : 0 }}>
       <div>
 
         {/* Header */}
