@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { currentUser, APP_NAME } from '../../data/demo';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -17,6 +18,7 @@ export default function MobileTopbar({
   notifHasUnread: boolean;
 }) {
   const { theme, toggle } = useTheme();
+  const navigate = useNavigate();
   return (
     <div>
       {/* Main topbar row */}
@@ -105,12 +107,15 @@ export default function MobileTopbar({
           </button>
 
           {/* User avatar */}
-          <div style={{
-            width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-            background: `linear-gradient(135deg, ${currentUser.avatarGradient[0]}, ${currentUser.avatarGradient[1]})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: 11, fontWeight: 700,
-          }}>
+          <div
+            onClick={() => navigate(`/profile/${currentUser.id}`)}
+            style={{
+              width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+              background: `linear-gradient(135deg, ${currentUser.avatarGradient[0]}, ${currentUser.avatarGradient[1]})`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+            }}
+          >
             {currentUser.initials}
           </div>
         </div>

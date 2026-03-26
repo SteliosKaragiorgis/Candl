@@ -8,6 +8,7 @@ import NotifPanel from './NotifPanel';
 import MobileTopbar from './MobileTopbar';
 import BottomNav from './BottomNav';
 import ComposerModal from '../feed/ComposerModal';
+import { currentUser } from '../../data/demo';
 
 export default function AppShell() {
   const [notifOpen, setNotifOpen] = useState(false);
@@ -76,7 +77,7 @@ export default function AppShell() {
             if (page === 'feed') navigate('/');
             if (page === 'news') navigate('/news');
             if (page === 'notifications') navigate('/notifications');
-            if (page === 'profile') navigate('/profile/current-user');
+            if (page === 'profile') navigate(`/profile/${currentUser.id}`);
           }}
           onPostClick={() => setComposerOpen(true)}
         />
