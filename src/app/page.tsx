@@ -125,10 +125,9 @@ function TopBar() {
 
       {/* Logo section — 268px = icon rail (48) + sidebar (220) */}
       <div style={{ width: '268px', flexShrink: 0, borderRight: '1px solid #ebebeb', height: '100%', display: 'flex', alignItems: 'center', paddingLeft: '14px', gap: '5px' }}>
-        <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '16px', color: '#0a0a0a', letterSpacing: '-0.8px' }}>
-          TradeFlow
+        <span style={{ fontFamily: "'Trebuchet MS', sans-serif", fontWeight: 700, fontSize: '16px', color: '#0a0a0a', letterSpacing: '-0.5px' }}>
+          Candl.
         </span>
-        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0047FF', flexShrink: 0 }} />
       </div>
 
       {/* Market ticker strip */}

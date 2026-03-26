@@ -35,24 +35,33 @@ export default function MobileTopbar({
         {/* Blue accent line */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-          background: 'linear-gradient(90deg, #0047FF, #60a5fa, transparent)',
+          background: 'linear-gradient(90deg, #2563EB, #0EA5E9, transparent)',
         }} />
 
         {/* Logo */}
-        <span style={{
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 800,
-          fontSize: 18,
-          color: 'var(--blue)',
-          letterSpacing: '-0.5px',
-        }}>
-          {APP_NAME}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div style={{
+            width: 26, height: 26, borderRadius: 6, flexShrink: 0,
+            background: 'linear-gradient(135deg, #2563EB, #0EA5E9)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <line x1="5"  y1="2"  x2="5"  y2="22" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
+              <rect x="3"   y="7"   width="4" height="10" rx="1" fill="white" opacity="0.5"/>
+              <line x1="12" y1="1"  x2="12" y2="23" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <rect x="10"  y="5"   width="4" height="12" rx="1" fill="white"/>
+              <line x1="19" y1="3"  x2="19" y2="21" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <rect x="17"  y="7"   width="4" height="9"  rx="1" fill="white" opacity="0.85"/>
+            </svg>
+          </div>
           <span style={{
-            display: 'inline-block', width: 6, height: 6,
-            borderRadius: '50%', background: 'var(--blue)',
-            marginLeft: 3, verticalAlign: 'middle',
-          }} />
-        </span>
+            fontFamily: "'Trebuchet MS', sans-serif",
+            fontWeight: 700, fontSize: 18,
+            color: 'var(--text)', letterSpacing: '-0.5px',
+          }}>
+            {APP_NAME}
+          </span>
+        </div>
 
         {/* Right controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
