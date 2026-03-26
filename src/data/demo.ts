@@ -2,8 +2,8 @@ import type {
   User, Post, WatchlistItem, LeaderboardEntry, TrendingTicker, Notification as LegacyNotification
 } from '../types';
 
-export const APP_NAME = 'TradeFlow';
-export const APP_TAGLINE = 'Share your trades. Follow the best.';
+export const APP_NAME = 'Candl.';
+export const APP_TAGLINE = 'Chart · Trade · Connect';
 
 export interface EconomicEvent {
   id: string;

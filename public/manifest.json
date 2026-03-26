@@ -1,6 +1,6 @@
 {
-  "name": "TradeFlow",
-  "short_name": "TradeFlow",
+  "name": "Candl.",
+  "short_name": "Candl.",
   "description": "Share trade ideas. Follow the best traders.",
   "start_url": "/",
   "display": "standalone",

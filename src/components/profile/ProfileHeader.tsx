@@ -24,7 +24,7 @@ function ShareButton({ username }: { username: string }) {
   async function handleShare() {
     const url = `${window.location.origin}/profile/${username}`;
     if (navigator.share) {
-      try { await navigator.share({ title: `@${username} on TradeFlow`, url }); } catch {}
+      try { await navigator.share({ title: `@${username} on Candl.`, url }); } catch {}
     } else {
       await navigator.clipboard.writeText(url);
       setCopied(true);
