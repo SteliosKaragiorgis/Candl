@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Topbar from './Topbar';
 import IconRail from './IconRail';
 import Sidebar from './Sidebar';
@@ -15,6 +15,14 @@ export default function AppShell() {
   const [composerOpen, setComposerOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/') setMobilePage('feed');
+    else if (location.pathname.startsWith('/news')) setMobilePage('news');
+    else if (location.pathname.startsWith('/notifications')) setMobilePage('notifications');
+    else if (location.pathname.startsWith('/profile')) setMobilePage('profile');
+  }, [location.pathname]);
 
   const [isMobile, setIsMobile] = useState(
     window.innerWidth <= 768
@@ -46,7 +54,7 @@ export default function AppShell() {
         background: 'var(--bg)',
       }}>
         <MobileTopbar
-          onNotifClick={() => setNotifOpen(o => !o)}
+          onNotifClick={() => navigate('/notifications')}
           notifHasUnread={true}
         />
 
@@ -66,8 +74,9 @@ export default function AppShell() {
           onNavigate={(page) => {
             setMobilePage(page);
             if (page === 'feed') navigate('/');
-            if (page === 'explore') navigate('/explore');
-            if (page === 'profile') navigate('/profile/u0');
+            if (page === 'news') navigate('/news');
+            if (page === 'notifications') navigate('/notifications');
+            if (page === 'profile') navigate('/profile/current-user');
           }}
           onPostClick={() => setComposerOpen(true)}
         />
@@ -104,7 +113,7 @@ export default function AppShell() {
         gridArea: 'feed',
         overflowY: 'auto',
         background: 'var(--bg)',
-        padding: '20px 24px',
+        padding: '28px 40px',
       }} className="scrollbar-hide">
         <Outlet />
       </div>

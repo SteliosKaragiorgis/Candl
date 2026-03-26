@@ -44,23 +44,34 @@ export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () =
       </div>
 
       {/* Ticker tape */}
-      <div style={{
-        flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center',
-        gap: '20px',
-      }}>
-        {TICKERS.map(({ t, p, c }) => (
-          <div key={t} style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{t}</span>
-            <span style={{ fontSize: '11px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace' }}>{p.toFixed(2)}</span>
-            <span style={{
-              fontSize: '10px', fontWeight: 600,
-              fontFamily: 'JetBrains Mono, monospace',
-              color: c >= 0 ? 'var(--green)' : 'var(--red)',
-            }}>
-              {c >= 0 ? '+' : ''}{c.toFixed(2)}%
-            </span>
-          </div>
-        ))}
+      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+        <style>{`
+          @keyframes ticker-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .ticker-track {
+            display: flex;
+            width: max-content;
+            animation: ticker-scroll 30s linear infinite;
+          }
+          .ticker-track:hover { animation-play-state: paused; }
+        `}</style>
+        <div className="ticker-track">
+          {[...TICKERS, ...TICKERS].map(({ t, p, c }, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0, marginRight: '28px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{t}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace' }}>{p.toFixed(2)}</span>
+              <span style={{
+                fontSize: '10px', fontWeight: 600,
+                fontFamily: 'JetBrains Mono, monospace',
+                color: c >= 0 ? 'var(--green)' : 'var(--red)',
+              }}>
+                {c >= 0 ? '+' : ''}{c.toFixed(2)}%
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Right controls */}
@@ -84,7 +95,7 @@ export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () =
         {/* Notif bell */}
         <button
           className={`icon-btn ${notifOpen ? 'icon-btn-active' : ''}`}
-          onClick={onNotifClick}
+          onClick={() => navigate('/notifications')}
           style={{ position: 'relative' }}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

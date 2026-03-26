@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { DEMO_WATCHLIST } from '../../data/demo';
+import { DEMO_WATCHLIST, privateUser, ryanC } from '../../data/demo';
 import ComposerModal from '../feed/ComposerModal';
 
 const navItems = [
   { label: 'Feed', path: '/', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
+  { label: 'News', path: '/news', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2V9"/><line x1="18" y1="14" x2="10" y2="14"/><line x1="18" y1="10" x2="10" y2="10"/><line x1="14" y1="18" x2="10" y2="18"/></svg> },
   { label: 'My Trades', path: '/trades', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg> },
   { label: 'Watchlist', path: '/watchlist', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> },
   { label: 'Portfolio', path: '/portfolio', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
@@ -90,6 +91,48 @@ export default function Sidebar() {
               minWidth: '44px', textAlign: 'right',
             }}>
               {item.changePct >= 0 ? '+' : ''}{item.changePct.toFixed(2)}%
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Private user teaser */}
+      <div style={{ marginTop: 8, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+        <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px', color: 'var(--text-3)', textTransform: 'uppercase', padding: '0 4px', marginBottom: 8 }}>
+          Suggested
+        </div>
+        {[privateUser, ryanC].map(u => (
+          <div
+            key={u.id}
+            onClick={() => navigate(`/profile/${u.id}`)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 4px', borderRadius: 8, cursor: 'pointer' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+              background: `linear-gradient(135deg, ${u.avatarGradient[0]}, ${u.avatarGradient[1]})`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontSize: 9, fontWeight: 700, position: 'relative',
+            }}>
+              {u.initials}
+              {u.hasSentFollowRequest && (
+                <div style={{
+                  position: 'absolute', top: -2, right: -2,
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: 'var(--blue)', border: '1.5px solid var(--surface)',
+                }} />
+              )}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>{u.name}</span>
+                {u.verified && <svg width="11" height="11" viewBox="0 0 24 24" fill="#3b82f6"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>}
+                {u.isPrivate && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--text4)" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
+              </div>
+              <div style={{ fontSize: 9, color: 'var(--text4)' }}>
+                {u.hasSentFollowRequest ? '• Wants to follow you' : `@${u.username}`}
+              </div>
             </div>
           </div>
         ))}

@@ -4,6 +4,8 @@ import AppShell from './components/layout/AppShell';
 import FeedPage from './pages/FeedPage';
 import ProfilePage from './pages/ProfilePage';
 import PostDetailPage from './pages/PostDetailPage';
+import NotificationsPage from './pages/NotificationsPage';
+import NewsPage from './pages/NewsPage';
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
             <Route index element={<FeedPage />} />
             <Route path="post/:postId" element={<PostDetailPage />} />
             <Route path="profile/:userId" element={<ProfilePage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="news" element={<NewsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
