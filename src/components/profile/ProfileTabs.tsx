@@ -1,43 +1,10 @@
-import { useMobile } from '../../hooks/useMobile';
-
-type Tab = 'posts' | 'trades' | 'investments' | 'commentary' | 'stats';
+export type Tab = 'posts' | 'commentary' | 'investments';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'posts', label: 'All Posts' },
-  { id: 'trades', label: 'Trades' },
+  { id: 'posts',       label: 'All posts' },
+  { id: 'commentary',  label: 'Commentary' },
   { id: 'investments', label: 'Investments' },
-  { id: 'commentary', label: 'Commentary' },
-  { id: 'stats', label: 'Stats' },
 ];
-
-function StatsComingSoon() {
-  return (
-    <div style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
-      borderRadius: 14,
-      padding: '32px 24px',
-      textAlign: 'center',
-    }}>
-      <div style={{ fontSize: 36, marginBottom: 14 }}>📊</div>
-      <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>
-        Performance stats coming soon
-      </div>
-      <div style={{ fontSize: 13, color: 'var(--text3)', lineHeight: 1.65, maxWidth: 300, margin: '0 auto 20px' }}>
-        Connect your brokerage to verify real trade performance.
-        Verified stats build trust with your followers.
-      </div>
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8,
-        background: 'var(--blue-bg)', border: '1px solid var(--blue-border)',
-        borderRadius: 9, padding: '10px 20px',
-        fontSize: 13, fontWeight: 700, color: 'var(--blue)', cursor: 'pointer',
-      }}>
-        Get notified when available →
-      </div>
-    </div>
-  );
-}
 
 export default function ProfileTabs({
   active, onChange, children,
@@ -46,32 +13,33 @@ export default function ProfileTabs({
   onChange: (t: Tab) => void;
   children?: React.ReactNode;
 }) {
-  const isMobile = useMobile();
-
   return (
     <>
       <div style={{
-        display: 'flex', gap: '0',
+        display: 'flex',
         borderBottom: '1px solid var(--border)',
-        marginBottom: '14px',
-        overflowX: isMobile ? 'auto' : undefined,
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-      } as React.CSSProperties}>
+        marginBottom: 16,
+      }}>
         {TABS.map(({ id, label }) => (
           <button
             key={id}
-            className={`feed-tab ${active === id ? 'feed-tab-active' : ''}`}
-            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
             onClick={() => onChange(id)}
+            style={{
+              flex: 1, padding: '12px 0',
+              background: 'none', border: 'none', outline: 'none',
+              fontSize: 13, fontWeight: active === id ? 700 : 500,
+              color: active === id ? 'var(--text)' : 'var(--text4)',
+              cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+              borderBottom: active === id ? '2px solid var(--text)' : '2px solid transparent',
+              marginBottom: -1,
+              transition: 'color 0.15s',
+            }}
           >
             {label}
           </button>
         ))}
       </div>
-      {active === 'stats' ? <StatsComingSoon /> : children}
+      {children}
     </>
   );
 }
-
-export type { Tab };

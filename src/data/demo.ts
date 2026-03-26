@@ -1,5 +1,5 @@
 import type {
-  User, Post, WatchlistItem, LeaderboardEntry, TrendingTicker, Notification
+  User, Post, WatchlistItem, LeaderboardEntry, TrendingTicker, Notification as LegacyNotification
 } from '../types';
 
 export const APP_NAME = 'TradeFlow';
@@ -139,7 +139,29 @@ export const currentUser: User = {
   mostActive: 'Learning · Equities',
 };
 
-export const DEMO_USERS = { alexKim, saraR, mikeW, jamieT, kayL, currentUser };
+export const ryanC: User = {
+  id: 'u7', name: 'Ryan C.', username: 'ryanc_trades', initials: 'RC',
+  avatarGradient: ['#0ea5e9', '#06b6d4'], verified: false,
+  bio: 'Day trader. Scalping tech & momentum plays.',
+  followersCount: 890, followingCount: 213,
+  tradesCount: 67, investmentsCount: 2,
+  coverColor: '#082f49',
+  mostActive: 'Day trading · Tech',
+  hasSentFollowRequest: true,
+};
+
+export const privateUser: User = {
+  id: 'u6', name: 'D. Morgan', username: 'dmorgan_fx', initials: 'DM',
+  avatarGradient: ['#1e293b', '#334155'], verified: true,
+  bio: 'Institutional FX & macro. Private account.',
+  followersCount: 5840, followingCount: 61,
+  tradesCount: 0, investmentsCount: 0,
+  coverColor: '#0f172a',
+  mostActive: 'FX · Macro · Options',
+  isPrivate: true,
+};
+
+export const DEMO_USERS = { alexKim, saraR, mikeW, jamieT, kayL, currentUser, privateUser, ryanC };
 export const SUGGESTED_USERS: User[] = [alexKim, saraR, kayL];
 
 // ── Posts ──────────────────────────────────────────────────────────────────────
@@ -252,7 +274,7 @@ export const DEMO_TRENDING: TrendingTicker[] = [
 
 // ── Notifications ──────────────────────────────────────────────────────────────
 
-export const DEMO_NOTIFICATIONS: Notification[] = [
+export const DEMO_NOTIFICATIONS: LegacyNotification[] = [
   { id: 'n1', type: 'like',    user: alexKim, content: 'liked your NVDA trade',             time: '2m ago',  read: false },
   { id: 'n2', type: 'follow',  user: saraR,   content: 'started following you',             time: '15m ago', read: false },
   { id: 'n3', type: 'comment', user: mikeW,   content: 'commented on your SPY post',        time: '1h ago',  read: false },
@@ -325,3 +347,231 @@ export const COMMENTS: Record<string, Comment[]> = {
     },
   ],
 };
+
+export interface Notification {
+  id: string
+  type: 'like' | 'comment' | 'follow' | 'reply' | 'mention'
+  read: boolean
+  createdAt: string
+  actor: {
+    name: string
+    handle: string
+    initials: string
+    avatarGradient: string
+    verified: boolean
+  }
+  post?: {
+    id: string
+    ticker?: string
+    preview: string
+  }
+  commentPreview?: string
+}
+
+export const NOTIFICATIONS: Notification[] = [
+  {
+    id: 'n1',
+    type: 'like',
+    read: false,
+    createdAt: '2m ago',
+    actor: { name: 'Sara R.', handle: '@macro_sara', initials: 'SR', avatarGradient: 'linear-gradient(135deg,#b45309,#f59e0b)', verified: true },
+    post: { id: 'post-1', ticker: 'NVDA', preview: "AI capex cycle isn't slowing — best risk/reward in months" }
+  },
+  {
+    id: 'n2',
+    type: 'comment',
+    read: false,
+    createdAt: '8m ago',
+    actor: { name: 'Mike W.', handle: '@optionsmike', initials: 'MW', avatarGradient: 'linear-gradient(135deg,#5b21b6,#7c3aed)', verified: false },
+    post: { id: 'post-1', ticker: 'NVDA', preview: "AI capex cycle isn't slowing — best risk/reward in months" },
+    commentPreview: 'Implied vol is elevated — worth considering a spread instead'
+  },
+  {
+    id: 'n3',
+    type: 'follow',
+    read: false,
+    createdAt: '15m ago',
+    actor: { name: 'Jamie T.', handle: '@longonlyjt', initials: 'JT', avatarGradient: 'linear-gradient(135deg,#065f46,#059669)', verified: false }
+  },
+  {
+    id: 'n4',
+    type: 'reply',
+    read: false,
+    createdAt: '34m ago',
+    actor: { name: 'Alex Kim', handle: '@swingkingAK', initials: 'AK', avatarGradient: 'linear-gradient(135deg,#1d4ed8,#60a5fa)', verified: true },
+    post: { id: 'post-1', ticker: 'NVDA', preview: "AI capex cycle isn't slowing" },
+    commentPreview: 'Exactly — $870 is the line in the sand for me too'
+  },
+  {
+    id: 'n5',
+    type: 'mention',
+    read: true,
+    createdAt: '1h ago',
+    actor: { name: 'Sara R.', handle: '@macro_sara', initials: 'SR', avatarGradient: 'linear-gradient(135deg,#b45309,#f59e0b)', verified: true },
+    post: { id: 'post-2', preview: 'Fed held — June cut incoming if jobs soften' },
+    commentPreview: 'Agree with @jamied on this — the language shift is key'
+  },
+  {
+    id: 'n6',
+    type: 'like',
+    read: true,
+    createdAt: '2h ago',
+    actor: { name: 'Kay L.', handle: '@kayltrading', initials: 'KL', avatarGradient: 'linear-gradient(135deg,#0e7490,#22d3ee)', verified: false },
+    post: { id: 'post-1', ticker: 'NVDA', preview: "AI capex cycle isn't slowing" }
+  },
+  {
+    id: 'n7',
+    type: 'follow',
+    read: true,
+    createdAt: '3h ago',
+    actor: { name: 'Mike W.', handle: '@optionsmike', initials: 'MW', avatarGradient: 'linear-gradient(135deg,#5b21b6,#7c3aed)', verified: false }
+  },
+  {
+    id: 'n8',
+    type: 'like',
+    read: true,
+    createdAt: '5h ago',
+    actor: { name: 'Jamie T.', handle: '@longonlyjt', initials: 'JT', avatarGradient: 'linear-gradient(135deg,#065f46,#059669)', verified: false },
+    post: { id: 'post-1', ticker: 'NVDA', preview: "AI capex cycle isn't slowing" }
+  }
+]
+
+// ─── News ────────────────────────────────────────────────────────────────────
+
+export interface NewsArticle {
+  id: string
+  source: string
+  sourceColor: string        // bg color for source badge
+  category: string
+  categoryType: 'earnings' | 'macro' | 'regulatory' | 'analyst' | 'bullish' | 'bearish' | 'ma'
+  headline: string
+  body: string
+  publishedAt: string        // "Today, 09:14 EST · 2h ago"
+  tickers: { symbol: string; change: number }[]
+  featured?: boolean         // hero article
+}
+
+export const NEWS_ARTICLES: NewsArticle[] = [
+  {
+    id: 'na1',
+    source: 'REUTERS',
+    sourceColor: '#e05c1a',
+    category: 'Earnings · Pre-announcement',
+    categoryType: 'earnings',
+    headline: "Jensen Huang confirms Blackwell GPU demand is 'staggering' — hyperscaler orders up 3× year-over-year heading into Q2",
+    body: "Nvidia CEO Jensen Huang made surprise comments at the GTC developer conference reaffirming that demand for the Blackwell architecture has exceeded all internal projections. Every major hyperscaler — Microsoft, Google, Amazon, and Meta — guided capex upward last earnings cycle, and Huang indicated order volumes reflect continued acceleration rather than any sign of plateau.",
+    publishedAt: 'Today, 09:14 EST · 2h ago',
+    tickers: [
+      { symbol: 'NVDA', change: 3.17 },
+      { symbol: 'AMD',  change: 1.88 },
+      { symbol: 'MSFT', change: -0.31 },
+      { symbol: 'META', change: 2.22 },
+    ],
+    featured: true,
+  },
+  {
+    id: 'na2',
+    source: 'NHTSA',
+    sourceColor: '#dc2626',
+    category: 'Regulatory',
+    categoryType: 'regulatory',
+    headline: 'Tesla faces NHTSA probe into FSD software — potential recall of 280,000 vehicles',
+    body: 'Federal regulators opened a preliminary investigation following 23 reported incidents. A formal recall notice could follow within 60 days.',
+    publishedAt: '08:31 EST',
+    tickers: [
+      { symbol: 'TSLA', change: -4.16 },
+    ],
+  },
+  {
+    id: 'na3',
+    source: 'WSJ',
+    sourceColor: '#1d4ed8',
+    category: 'Ad Tech',
+    categoryType: 'bullish',
+    headline: "Meta's AI ad targeting lifts click-through rates 34% — budgets shifting away from Google",
+    body: 'New survey data from 400 advertisers shows Meta\'s Advantage+ platform now outperforms Google Display in conversion efficiency for the first time.',
+    publishedAt: '08:31 EST',
+    tickers: [
+      { symbol: 'META',  change: 2.22 },
+      { symbol: 'GOOGL', change: -1.05 },
+    ],
+  },
+  {
+    id: 'na4',
+    source: 'FED',
+    sourceColor: '#0e7490',
+    category: 'Macro',
+    categoryType: 'macro',
+    headline: 'Fed minutes signal rates on hold through H1 — no cuts expected before September 2026',
+    body: '',
+    publishedAt: '08:30 EST',
+    tickers: [
+      { symbol: 'SPY', change: -0.48 },
+      { symbol: 'TLT', change: 0.92 },
+    ],
+  },
+  {
+    id: 'na5',
+    source: 'BLOOMBERG',
+    sourceColor: '#374151',
+    category: 'Analyst',
+    categoryType: 'analyst',
+    headline: 'Goldman Sachs raises AAPL target to $240 — services revenue seen accelerating through fiscal year 2026',
+    body: '',
+    publishedAt: '07:58 EST',
+    tickers: [
+      { symbol: 'AAPL', change: 0.59 },
+    ],
+  },
+  {
+    id: 'na6',
+    source: 'CNBC',
+    sourceColor: '#b45309',
+    category: 'Earnings',
+    categoryType: 'earnings',
+    headline: 'AMD MI300X shipments ahead of schedule — data center GPU segment to exceed $8B in 2026 guidance',
+    body: '',
+    publishedAt: '07:22 EST',
+    tickers: [
+      { symbol: 'AMD', change: 1.88 },
+    ],
+  },
+  {
+    id: 'na7',
+    source: 'FT',
+    sourceColor: '#9d174d',
+    category: 'Macro',
+    categoryType: 'regulatory',
+    headline: 'EU proposes new digital market levies on US tech giants — potential €4B annual impact across sector',
+    body: '',
+    publishedAt: '06:47 EST',
+    tickers: [
+      { symbol: 'MSFT',  change: -0.31 },
+      { symbol: 'GOOGL', change: -1.05 },
+      { symbol: 'META',  change: 2.22 },
+    ],
+  },
+]
+
+export const TOP_MOVERS = [
+  { ticker: 'NVDA', name: 'Nvidia',  stories: 6, price: 882.60, change: 3.17,  up: true,  spark: '0,20 10,18 20,14 30,10 40,6 50,2' },
+  { ticker: 'TSLA', name: 'Tesla',   stories: 4, price: 172.00, change: -4.16, up: false, spark: '0,2  10,6  20,10 30,16 40,22 50,28' },
+  { ticker: 'META', name: 'Meta',    stories: 3, price: 485.00, change: 2.22,  up: true,  spark: '0,22 10,18 20,14 30,10 40,6 50,2' },
+  { ticker: 'AMD',  name: 'AMD',     stories: 2, price: 162.50, change: 1.88,  up: true,  spark: '0,20 10,16 20,12 30,8 40,5 50,2' },
+]
+
+export const SECTOR_HEAT = [
+  { name: 'Tech',     change: 1.84,  up: true  },
+  { name: 'AI/Semi',  change: 2.53,  up: true  },
+  { name: 'EV',       change: -3.12, up: false },
+  { name: 'Bonds',    change: -0.22, up: false },
+  { name: 'Ad Tech',  change: 1.67,  up: true  },
+  { name: 'Energy',   change: 0.08,  up: true  },
+]
+
+export const ECONOMIC_CALENDAR = [
+  { event: 'NFP Jobs Report',  date: 'Fri Apr 3 · 08:30',  prev: '151k', est: '',      impact: 'high' as const },
+  { event: 'CPI Inflation',    date: 'Wed Apr 9 · 08:30',  prev: '3.1%', est: '',      impact: 'high' as const },
+  { event: 'GDP Report',       date: 'Thu Apr 24 · 08:30', prev: '2.8%', est: '',      impact: 'med'  as const },
+  { event: 'NVDA Earnings',    date: 'Thu May 22 · after close', prev: '', est: '$0.88', impact: 'high' as const },
+]

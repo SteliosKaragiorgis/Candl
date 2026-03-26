@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DEMO_POSTS, COMMENTS, currentUser } from '../data/demo';
 import type { Comment } from '../data/demo';
 import type { TradePost, InvestmentPost, CommentaryPost } from '../types';
 import { useMobile } from '../hooks/useMobile';
+import ShareDropdown from '../components/feed/ShareDropdown';
 
 const CONVICTION_COLOR: Record<string, string> = {
   High: 'var(--green)', Medium: 'var(--gold)', Speculative: 'var(--red)',
@@ -12,15 +13,41 @@ const ACCENT: Record<string, string> = {
   BUY: 'var(--green)', SELL: 'var(--red)', SHORT: 'var(--red)',
 };
 
-function CommentItem({ comment, nested = false }: { comment: Comment; nested?: boolean }) {
+
+function CommentItem({
+  comment,
+  nested = false,
+  onReply,
+}: {
+  comment: Comment;
+  nested?: boolean;
+  onReply?: (commentId: string, text: string) => void;
+}) {
   const [liked, setLiked] = useState(comment.liked);
   const [likeCount, setLikeCount] = useState(comment.likes);
   const [anim, setAnim] = useState(false);
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const replyRef = useRef<HTMLTextAreaElement>(null);
 
   function handleLike() {
-    setLiked(l => { setLikeCount(c => l ? c - 1 : c + 1); return !l; });
+    const next = !liked;
+    setLiked(next);
+    setLikeCount(c => next ? c + 1 : c - 1);
     setAnim(true);
     setTimeout(() => setAnim(false), 350);
+  }
+
+  function toggleReply() {
+    setReplyOpen(o => !o);
+    if (!replyOpen) setTimeout(() => replyRef.current?.focus(), 50);
+  }
+
+  function submitReply() {
+    if (!replyText.trim() || !onReply) return;
+    onReply(comment.id, replyText.trim());
+    setReplyText('');
+    setReplyOpen(false);
   }
 
   const sz = nested ? 28 : 36;
@@ -35,7 +62,7 @@ function CommentItem({ comment, nested = false }: { comment: Comment; nested?: b
       }}>
         {comment.user.initials}
       </div>
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{comment.user.name}</span>
           {comment.user.verified && (
@@ -47,18 +74,67 @@ function CommentItem({ comment, nested = false }: { comment: Comment; nested?: b
             {comment.user.handle} · {comment.createdAt}
           </span>
         </div>
-        <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text2)', margin: '6px 0 10px' }}>{comment.body}</p>
-        <div style={{ display: 'flex', gap: 14 }}>
+        <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text)', margin: '6px 0 10px' }}>{comment.body}</p>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
           <button onClick={handleLike} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: '3px 0', fontSize: 12, color: liked ? 'var(--red)' : 'var(--text4)', cursor: 'pointer' }}>
             <svg className={anim ? 'like-pop' : ''} width="12" height="12" viewBox="0 0 24 24" fill={liked ? 'var(--red)' : 'none'} stroke={liked ? 'var(--red)' : 'currentColor'} strokeWidth="2" strokeLinecap="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
             {likeCount}
           </button>
-          <button style={{ background: 'none', border: 'none', padding: '3px 0', fontSize: 12, color: 'var(--text4)', cursor: 'pointer' }}>Reply</button>
+          {!nested && onReply && (
+            <button
+              onClick={toggleReply}
+              style={{ background: 'none', border: 'none', padding: '3px 0', fontSize: 12, color: replyOpen ? 'var(--blue)' : 'var(--text4)', cursor: 'pointer', fontWeight: replyOpen ? 600 : 400 }}
+            >
+              {replyOpen ? 'Cancel' : 'Reply'}
+            </button>
+          )}
         </div>
+
+        {/* Inline reply form */}
+        {replyOpen && (
+          <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+              background: `linear-gradient(135deg, ${currentUser.avatarGradient[0]}, ${currentUser.avatarGradient[1]})`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontSize: 8, fontWeight: 700,
+            }}>
+              {currentUser.initials}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, color: 'var(--text4)', marginBottom: 4 }}>
+                Replying to <span style={{ color: 'var(--blue)', fontWeight: 600 }}>{comment.user.handle}</span>
+              </div>
+              <textarea
+                ref={replyRef}
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitReply(); }}
+                placeholder={`Reply to ${comment.user.name}...`}
+                rows={2}
+                style={{
+                  width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)',
+                  borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text)',
+                  resize: 'none', fontFamily: 'Inter, sans-serif', outline: 'none', boxSizing: 'border-box',
+                }}
+              />
+              {replyText.trim() && (
+                <button
+                  onClick={submitReply}
+                  style={{ marginTop: 6, background: 'var(--blue)', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                >
+                  Post reply
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Nested replies */}
         {comment.replies && comment.replies.length > 0 && (
-          <div style={{ marginLeft: 36, marginTop: 10 }}>
+          <div style={{ marginLeft: 10, marginTop: 10, paddingLeft: 18, borderLeft: '2px solid var(--border2)' }}>
             {comment.replies.map(r => <CommentItem key={r.id} comment={r} nested />)}
           </div>
         )}
@@ -71,13 +147,28 @@ export default function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const isMobile = useMobile();
+
+  const post = DEMO_POSTS.find(p => p.id === postId);
+
   const [commentText, setCommentText] = useState('');
   const [backHovered, setBackHovered] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(post?.likes ?? 0);
+  const [likeAnim, setLikeAnim] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareAnchorRef = useRef<HTMLButtonElement>(null);
+  const commentsRef = useRef<HTMLDivElement>(null);
 
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const post = DEMO_POSTS.find(p => p.id === postId);
   const initComments = COMMENTS[postId ?? ''] ?? [];
   const [localComments, setLocalComments] = useState<Comment[]>(initComments);
+
+  // Scroll to comments section if navigated with #comments hash
+  useEffect(() => {
+    if (window.location.hash === '#comments' && commentsRef.current) {
+      setTimeout(() => commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+    }
+  }, []);
 
   if (!post) {
     return (
@@ -100,18 +191,28 @@ export default function PostDetailPage() {
   const ticker     = trade?.ticker ?? invest?.ticker;
   const tvSymbol   = trade?.tvSymbol ?? (ticker ? `NASDAQ:${ticker}` : null);
 
+  function handleLike() {
+    const next = !liked;
+    setLiked(next);
+    setLikeCount(c => next ? c + 1 : c - 1);
+    setLikeAnim(true);
+    setTimeout(() => setLikeAnim(false), 350);
+  }
+
+  const myUser = {
+    name: currentUser.name,
+    handle: `@${currentUser.username}`,
+    initials: currentUser.initials,
+    avatarGradient: `linear-gradient(135deg, ${currentUser.avatarGradient[0]}, ${currentUser.avatarGradient[1]})`,
+    verified: currentUser.verified,
+  };
+
   function handleSubmitComment() {
     if (!commentText.trim()) return;
     const c: Comment = {
       id: `new-${Date.now()}`,
       userId: currentUser.id,
-      user: {
-        name: currentUser.name,
-        handle: `@${currentUser.username}`,
-        initials: currentUser.initials,
-        avatarGradient: `linear-gradient(135deg, ${currentUser.avatarGradient[0]}, ${currentUser.avatarGradient[1]})`,
-        verified: currentUser.verified,
-      },
+      user: myUser,
       body: commentText.trim(),
       createdAt: 'just now',
       likes: 0,
@@ -119,6 +220,23 @@ export default function PostDetailPage() {
     };
     setLocalComments(prev => [c, ...prev]);
     setCommentText('');
+  }
+
+  function handleReply(commentId: string, text: string) {
+    const reply: Comment = {
+      id: `reply-${Date.now()}`,
+      userId: currentUser.id,
+      user: myUser,
+      body: text,
+      createdAt: 'just now',
+      likes: 0,
+      liked: false,
+    };
+    setLocalComments(prev => prev.map(c =>
+      c.id === commentId
+        ? { ...c, replies: [...(c.replies ?? []), reply] }
+        : c
+    ));
   }
 
   return (
@@ -177,7 +295,7 @@ export default function PostDetailPage() {
         )}
 
         {/* Body */}
-        <p style={{ padding: '0 16px 12px', fontSize: 13, lineHeight: 1.65, color: 'var(--text2)', margin: 0 }}>{post.body}</p>
+        <p style={{ padding: '0 16px 12px', fontSize: 14, lineHeight: 1.65, color: 'var(--text)', margin: 0 }}>{post.body}</p>
 
         {/* Trade block */}
         {trade && (
@@ -287,22 +405,78 @@ export default function PostDetailPage() {
         </div>
       )}
 
-      {/* Stats row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 16 : 24, padding: '14px 0', borderTop: '1px solid var(--border2)', borderBottom: '1px solid var(--border2)', marginBottom: 20 }}>
-        {[
-          { num: post.likes,           label: 'Likes' },
-          { num: localComments.length, label: 'Comments' },
-          { num: post.shares,          label: 'Shares' },
-        ].map(({ num, label }) => (
-          <div key={label} style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{num.toLocaleString()}</span>
-            <span style={{ fontSize: 11, color: 'var(--text4)', marginTop: 3 }}>{label}</span>
-          </div>
-        ))}
+      {/* Stats / action row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', borderTop: '1px solid var(--border2)', borderBottom: '1px solid var(--border2)', marginBottom: 20 }}>
+
+        {/* Like button */}
+        <button
+          onClick={handleLike}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '8px 14px', borderRadius: 9,
+            border: `1px solid ${liked ? 'rgba(239,68,68,0.3)' : 'var(--border)'}`,
+            background: liked ? 'rgba(239,68,68,0.06)' : 'var(--surface2)',
+            color: liked ? 'var(--red)' : 'var(--text3)',
+            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            transition: 'all 0.15s', fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          <svg className={likeAnim ? 'like-pop' : ''} width="15" height="15" viewBox="0 0 24 24" fill={liked ? 'var(--red)' : 'none'} stroke={liked ? 'var(--red)' : 'currentColor'} strokeWidth="2" strokeLinecap="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          {likeCount.toLocaleString()}
+        </button>
+
+        {/* Comments count */}
+        <button
+          onClick={() => commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '8px 14px', borderRadius: 9,
+            border: '1px solid var(--border)', background: 'var(--surface2)',
+            color: 'var(--text3)', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', transition: 'all 0.15s', fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          {localComments.length}
+        </button>
+
+        {/* Share button */}
+        <div style={{ position: 'relative', marginLeft: 'auto' }}>
+          <button
+            ref={shareAnchorRef}
+            onClick={() => setShareOpen(o => !o)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '8px 16px', borderRadius: 9,
+              border: '1px solid var(--border)', background: shareOpen ? 'var(--surface2)' : 'var(--blue)',
+              color: shareOpen ? 'var(--text)' : '#fff',
+              fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              transition: 'all 0.15s', fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            Share
+          </button>
+          {shareOpen && (
+            <ShareDropdown
+              postId={post.id}
+              title={post.body.slice(0, 80)}
+              anchorRef={shareAnchorRef}
+              onClose={() => setShareOpen(false)}
+            />
+          )}
+        </div>
       </div>
 
       {/* Comments heading */}
-      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 14 }}>Comments</div>
+      <div ref={commentsRef} id="comments" style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 14 }}>Comments</div>
 
       {/* Comment input */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, alignItems: 'flex-start' }}>
@@ -330,7 +504,7 @@ export default function PostDetailPage() {
         {localComments.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '30px 0', fontSize: 13, color: 'var(--text4)' }}>No comments yet. Be the first!</div>
         ) : (
-          localComments.map(c => <CommentItem key={c.id} comment={c} />)
+          localComments.map(c => <CommentItem key={c.id} comment={c} onReply={handleReply} />)
         )}
       </div>
     </div>

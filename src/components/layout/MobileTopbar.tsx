@@ -1,4 +1,5 @@
 import { currentUser, APP_NAME } from '../../data/demo';
+import { useTheme } from '../../context/ThemeContext';
 
 const MARKET_TICKERS = [
   { label: 'S&P',  price: '5,842.17', change: '+1.12%', up: true  },
@@ -15,6 +16,7 @@ export default function MobileTopbar({
   onNotifClick: () => void;
   notifHasUnread: boolean;
 }) {
+  const { theme, toggle } = useTheme();
   return (
     <div>
       {/* Main topbar row */}
@@ -52,6 +54,32 @@ export default function MobileTopbar({
 
         {/* Right controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Theme toggle */}
+          <button
+            onClick={toggle}
+            style={{
+              width: 34, height: 34, borderRadius: 10,
+              border: '1px solid var(--border)',
+              background: 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--text)',
+            }}
+          >
+            {theme === 'light' ? (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            ) : (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+            )}
+          </button>
+
           {/* Notification bell */}
           <button
             onClick={onNotifClick}
@@ -89,40 +117,48 @@ export default function MobileTopbar({
       </div>
 
       {/* Market ticker strip */}
-      <div
-        className="scrollbar-hide"
-        style={{
-          padding: '7px 16px',
-          display: 'flex',
-          gap: 0,
-          overflowX: 'auto',
-          background: 'var(--surface)',
-          borderBottom: '1px solid var(--border)',
-        }}
-      >
-        {MARKET_TICKERS.map(({ label, price, change, up }, i) => (
-          <div key={label} style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            flexShrink: 0, paddingRight: 14,
-            borderRight: i < MARKET_TICKERS.length - 1 ? '1px solid var(--border2)' : 'none',
-            marginRight: i < MARKET_TICKERS.length - 1 ? 14 : 0,
-          }}>
-            <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text4)' }}>
-              {label}
-            </span>
-            <span style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: 'var(--text)' }}>
-              {price}
-            </span>
-            <span style={{
-              fontSize: 9, fontFamily: 'JetBrains Mono, monospace', fontWeight: 600,
-              padding: '1px 4px', borderRadius: 4,
-              background: up ? 'var(--green-bg)' : 'var(--red-bg)',
-              color: up ? 'var(--green)' : 'var(--red)',
+      <div style={{
+        overflow: 'hidden',
+        background: 'var(--surface)',
+        borderBottom: '1px solid var(--border)',
+        padding: '7px 0',
+      }}>
+        <style>{`
+          @keyframes mobile-ticker-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .mobile-ticker-track {
+            display: flex;
+            width: max-content;
+            animation: mobile-ticker-scroll 18s linear infinite;
+          }
+        `}</style>
+        <div className="mobile-ticker-track">
+          {[...MARKET_TICKERS, ...MARKET_TICKERS].map(({ label, price, change, up }, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              flexShrink: 0, paddingRight: 14,
+              borderRight: '1px solid var(--border2)',
+              marginRight: 14,
             }}>
-              {change}
-            </span>
-          </div>
-        ))}
+              <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text4)' }}>
+                {label}
+              </span>
+              <span style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: 'var(--text)' }}>
+                {price}
+              </span>
+              <span style={{
+                fontSize: 9, fontFamily: 'JetBrains Mono, monospace', fontWeight: 600,
+                padding: '1px 4px', borderRadius: 4,
+                background: up ? 'var(--green-bg)' : 'var(--red-bg)',
+                color: up ? 'var(--green)' : 'var(--red)',
+              }}>
+                {change}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

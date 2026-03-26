@@ -10,16 +10,17 @@ const NAV_ITEMS = [
     ),
   },
   {
-    id: 'explore',
-    label: 'Explore',
+    id: 'news',
+    label: 'News',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2V9"/>
+        <line x1="18" y1="14" x2="10" y2="14"/><line x1="18" y1="10" x2="10" y2="10"/><line x1="14" y1="18" x2="10" y2="18"/>
       </svg>
     ),
   },
   {
-    id: 'alerts',
+    id: 'notifications',
     label: 'Alerts',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -70,12 +71,12 @@ export default function BottomNav({
         onNavigate={onNavigate}
       />
 
-      {/* Explore */}
+      {/* News */}
       <NavItem
-        id="explore"
+        id="news"
         label={NAV_ITEMS[1].label}
         icon={NAV_ITEMS[1].icon}
-        active={currentPage === 'explore'}
+        active={currentPage === 'news'}
         onNavigate={onNavigate}
       />
 
@@ -105,7 +106,7 @@ export default function BottomNav({
         id="alerts"
         label={NAV_ITEMS[2].label}
         icon={NAV_ITEMS[2].icon}
-        active={currentPage === 'alerts'}
+        active={currentPage === 'notifications'}
         onNavigate={onNavigate}
       />
 

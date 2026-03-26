@@ -19,6 +19,8 @@ export interface User {
   investmentsCount?: number;
   coverColor?: string;
   mostActive: string;
+  isPrivate?: boolean;
+  hasSentFollowRequest?: boolean;
 }
 
 // ── Posts ─────────────────────────────────────────────────────────────────────

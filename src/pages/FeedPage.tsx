@@ -58,7 +58,7 @@ export default function FeedPage() {
   const newsMap = Object.fromEntries(NEWS_ITEMS.map(n => [n.relatedPostId, n]));
 
   return (
-    <div style={{ maxWidth: '740px', margin: '0 auto', padding: isMobile ? '12px 10px 0' : undefined, background: 'var(--bg)', minHeight: '100%' }}>
+    <div style={{ padding: isMobile ? '12px 10px 0' : undefined, background: 'var(--bg)', minHeight: '100%' }}>
       <MarketsPanel />
 
       {/* Compose box — simplified on mobile */}
