@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 interface Props {
   postId: string;
   title: string;
-  anchorRef: React.RefObject<HTMLElement>;
+  anchorRef: React.RefObject<HTMLElement | null>;
   onClose: () => void;
 }
 
