@@ -463,7 +463,7 @@ export default function SettingsPage() {
               onClick={() => setTab(id)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
-                padding: '7px 14px', borderRadius: 20, border: 'none', flexShrink: 0,
+                padding: '7px 14px', borderRadius: 20, flexShrink: 0,
                 background: tab === id ? 'var(--blue)' : 'var(--surface)',
                 color: tab === id ? '#fff' : 'var(--text3)',
                 fontSize: 12, fontWeight: 600, cursor: 'pointer',
@@ -495,7 +495,7 @@ export default function SettingsPage() {
               onClick={() => setTab(id)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                padding: '9px 20px', background: 'none', border: 'none',
+                padding: '9px 20px', border: 'none',
                 borderLeft: `2px solid ${tab === id ? 'var(--blue)' : 'transparent'}`,
                 background: tab === id ? 'rgba(0,71,255,0.05)' : 'transparent',
                 color: tab === id ? 'var(--blue)' : 'var(--text3)',
