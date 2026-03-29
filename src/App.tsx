@@ -20,6 +20,7 @@ import DiscoverForumsPage from './pages/DiscoverForumsPage';
 import SignInPage from './pages/SignInPage';
 import WatchlistPage from './pages/WatchlistPage';
 import TickerPage from './pages/TickerPage';
+import PortfolioPage from './pages/PortfolioPage';
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="forum/thread/:threadId" element={<ForumThreadPage />} />
             <Route path="forum" element={<ForumPage />} />
             <Route path="watchlist" element={<WatchlistPage />} />
+            <Route path="portfolio" element={<PortfolioPage />} />
             <Route path="ticker/:symbol" element={<TickerPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
