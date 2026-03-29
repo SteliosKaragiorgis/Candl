@@ -6,6 +6,7 @@ import ProfileTabs, { type Tab } from '../components/profile/ProfileTabs';
 import TradeCard from '../components/feed/TradeCard';
 import InvestCard from '../components/feed/InvestCard';
 import CommentaryCard from '../components/feed/CommentaryCard';
+import SocialCard from '../components/feed/SocialCard';
 import type { Post, User } from '../types';
 
 function findUser(id: string): User | undefined {
@@ -15,6 +16,7 @@ function findUser(id: string): User | undefined {
 function PostCard({ post }: { post: Post }) {
   if (post.postType === 'trade') return <TradeCard post={post} />;
   if (post.postType === 'investment') return <InvestCard post={post} />;
+  if (post.postType === 'social') return <SocialCard post={post} />;
   return <CommentaryCard post={post} />;
 }
 

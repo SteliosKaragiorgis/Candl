@@ -2,9 +2,10 @@ import { useState, useRef } from 'react';
 import { currentUser } from '../../data/demo';
 import { TickerChart } from './TickerChart';
 import type { TickerMeta } from './TickerChart';
+import TickerInput from './TickerInput';
 import { useMobile } from '../../hooks/useMobile';
 
-type PostType = 'trade' | 'invest' | 'commentary';
+type PostType = 'trade' | 'invest' | 'commentary' | 'post';
 
 const TIMEFRAMES = ['1m', '5m', '15m', '1h', '4h', 'Daily', 'Weekly'];
 
@@ -30,7 +31,7 @@ const INPUT: React.CSSProperties = {
   boxSizing: 'border-box',
 };
 
-export default function ComposerModal({ open, onClose, initialTab = 'trade' }: { open: boolean; onClose: () => void; initialTab?: PostType }) {
+export default function ComposerModal({ open, onClose, initialTab = 'post' }: { open: boolean; onClose: () => void; initialTab?: PostType }) {
   const isMobile = useMobile();
   const [postType, setPostType] = useState<PostType>(initialTab);
 
@@ -62,8 +63,10 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
   // Commentary
   const [body, setBody] = useState('');
   const [sentiment, setSentiment] = useState<'Bullish' | 'Neutral' | 'Bearish'>('Bullish');
+  const [postSentiment, setPostSentiment] = useState<'Bullish' | 'Neutral' | 'Bearish' | null>(null);
   const [macroThemes, setMacroThemes] = useState<string[]>([]);
   const [commentaryTicker, setCommentaryTicker] = useState('');
+  const [postTickerMeta, setPostTickerMeta] = useState<TickerMeta | null>(null);
   const [commentaryDate, setCommentaryDate] = useState('');
   const [commentaryDateEnabled, setCommentaryDateEnabled] = useState(false);
   const [pollEnabled, setPollEnabled] = useState(false);
@@ -105,6 +108,7 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
   const canPublish =
     postType === 'trade' ? ticker.trim().length > 0 :
     postType === 'invest' ? investTicker.trim().length > 0 :
+    postType === 'post' ? body.trim().length > 0 || mediaFiles.length > 0 :
     body.trim().length > 0;
 
   function toggleTimeframe(tf: string) {
@@ -140,6 +144,7 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
   if (!open) return null;
 
   const TABS: { id: PostType; label: string }[] = [
+    { id: 'post',       label: '✦ Post' },
     { id: 'trade',      label: '📝 Trade' },
     { id: 'invest',     label: '💼 Investment' },
     { id: 'commentary', label: '💬 Commentary' },
@@ -196,7 +201,7 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
         </div>
 
         {/* ── Tabs ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, padding: isMobile ? '0 14px 12px' : '0 20px 16px', flexShrink: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 6, padding: isMobile ? '0 14px 12px' : '0 20px 16px', flexShrink: 0 }}>
           {TABS.map(({ id, label }) => (
             <button
               key={id}
@@ -216,6 +221,108 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
 
         {/* ── Form ── */}
         <div style={{ padding: isMobile ? '0 14px 20px' : '0 20px 20px' }}>
+
+          {/* ────── POST (Twitter-like) ────── */}
+          {postType === 'post' && (
+            <>
+              <div style={CARD}>
+                <textarea
+                  value={body}
+                  onChange={e => { if (e.target.value.length <= 280) setBody(e.target.value); }}
+                  placeholder="What's happening in the market?"
+                  rows={isMobile ? 4 : 5}
+                  autoFocus
+                  style={{ ...INPUT, resize: 'none', fontSize: 16, lineHeight: 1.65, background: 'transparent', border: 'none', padding: '0 0 8px', fontWeight: 400 }}
+                />
+                {/* Toolbar: char counter + image button */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingTop: 8, borderTop: '1px solid var(--border2)' }}>
+                  <span style={{ fontSize: 11, color: body.length > 250 ? 'var(--red)' : 'var(--text4)', fontFamily: 'JetBrains Mono, monospace', marginRight: 'auto' }}>
+                    {body.length}/280
+                  </span>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Add image"
+                    style={{
+                      width: 34, height: 34, borderRadius: 8,
+                      border: '1.5px solid var(--border)',
+                      background: 'var(--surface2)',
+                      color: 'var(--text)',
+                      cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Ticker search row */}
+                <div style={{ marginTop: 10 }}>
+                  <TickerInput
+                    onConfirm={(sym, m) => { setCommentaryTicker(sym); setPostTickerMeta(m); }}
+                    onClear={() => { setCommentaryTicker(''); setPostTickerMeta(null); }}
+                  />
+                </div>
+              </div>
+
+              {/* Sentiment selector */}
+              <div style={CARD}>
+                <span style={LABEL}>Sentiment <span style={{ fontWeight: 400, letterSpacing: 0, textTransform: 'none', color: 'var(--text4)' }}>— optional</span></span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+                  {([
+                    { label: 'Bullish', dot: '#16a34a', activeBg: 'rgba(22,163,74,0.12)', activeBorder: 'rgba(22,163,74,0.35)', activeColor: '#16a34a' },
+                    { label: 'Neutral', dot: '#d97706', activeBg: 'rgba(217,119,6,0.12)',  activeBorder: 'rgba(217,119,6,0.35)',  activeColor: '#d97706' },
+                    { label: 'Bearish', dot: '#dc2626', activeBg: 'rgba(220,38,38,0.12)',  activeBorder: 'rgba(220,38,38,0.35)',  activeColor: '#dc2626' },
+                  ] as const).map(({ label, dot, activeBg, activeBorder, activeColor }) => {
+                    const active = postSentiment === label;
+                    return (
+                      <button
+                        key={label}
+                        onClick={() => setPostSentiment(prev => prev === label ? null : label)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 0', borderRadius: 10, border: `1px solid ${active ? activeBorder : 'var(--border)'}`, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s', background: active ? activeBg : 'var(--surface)', color: active ? activeColor : 'var(--text-2)', fontFamily: 'Inter, sans-serif' }}
+                      >
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: dot, display: 'inline-block', flexShrink: 0 }} />
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Image previews for post type */}
+              {mediaPreviews.length > 0 && (
+                <div style={{ ...CARD }}>
+                  <span style={LABEL}>Images</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: mediaPreviews.length === 1 ? '1fr' : 'repeat(2, 1fr)', gap: 6 }}>
+                    {mediaPreviews.map((src, i) => (
+                      <div key={i} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', aspectRatio: mediaPreviews.length === 1 ? '16/9' : '1', background: 'var(--bg)' }}>
+                        <img src={src} alt={`Upload ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        <button
+                          onClick={() => removeMedia(i)}
+                          style={{ position: 'absolute', top: 5, right: 5, width: 22, height: 22, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                    {mediaPreviews.length < 4 && (
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{ borderRadius: 10, border: '1.5px dashed var(--border)', aspectRatio: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: 'pointer', background: 'transparent' }}
+                      >
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text4)" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span style={{ fontSize: 11, color: 'var(--text4)' }}>Add more</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           {/* ────── TRADE ────── */}
           {postType === 'trade' && (
@@ -586,7 +693,7 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
             style={{ display: 'none' }}
             onChange={e => { if (e.target.files) handleMediaFiles(e.target.files); }}
           />
-          <div style={CARD}>
+          <div style={{ ...CARD, display: postType === 'post' ? 'none' : undefined }}>
             <span style={LABEL}>Chart or Screenshot</span>
             {mediaPreviews.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
@@ -633,8 +740,8 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
             )}
           </div>
 
-          {/* ── SOCIAL (non-commentary: confidence + visibility) ── */}
-          {postType !== 'commentary' && (
+          {/* ── SOCIAL (non-commentary, non-post: confidence + visibility) ── */}
+          {postType !== 'commentary' && postType !== 'post' && (
             <div style={CARD}>
               <span style={LABEL}>Social</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -682,11 +789,13 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
             </div>
           )}
 
-          {/* ── HASHTAGS ── */}
-          <div style={{ ...CARD, marginBottom: 0 }}>
-            <span style={LABEL}>Hashtags</span>
-            <input value={hashtags} onChange={e => setHashtags(e.target.value)} placeholder="#AI #Semiconductors #Earnings" style={INPUT} />
-          </div>
+          {/* ── HASHTAGS (not shown for post type — hashtags go in the body) ── */}
+          {postType !== 'post' && (
+            <div style={{ ...CARD, marginBottom: 0 }}>
+              <span style={LABEL}>Hashtags</span>
+              <input value={hashtags} onChange={e => setHashtags(e.target.value)} placeholder="#AI #Semiconductors #Earnings" style={INPUT} />
+            </div>
+          )}
         </div>
 
         {/* ── Footer ── */}
@@ -703,7 +812,7 @@ export default function ComposerModal({ open, onClose, initialTab = 'trade' }: {
               fontFamily: 'Inter, sans-serif', transition: 'all 0.15s',
             }}
           >
-            Post trade idea
+            {postType === 'post' ? 'Post' : 'Post trade idea'}
           </button>
         </div>
       </div>

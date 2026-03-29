@@ -32,7 +32,7 @@ interface TickerChartProps {
 
 const API_KEY = import.meta.env.VITE_TWELVEDATA_KEY ?? ''
 
-interface SearchResult {
+export interface SearchResult {
   symbol: string
   instrument_name: string
   exchange: string
@@ -40,7 +40,7 @@ interface SearchResult {
   currency: string
 }
 
-async function fetchSearch(query: string): Promise<SearchResult[]> {
+export async function fetchSearch(query: string): Promise<SearchResult[]> {
   const url = `https://api.twelvedata.com/symbol_search?symbol=${encodeURIComponent(query)}&apikey=${API_KEY}`
   const res = await fetch(url)
   const json = await res.json()
@@ -48,7 +48,7 @@ async function fetchSearch(query: string): Promise<SearchResult[]> {
   return (json.data as SearchResult[]).slice(0, 7)
 }
 
-async function fetchQuote(symbol: string): Promise<TickerMeta> {
+export async function fetchQuote(symbol: string): Promise<TickerMeta> {
   const url = `https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${API_KEY}`
   const res = await fetch(url)
   const json = await res.json()
@@ -101,7 +101,7 @@ function toTVSymbol(exchange: string, symbol: string): string {
   return `${exchange}:${sym}`
 }
 
-function useDebounce<T>(value: T, delay: number): T {
+export function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value)
   useEffect(() => {
     const t = setTimeout(() => setDebounced(value), delay)

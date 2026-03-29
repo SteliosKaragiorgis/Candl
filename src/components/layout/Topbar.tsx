@@ -1,6 +1,7 @@
 import { useTheme } from '../../context/ThemeContext';
 import { currentUser, APP_NAME } from '../../data/demo';
 import { useNavigate } from 'react-router-dom';
+import { useMarketData } from '../../context/MarketDataContext';
 
 function CandlIcon() {
   return (
@@ -15,19 +16,18 @@ function CandlIcon() {
   );
 }
 
-const TICKERS = [
-  { t: 'NVDA', p: 882.60, c: 3.17 },
-  { t: 'SPY',  p: 512.50, c: -0.40 },
-  { t: 'TSLA', p: 172.00, c: -4.16 },
-  { t: 'AAPL', p: 211.45, c: 0.59 },
-  { t: 'META', p: 485.00, c: 2.22 },
-  { t: 'AMD',  p: 162.50, c: 1.88 },
-  { t: 'AMZN', p: 198.30, c: 0.74 },
-  { t: 'MSFT', p: 415.20, c: -0.31 },
-];
-
 export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () => void; notifOpen: boolean }) {
   const { theme, toggle } = useTheme();
+  const { quotes } = useMarketData();
+  const tickers = ['NVDA', 'SPY', 'TSLA', 'AAPL', 'META', 'AMD', 'AMZN', 'MSFT'].map(s => {
+    const q = quotes[s];
+    return {
+      label: s,
+      price: q?.price > 0 ? q.price.toFixed(2) : '—',
+      change: q?.price > 0 ? `${q.changePct >= 0 ? '+' : ''}${q.changePct.toFixed(2)}%` : '—',
+      up: (q?.changePct ?? 0) >= 0,
+    };
+  });
   const navigate = useNavigate();
 
   return (
@@ -48,7 +48,6 @@ export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () =
         style={{
           display: 'flex', alignItems: 'center', gap: 8,
           cursor: 'pointer', flexShrink: 0,
-          width: 'var(--sidebar-w)',
         }}
       >
         <div style={{
@@ -82,16 +81,16 @@ export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () =
           .ticker-track:hover { animation-play-state: paused; }
         `}</style>
         <div className="ticker-track">
-          {[...TICKERS, ...TICKERS].map(({ t, p, c }, i) => (
+          {[...tickers, ...tickers].map(({ label, price, change, up }, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0, marginRight: '28px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{t}</span>
-              <span style={{ fontSize: '11px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace' }}>{p.toFixed(2)}</span>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{label}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-2)', fontFamily: 'JetBrains Mono, monospace' }}>{price}</span>
               <span style={{
                 fontSize: '10px', fontWeight: 600,
                 fontFamily: 'JetBrains Mono, monospace',
-                color: c >= 0 ? 'var(--green)' : 'var(--red)',
+                color: up ? 'var(--green)' : 'var(--red)',
               }}>
-                {c >= 0 ? '+' : ''}{c.toFixed(2)}%
+                {change}
               </span>
             </div>
           ))}

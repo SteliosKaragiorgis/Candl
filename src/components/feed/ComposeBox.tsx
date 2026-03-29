@@ -1,28 +1,31 @@
 import { useState } from 'react';
 import { currentUser } from '../../data/demo';
 
-type Tab = 'trade' | 'investment' | 'commentary';
+type Tab = 'post' | 'trade' | 'investment' | 'commentary';
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: 'post', label: 'Post' },
   { id: 'trade', label: 'Trade' },
   { id: 'investment', label: 'Investment' },
   { id: 'commentary', label: 'Commentary' },
 ];
 
 const TAGS: Record<Tab, string[]> = {
+  post: ['Image', 'Bullish', 'Bearish', 'Ticker'],
   trade: ['Ticker', 'Chart', 'Levels', 'Strategy'],
   investment: ['Ticker', 'Chart', 'Fundamentals', 'Catalyst'],
   commentary: ['Macro', 'Chart', 'News', 'Rates'],
 };
 
 const PLACEHOLDERS: Record<Tab, string> = {
+  post: "What's happening in the market?",
   trade: 'Share a trade — ticker, entry, thesis, levels…',
   investment: 'Share an investment thesis — conviction, catalyst, valuation…',
   commentary: 'Market commentary — macro events, rate moves, sector rotation…',
 };
 
 export default function ComposeBox({ onOpen }: { onOpen?: (tab: Tab) => void }) {
-  const [tab, setTab] = useState<Tab>('trade');
+  const [tab, setTab] = useState<Tab>('post');
 
   return (
     <div style={{

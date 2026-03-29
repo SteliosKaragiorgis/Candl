@@ -5,6 +5,7 @@ import ComposerModal from '../components/feed/ComposerModal';
 import TradeCard from '../components/feed/TradeCard';
 import InvestCard from '../components/feed/InvestCard';
 import CommentaryCard from '../components/feed/CommentaryCard';
+import SocialCard from '../components/feed/SocialCard';
 import SkeletonCard from '../components/feed/SkeletonCard';
 import NewsCard from '../components/feed/NewsCard';
 import { DEMO_POSTS, NEWS_ITEMS, currentUser } from '../data/demo';
@@ -24,12 +25,13 @@ function filterPosts(posts: Post[], tab: FeedTab): Post[] {
   if (tab === 'all') return posts;
   if (tab === 'trades') return posts.filter(p => p.postType === 'trade');
   if (tab === 'investments') return posts.filter(p => p.postType === 'investment');
-  return posts.filter(p => p.postType === 'commentary');
+  return posts.filter(p => p.postType === 'commentary' || p.postType === 'social');
 }
 
 function PostCard({ post }: { post: Post }) {
   if (post.postType === 'trade') return <TradeCard post={post} />;
   if (post.postType === 'investment') return <InvestCard post={post} />;
+  if (post.postType === 'social') return <SocialCard post={post} />;
   return <CommentaryCard post={post} />;
 }
 
@@ -38,9 +40,9 @@ export default function FeedPage() {
   const [tab, setTab] = useState<FeedTab>('all');
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerKey, setComposerKey] = useState(0);
-  const [composerTab, setComposerTab] = useState<'trade' | 'invest' | 'commentary'>('trade');
+  const [composerTab, setComposerTab] = useState<'post' | 'trade' | 'invest' | 'commentary'>('post');
 
-  function openComposer(tab: 'trade' | 'invest' | 'commentary' = 'trade') {
+  function openComposer(tab: 'post' | 'trade' | 'invest' | 'commentary' = 'post') {
     setComposerTab(tab);
     setComposerOpen(true);
     setComposerKey(k => k + 1);
@@ -95,7 +97,7 @@ export default function FeedPage() {
           </button>
         </div>
       ) : (
-        <ComposeBox onOpen={t => openComposer(t === 'investment' ? 'invest' : t)} />
+        <ComposeBox onOpen={t => openComposer(t === 'investment' ? 'invest' : t as 'post' | 'trade' | 'invest' | 'commentary')} />
       )}
 
       {/* Feed tabs */}

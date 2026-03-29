@@ -240,6 +240,27 @@ export const DEMO_POSTS: Post[] = [
     hashtags: ['#Options', '#GEX', '#AMD'],
     likes: 178, comments: 29, shares: 41,
   },
+  {
+    id: 'p7', postType: 'social',
+    user: saraR, createdAt: '1h ago',
+    body: '$5 trillion wiped out.\n\nEverything is going exactly as planned.\n\nStay tuned.',
+    ticker: undefined,
+    sentiment: 'Bearish',
+    images: [
+      'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80',
+    ],
+    hashtags: ['#Markets', '#Selloff', '#Macro'],
+    likes: 5400, comments: 365, shares: 490,
+  },
+  {
+    id: 'p8', postType: 'social',
+    user: alexKim, createdAt: '30m ago',
+    body: 'Reminder: market structure is still intact on the weekly. This is noise, not a trend reversal — yet.\n\nWatch the 200-week MA. That\'s the real line in the sand.',
+    ticker: 'SPY',
+    sentiment: 'Neutral',
+    hashtags: ['#SPY', '#MarketStructure', '#Technicals'],
+    likes: 1240, comments: 88, shares: 211,
+  },
 ];
 
 // ── Watchlist ──────────────────────────────────────────────────────────────────
@@ -443,11 +464,12 @@ export interface NewsArticle {
   source: string
   sourceColor: string        // bg color for source badge
   category: string
-  categoryType: 'earnings' | 'macro' | 'regulatory' | 'analyst' | 'bullish' | 'bearish' | 'ma'
+  categoryType: 'earnings' | 'macro' | 'regulatory' | 'analyst' | 'bullish' | 'bearish' | 'ma' | 'crypto' | 'commodity'
   headline: string
   body: string
   publishedAt: string        // "Today, 09:14 EST · 2h ago"
   tickers: { symbol: string; change: number }[]
+  image?: string             // thumbnail URL from news source
   featured?: boolean         // hero article
 }
 

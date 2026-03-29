@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { DEMO_POSTS, COMMENTS, currentUser } from '../data/demo';
 import type { Comment } from '../data/demo';
-import type { TradePost, InvestmentPost, CommentaryPost } from '../types';
+import type { TradePost, InvestmentPost, CommentaryPost, SocialPost } from '../types';
 import { useMobile } from '../hooks/useMobile';
 import ShareDropdown from '../components/feed/ShareDropdown';
 
@@ -188,6 +188,7 @@ export default function PostDetailPage() {
   const trade      = post.postType === 'trade'      ? post as TradePost      : null;
   const invest     = post.postType === 'investment'  ? post as InvestmentPost  : null;
   const commentary = post.postType === 'commentary'  ? post as CommentaryPost  : null;
+  const social     = post.postType === 'social'      ? post as SocialPost      : null;
   const ticker     = trade?.ticker ?? invest?.ticker;
   const tvSymbol   = trade?.tvSymbol ?? (ticker ? `NASDAQ:${ticker}` : null);
 
@@ -258,7 +259,7 @@ export default function PostDetailPage() {
       {/* Post card */}
       <div style={{
         background: 'var(--surface)', border: '1px solid var(--border)',
-        borderLeft: `3px solid ${trade ? ACCENT[trade.direction] : invest ? 'var(--blue)' : 'var(--gold)'}`,
+        borderLeft: `3px solid ${trade ? ACCENT[trade.direction] : invest ? 'var(--blue)' : social ? 'transparent' : 'var(--gold)'}`,
         borderRadius: 16, overflow: 'hidden', marginBottom: 16,
       }}>
         {/* Header */}
@@ -275,6 +276,12 @@ export default function PostDetailPage() {
               {trade && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'rgba(234,88,12,0.1)', color: '#ea580c', border: '1px solid rgba(234,88,12,0.2)' }}>TRADE</span>}
               {invest && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'var(--green-bg)', color: 'var(--green)', border: '1px solid var(--green-border)' }}>INVEST</span>}
               {commentary && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'var(--gold-bg)', color: 'var(--gold)', border: '1px solid var(--gold-border)' }}>COMMENTARY</span>}
+              {social?.sentiment && (() => {
+                const c = social.sentiment === 'Bullish' ? { bg: 'rgba(22,163,74,0.12)', color: '#16a34a', border: 'rgba(22,163,74,0.35)' }
+                        : social.sentiment === 'Bearish' ? { bg: 'rgba(220,38,38,0.12)', color: '#dc2626', border: 'rgba(220,38,38,0.35)' }
+                        : { bg: 'rgba(217,119,6,0.12)', color: '#d97706', border: 'rgba(217,119,6,0.35)' };
+                return <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>{social.sentiment!.toUpperCase()}</span>;
+              })()}
               {post.user.verified && <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--blue)"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>}
             </div>
             <div style={{ fontSize: 10, color: 'var(--text4)', fontFamily: 'JetBrains Mono, monospace' }}>@{post.user.username} · {post.createdAt}</div>
@@ -372,6 +379,22 @@ export default function PostDetailPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Social images */}
+        {social?.images && social.images.length > 0 && (
+          <div style={{ padding: '0 16px 12px' }}>
+            <div style={{
+              display: social.images.length === 1 ? 'block' : 'grid',
+              gridTemplateColumns: social.images.length >= 2 ? '1fr 1fr' : undefined,
+              gap: 2, borderRadius: 12, overflow: 'hidden',
+              border: '1px solid var(--border)',
+            }}>
+              {social.images.map((src, i) => (
+                <img key={i} src={src} alt="" style={{ width: '100%', display: 'block', objectFit: 'cover', maxHeight: social.images!.length === 1 ? 400 : 220 }} />
+              ))}
+            </div>
           </div>
         )}
 
