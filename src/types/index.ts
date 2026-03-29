@@ -73,7 +73,14 @@ export interface CommentaryPost extends BasePost {
   newsDate: string;
 }
 
-export type Post = TradePost | InvestmentPost | CommentaryPost;
+export interface SocialPost extends BasePost {
+  postType: 'social';
+  images?: string[];
+  sentiment?: 'Bullish' | 'Neutral' | 'Bearish';
+  ticker?: string;
+}
+
+export type Post = TradePost | InvestmentPost | CommentaryPost | SocialPost;
 
 // ── Supporting data ───────────────────────────────────────────────────────────
 

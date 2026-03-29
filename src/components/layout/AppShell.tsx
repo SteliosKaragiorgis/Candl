@@ -20,8 +20,8 @@ export default function AppShell() {
 
   useEffect(() => {
     if (location.pathname === '/') setMobilePage('feed');
-    else if (location.pathname.startsWith('/news')) setMobilePage('news');
-    else if (location.pathname.startsWith('/notifications')) setMobilePage('notifications');
+    else if (location.pathname.startsWith('/news'))    setMobilePage('news');
+    else if (location.pathname.startsWith('/forum'))   setMobilePage('forum');
     else if (location.pathname.startsWith('/profile')) setMobilePage('profile');
   }, [location.pathname]);
 
@@ -74,13 +74,14 @@ export default function AppShell() {
           currentPage={mobilePage}
           onNavigate={(page) => {
             setMobilePage(page);
-            if (page === 'feed') navigate('/');
-            if (page === 'news') navigate('/news');
-            if (page === 'notifications') navigate('/notifications');
+            if (page === 'feed')    navigate('/');
+            if (page === 'news')    navigate('/news');
+            if (page === 'forum')   navigate('/forum');
             if (page === 'profile') navigate(`/profile/${currentUser.id}`);
           }}
           onPostClick={() => setComposerOpen(true)}
         />
+        <ComposerModal open={composerOpen} onClose={() => setComposerOpen(false)} />
 
         {notifOpen && (
           <div ref={notifRef}>
@@ -88,7 +89,6 @@ export default function AppShell() {
           </div>
         )}
 
-        <ComposerModal open={composerOpen} onClose={() => setComposerOpen(false)} />
       </div>
     );
   }

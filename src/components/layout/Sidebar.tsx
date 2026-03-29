@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { DEMO_WATCHLIST, privateUser, ryanC } from '../../data/demo';
+import React, { useState } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { privateUser, ryanC } from '../../data/demo';
+import { useWatchlist } from '../../context/WatchlistContext';
 import ComposerModal from '../feed/ComposerModal';
+import { MY_FORUMS } from '../../pages/ForumPage';
 
 const navItems = [
   { label: 'Feed', path: '/', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
@@ -12,6 +14,14 @@ const navItems = [
   { label: 'Analytics', path: '/analytics', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
   { label: 'Settings', path: '/settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
 ];
+
+type GroupType = 'investment' | 'trading' | 'topic';
+
+const GROUP_TYPE_CFG: Record<GroupType, { label: string; color: string }> = {
+  investment: { label: 'Investment', color: '#185FA5' },
+  trading:    { label: 'Trading',    color: '#1D9E75' },
+  topic:      { label: 'Topic',      color: '#7c3aed' },
+};
 
 function Sparkline({ points, positive }: { points: string; positive: boolean }) {
   return (
@@ -31,6 +41,8 @@ function Sparkline({ points, positive }: { points: string; positive: boolean }) 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { tickers } = useWatchlist();
+  const [searchParams] = useSearchParams();
   const [composerOpen, setComposerOpen] = useState(false);
 
   return (
@@ -60,6 +72,60 @@ export default function Sidebar() {
         })}
       </div>
 
+      {/* MY FORUMS */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 4px', marginBottom: 4,
+        }}>
+          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1px', color: 'var(--text-3)', textTransform: 'uppercase' }}>
+            My Groups
+          </span>
+          <button style={{ fontSize: 10, fontWeight: 700, color: 'var(--blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            + new
+          </button>
+        </div>
+
+        {(['investment', 'trading', 'topic'] as GroupType[]).map(gt => {
+          const groupForums = MY_FORUMS.filter(f => f.groupType === gt);
+          if (groupForums.length === 0) return null;
+          const gtCfg = GROUP_TYPE_CFG[gt];
+          return (
+            <div key={gt}>
+              <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', color: gtCfg.color, textTransform: 'uppercase', padding: '6px 4px 3px', opacity: 0.8 }}>
+                {gtCfg.label}
+              </div>
+              {groupForums.map(f => {
+                const onForumPage = location.pathname === '/forum' || (location.pathname.startsWith('/forum/') && !location.pathname.includes('discover'));
+                const selectedId = searchParams.get('f') ?? MY_FORUMS[0].id;
+                const active = onForumPage && selectedId === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    className={`nav-item ${active ? 'nav-item-active' : ''}`}
+                    onClick={() => navigate(`/forum?f=${f.id}`)}
+                  >
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: f.color, flexShrink: 0 }} />
+                    <span style={{ flex: 1, textAlign: 'left' }}>{f.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
+
+        <button
+          className="nav-item"
+          onClick={() => navigate('/forum/discover')}
+          style={{ color: 'var(--text-3)' }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Discover groups
+        </button>
+      </div>
+
       {/* Post trade button */}
       <button className="post-btn" onClick={() => setComposerOpen(true)} style={{ marginBottom: '16px' }}>
         + POST TRADE
@@ -74,17 +140,17 @@ export default function Sidebar() {
         }}>
           Watchlist
         </div>
-        {DEMO_WATCHLIST.map(item => (
-          <div key={item.ticker} className="watchlist-row">
+        {tickers.slice(0, 8).map(item => (
+          <div key={item.symbol} className="watchlist-row" onClick={() => navigate(`/ticker/${item.symbol}`)} style={{ cursor: 'pointer' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>
-                {item.ticker}
+                {item.symbol}
               </div>
               <div style={{ fontSize: '10px', color: 'var(--text-3)', fontFamily: 'JetBrains Mono, monospace' }}>
-                ${item.price.toFixed(2)}
+                {item.price > 0 ? `$${item.price.toFixed(2)}` : '—'}
               </div>
             </div>
-            <Sparkline points={item.sparkline} positive={item.changePct >= 0} />
+            <Sparkline points={item.sparkPoints} positive={item.changePct >= 0} />
             <div style={{
               fontSize: '10px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace',
               color: item.changePct >= 0 ? 'var(--green)' : 'var(--red)',
