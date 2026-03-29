@@ -238,7 +238,7 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
 
       {/* Alert CTA */}
       <button
-        onClick={() => setAlertOpen(a => !a)}
+        onClick={() => {}}
         style={{
           width: '100%', padding: '11px', borderRadius: 10,
           background: 'var(--surface2)', border: '1px solid var(--border)',

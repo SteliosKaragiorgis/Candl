@@ -34,7 +34,8 @@ export default function ForumNewPostPage() {
   // Shared fields
   const [title, setTitle] = useState('');
   const [selectedSymbol, setSelectedSymbol] = useState<SymbolResult | null>(null);
-  const { darkMode } = useTheme();
+  const { theme } = useTheme();
+  const darkMode = theme === 'dark';
   const [sentiment, setSentiment] = useState<Sentiment | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -499,7 +500,7 @@ function TagsField({ tags, tagInput, setTagInput, showTagInput, setShowTagInput,
   setShowTagInput: (v: boolean) => void;
   addTag: (t: string) => void;
   removeTag: (t: string) => void;
-  tagInputRef: React.RefObject<HTMLInputElement>;
+  tagInputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const suggested = SUGGESTED_TAGS.filter(t => !tags.includes(t) && t.toLowerCase().includes(tagInput.toLowerCase())).slice(0, 6);
   return (

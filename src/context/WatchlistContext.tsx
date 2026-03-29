@@ -1,6 +1,7 @@
 import {
-  createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode,
+  createContext, useContext, useState, useEffect, useRef, useCallback,
 } from 'react';
+import type { ReactNode } from 'react';
 
 const KEY = import.meta.env.VITE_FINNHUB_KEY as string | undefined;
 

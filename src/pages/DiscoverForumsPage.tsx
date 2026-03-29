@@ -226,10 +226,10 @@ function ForumPreview({ forum, onClose, onJoin }: {
             <button
               onClick={() => onJoin(forum)}
               style={{
-                width: '100%', padding: '12px', borderRadius: 10, border: 'none',
+                width: '100%', padding: '12px', borderRadius: 10,
                 background: 'rgba(202,138,4,0.15)', color: '#ca8a04',
                 fontWeight: 700, fontSize: 14, cursor: 'pointer',
-                border: '1px solid rgba(202,138,4,0.3)' as any,
+                border: '1px solid rgba(202,138,4,0.3)',
               }}
             >
               Subscribe · ${forum.price}/mo
