@@ -594,9 +594,9 @@ export default function NewsArticlePage() {
         }}>
           {/* Chart header */}
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 10,
+            display: 'flex', alignItems: 'center', gap: 8,
             padding: '14px 18px', borderBottom: '1px solid var(--border2)',
-            flexWrap: 'wrap', gap: 8,
+            flexWrap: 'wrap',
           }}>
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 800, color: 'var(--text)' }}>
               {active.symbol}

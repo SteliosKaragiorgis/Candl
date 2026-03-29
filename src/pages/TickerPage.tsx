@@ -10,6 +10,7 @@ import {
 } from '../hooks/useTickerDetail';
 import TradeCard from '../components/feed/TradeCard';
 import CommentaryCard from '../components/feed/CommentaryCard';
+import type { TradePost, CommentaryPost } from '../types';
 
 type ContentTab = 'news' | 'posts' | 'trades' | 'commentary';
 
@@ -402,7 +403,7 @@ export default function TickerPage() {
                     </div>
                     {reactions.map(post => (
                       <div key={post.id} style={{ padding: '0 16px 12px' }}>
-                        {post.postType === 'trade' ? <TradeCard post={post} /> : <CommentaryCard post={post} />}
+                        {post.postType === 'trade' ? <TradeCard post={post as TradePost} /> : <CommentaryCard post={post as CommentaryPost} />}
                       </div>
                     ))}
                     <div style={{ padding: '8px 16px 12px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)' }}>
@@ -467,8 +468,8 @@ export default function TickerPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {tickerPosts.map(post =>
             post.postType === 'trade'
-              ? <TradeCard key={post.id} post={post} />
-              : <CommentaryCard key={post.id} post={post} />
+              ? <TradeCard key={post.id} post={post as TradePost} />
+              : <CommentaryCard key={post.id} post={post as CommentaryPost} />
           )}
           {tickerPosts.length === 0 && (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-3)', fontSize: 13 }}>
