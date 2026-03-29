@@ -74,10 +74,13 @@ export default function AppShell() {
           currentPage={mobilePage}
           onNavigate={(page) => {
             setMobilePage(page);
-            if (page === 'feed')    navigate('/');
-            if (page === 'news')    navigate('/news');
-            if (page === 'forum')   navigate('/forum');
-            if (page === 'profile') navigate(`/profile/${currentUser.id}`);
+            if (page === 'feed')      navigate('/');
+            if (page === 'news')      navigate('/news');
+            if (page === 'forum')     navigate('/forum');
+            if (page === 'watchlist') navigate('/watchlist');
+            if (page === 'portfolio') navigate('/portfolio');
+            if (page === 'profile')   navigate(`/profile/${currentUser.id}`);
+            if (page === 'settings')  navigate('/settings');
           }}
           onPostClick={() => setComposerOpen(true)}
         />
