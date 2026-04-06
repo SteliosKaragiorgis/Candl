@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ECONOMIC_EVENTS } from '../../data/demo';
 import type { EconomicEvent } from '../../data/demo';
+import { useTheme } from '../../context/ThemeContext';
 
 interface TimeLeft {
   days: number;
@@ -33,6 +34,8 @@ const DOT_COLORS: Record<EconomicEvent['category'], string> = {
 };
 
 export default function NewsCountdown() {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const sorted = [...ECONOMIC_EVENTS].sort((a, b) => a.date.getTime() - b.date.getTime());
   const now = Date.now();
   const event = sorted.find(e => e.date.getTime() > now);
@@ -59,9 +62,9 @@ export default function NewsCountdown() {
     days === 1 ? 'tomorrow' :
     days <= 5  ? 'soon' : 'upcoming';
 
-  const urgencyColor  = urgency === 'today' ? '#dc2626' : urgency === 'tomorrow' ? '#ea580c' : urgency === 'soon' ? '#ca8a04' : '#0047FF';
-  const urgencyBg     = urgency === 'today' ? 'rgba(220,38,38,0.10)' : urgency === 'tomorrow' ? 'rgba(234,88,12,0.10)' : urgency === 'soon' ? 'rgba(202,138,4,0.10)' : 'rgba(0,71,255,0.06)';
-  const urgencyBorder = urgency === 'today' ? 'rgba(220,38,38,0.28)' : urgency === 'tomorrow' ? 'rgba(234,88,12,0.28)' : urgency === 'soon' ? 'rgba(202,138,4,0.28)' : 'rgba(0,71,255,0.18)';
+  const urgencyColor  = urgency === 'today' ? '#dc2626' : urgency === 'tomorrow' ? '#ea580c' : urgency === 'soon' ? '#ca8a04' : (isLight ? '#16a34a' : '#4ade80');
+  const urgencyBg     = urgency === 'today' ? 'rgba(220,38,38,0.10)' : urgency === 'tomorrow' ? 'rgba(234,88,12,0.10)' : urgency === 'soon' ? 'rgba(202,138,4,0.10)' : (isLight ? '#f0fdf4' : 'rgba(34,197,94,0.06)');
+  const urgencyBorder = urgency === 'today' ? 'rgba(220,38,38,0.28)' : urgency === 'tomorrow' ? 'rgba(234,88,12,0.28)' : urgency === 'soon' ? 'rgba(202,138,4,0.28)' : (isLight ? '#bbf7d0' : 'rgba(34,197,94,0.18)');
   const urgencyLabel  = urgency === 'today' ? 'TODAY' : urgency === 'tomorrow' ? 'TOMORROW' : `${days}D AWAY`;
 
   const unitStyle: React.CSSProperties = {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
 import { DEMO_LEADERBOARD, DEMO_TRENDING, SUGGESTED_USERS, alexKim, saraR } from '../../data/demo';
 import { useTickerData } from '../../context/TickerDataContext';
 import { useMarketData } from '../../context/MarketDataContext';
@@ -245,6 +246,8 @@ export default function RightPanel() {
   const location = useLocation();
   const [followed, setFollowed] = useState<Record<string, boolean>>({});
   const { quotes } = useMarketData();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   const tickerMatch = location.pathname.match(/^\/ticker\/([A-Z]+)$/i);
   if (tickerMatch) {
@@ -305,7 +308,7 @@ export default function RightPanel() {
           <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase' }}>
             Trending
           </span>
-          <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--blue)', cursor: 'pointer' }}>
+          <span style={{ fontSize: 11, fontWeight: 500, color: isLight ? '#16a34a' : 'var(--blue)', cursor: 'pointer' }}>
             See all →
           </span>
         </div>
@@ -317,15 +320,15 @@ export default function RightPanel() {
               ? `${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%`
               : t.change;
             const isPos = changePct >= 0;
-            // heat map: clamp intensity 0–1 over ±5%
+            // heat map (dark mode only): clamp intensity 0–1 over ±5%
             const intensity = Math.min(Math.abs(changePct) / 5, 1);
-            const alpha = 0.12 + intensity * 0.38; // 0.12 → 0.50
-            const heatBg = isPos
-              ? `rgba(34,197,94,${alpha})`
-              : `rgba(239,68,68,${alpha})`;
-            const heatBorder = isPos
-              ? `rgba(34,197,94,${alpha + 0.15})`
-              : `rgba(239,68,68,${alpha + 0.15})`;
+            const alpha = 0.12 + intensity * 0.38;
+            const heatBg = isLight
+              ? '#f9fafb'
+              : isPos ? `rgba(34,197,94,${alpha})` : `rgba(239,68,68,${alpha})`;
+            const heatBorder = isLight
+              ? '#e8e8e8'
+              : isPos ? `rgba(34,197,94,${alpha + 0.15})` : `rgba(239,68,68,${alpha + 0.15})`;
             return (
               <div
                 key={t.ticker}
@@ -336,16 +339,16 @@ export default function RightPanel() {
                   borderRadius: 4, padding: '7px 8px',
                   cursor: 'pointer', transition: 'filter 0.15s',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.15)')}
+                onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(0.97)')}
                 onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
               >
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 2, fontVariantNumeric: 'tabular-nums' }}>
+                <div style={{ fontSize: 12, fontWeight: 500, color: isLight ? '#111111' : 'var(--text)', marginBottom: 2, fontVariantNumeric: 'tabular-nums' }}>
                   {t.ticker}
                 </div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 3 }}>
+                <div style={{ fontSize: 10, color: isLight ? '#888888' : 'rgba(255,255,255,0.4)', marginBottom: 3 }}>
                   {t.posts}
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: isPos ? '#4ade80' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: isPos ? (isLight ? '#16a34a' : '#4ade80') : (isLight ? '#dc2626' : '#f87171'), fontVariantNumeric: 'tabular-nums' }}>
                   {changeStr}
                 </div>
               </div>

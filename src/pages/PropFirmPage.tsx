@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { useChallenges } from '../hooks/useChallenge';
 import {
   useCommunityFeed,
@@ -163,6 +164,8 @@ function CommunityFeedTab() {
   const posts = useCommunityFeed(filter);
   const { toggle: toggleLike, isLiked } = useLikePost();
   const { toggle: toggleFollow, isFollowing } = useFollowChallenge();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   return (
     <>
@@ -175,9 +178,9 @@ function CommunityFeedTab() {
               key={f.value}
               onClick={() => setFilter(f.value)}
               style={{
-                background: active ? 'var(--blue-bg)' : 'transparent',
-                border: `var(--bw) solid ${active ? 'var(--blue-border)' : 'var(--border)'}`,
-                color: active ? 'var(--blue)' : 'var(--text-3)',
+                background: active ? (isLight ? '#f0fdf4' : 'var(--blue-bg)') : 'transparent',
+                border: `var(--bw) solid ${active ? (isLight ? '#bbf7d0' : 'var(--blue-border)') : 'var(--border)'}`,
+                color: active ? (isLight ? '#16a34a' : 'var(--blue)') : 'var(--text-3)',
                 borderRadius: 3, fontSize: 10, padding: '4px 10px',
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
@@ -217,6 +220,8 @@ function LeaderboardTab() {
   const [period, setPeriod] = useState<LeaderboardPeriod>('all');
   const [sortBy, setSortBy] = useState<LeaderboardSort>('consistency');
   const traders = useLeaderboard(period, sortBy);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   const PERIODS: { value: LeaderboardPeriod; label: string }[] = [
     { value: 'all', label: 'All time' },
@@ -246,9 +251,9 @@ function LeaderboardTab() {
               key={p.value}
               onClick={() => setPeriod(p.value)}
               style={{
-                background: period === p.value ? 'var(--blue-bg)' : 'transparent',
-                border: `var(--bw) solid ${period === p.value ? 'var(--blue-border)' : 'var(--border)'}`,
-                color: period === p.value ? 'var(--blue)' : 'var(--text-3)',
+                background: period === p.value ? (isLight ? '#f0fdf4' : 'var(--blue-bg)') : 'transparent',
+                border: `var(--bw) solid ${period === p.value ? (isLight ? '#bbf7d0' : 'var(--blue-border)') : 'var(--border)'}`,
+                color: period === p.value ? (isLight ? '#16a34a' : 'var(--blue)') : 'var(--text-3)',
                 borderRadius: 3, fontSize: 10, padding: '4px 10px',
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
@@ -367,6 +372,8 @@ function FirmStatsTab() {
 function TipsTab() {
   const [category, setCategory] = useState<TipCategory>('all');
   const tips = useTips(category);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   const CATS: { value: TipCategory; label: string }[] = [
     { value: 'all',         label: 'All' },
@@ -383,14 +390,14 @@ function TipsTab() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
         {CATS.map(c => {
           const active = category === c.value;
-          const accentColor = c.value !== 'all' ? CATEGORY_CFG[c.value as Tip['category']].color : 'var(--blue)';
+          const accentColor = c.value !== 'all' ? CATEGORY_CFG[c.value as Tip['category']].color : (isLight ? '#16a34a' : 'var(--blue)');
           return (
             <button
               key={c.value}
               onClick={() => setCategory(c.value)}
               style={{
-                background: active ? 'var(--blue-bg)' : 'transparent',
-                border: `var(--bw) solid ${active ? 'var(--blue-border)' : 'var(--border)'}`,
+                background: active ? (isLight ? '#f0fdf4' : 'var(--blue-bg)') : 'transparent',
+                border: `var(--bw) solid ${active ? (isLight ? '#bbf7d0' : 'var(--blue-border)') : 'var(--border)'}`,
                 color: active ? accentColor : 'var(--text-3)',
                 borderRadius: 3, fontSize: 10, padding: '4px 10px',
                 cursor: 'pointer', fontFamily: 'inherit',

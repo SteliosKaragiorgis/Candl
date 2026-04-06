@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import MarketsPanel from '../components/feed/MarketsPanel';
 import ComposerModal from '../components/feed/ComposerModal';
 import TradeCard from '../components/feed/TradeCard';
@@ -105,7 +106,7 @@ function PublishedMT5Card({ post }: { post: PublishedMT5Post }) {
 
         {/* Narrative */}
         {post.narrative && (
-          <p style={{ fontSize: 14, color: '#c8c8c8', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+          <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6, margin: '0 0 12px 0' }}>
             {post.narrative}
           </p>
         )}
@@ -118,7 +119,7 @@ function PublishedMT5Card({ post }: { post: PublishedMT5Post }) {
             </span>
             <span style={{
               fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
-              background: isLong ? '#0d1f12' : '#1f0d0d',
+              background: isLong ? 'var(--green-bg)' : 'var(--red-bg)',
               color: isLong ? '#22c55e' : '#ef4444',
             }}>
               LONG
@@ -194,6 +195,8 @@ function PublishedMT5Card({ post }: { post: PublishedMT5Post }) {
 
 export default function FeedPage() {
   const isMobile = useMobile();
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [tab, setTab] = useState<FeedTab>('all');
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerKey, setComposerKey] = useState(0);
@@ -280,8 +283,9 @@ export default function FeedPage() {
                 onClick={() => { setActiveComposeType(id); openComposer(id); }}
                 style={{
                   fontSize: 12, fontWeight: 500, padding: '4px 10px',
-                  borderRadius: 4, border: `0.5px solid ${activeComposeType === id ? '#1d9bf0' : 'var(--border)'}`,
-                  color: activeComposeType === id ? '#1d9bf0' : 'var(--text-3)',
+                  borderRadius: 4, border: `0.5px solid ${activeComposeType === id ? (isLight ? '#bbf7d0' : '#1d9bf0') : 'var(--border)'}`,
+                  color: activeComposeType === id ? (isLight ? '#16a34a' : '#1d9bf0') : 'var(--text-3)',
+                  background: activeComposeType === id ? (isLight ? '#f0fdf4' : 'transparent') : 'transparent',
                   background: 'transparent', cursor: 'pointer', transition: 'all 0.1s',
                 }}
               >
@@ -291,7 +295,7 @@ export default function FeedPage() {
             <button
               onClick={() => openComposer(activeComposeType)}
               style={{
-                background: '#1d9bf0', color: '#000', fontWeight: 700,
+                background: isLight ? '#16a34a' : '#1d9bf0', color: isLight ? '#fff' : '#000', fontWeight: 700,
                 fontSize: 14, padding: '6px 18px', borderRadius: 20, border: 'none',
                 cursor: 'pointer', marginLeft: 'auto',
               }}
@@ -323,7 +327,7 @@ export default function FeedPage() {
                 padding: '16px 0', textAlign: 'center',
                 color: tab === id ? 'var(--text)' : 'var(--text-3)',
                 background: 'none', border: 'none', cursor: 'pointer',
-                borderBottom: tab === id ? '2px solid #1d9bf0' : '2px solid transparent',
+                borderBottom: tab === id ? `2px solid ${isLight ? '#16a34a' : '#1d9bf0'}` : '2px solid transparent',
                 transition: 'background 0.1s',
               }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface)')}
