@@ -180,7 +180,7 @@ export default function TradeChart({
   priceData,
 }: TradeChartProps) {
   const { theme } = useTheme();
-  const palRef = useRef(theme === 'light' ? LIGHT : DARK);
+  const palRef = useRef((theme as string) === 'light' ? LIGHT : DARK);
 
   const defaultTF: TF = TIMEFRAMES.includes(timeframe as TF) ? (timeframe as TF) : 'H1';
   const [activeTF, setActiveTF] = useState<TF>(defaultTF);
@@ -200,7 +200,7 @@ export default function TradeChart({
 
   // Keep palette ref in sync
   useEffect(() => {
-    palRef.current = theme === 'light' ? LIGHT : DARK;
+    palRef.current = (theme as string) === 'light' ? LIGHT : DARK;
     paintRef.current();
   }, [theme]);
 
@@ -211,9 +211,11 @@ export default function TradeChart({
   }, [activeTF]);
 
   useEffect(() => {
-    const canvas    = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
+    const canvasOrNull    = canvasRef.current;
+    const containerOrNull = containerRef.current;
+    if (!canvasOrNull || !containerOrNull) return;
+    const canvas: HTMLCanvasElement    = canvasOrNull;
+    const container: HTMLDivElement    = containerOrNull;
 
     const candles: OHLCCandle[] = priceData && priceData.length >= 10
       ? priceData
