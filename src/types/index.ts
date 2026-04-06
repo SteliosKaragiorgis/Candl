@@ -114,3 +114,7 @@ export interface Notification {
   time: string;
   read: boolean;
 }
+
+// ── TradeChart ────────────────────────────────────────────────────────────────
+
+export type { TradeChartProps, OHLCCandle } from '../components/feed/TradeChart';

@@ -125,7 +125,7 @@ function TopBar() {
 
       {/* Logo section — 268px = icon rail (48) + sidebar (220) */}
       <div style={{ width: '268px', flexShrink: 0, borderRight: '1px solid #ebebeb', height: '100%', display: 'flex', alignItems: 'center', paddingLeft: '14px', gap: '5px' }}>
-        <span style={{ fontFamily: "'Trebuchet MS', sans-serif", fontWeight: 700, fontSize: '16px', color: '#0a0a0a', letterSpacing: '-0.5px' }}>
+        <span style={{ fontFamily: "'Trebuchet MS', sans-serif", fontWeight: 700, fontSize: '16px', color: '#22c55e', letterSpacing: '-0.5px' }}>
           Candl.
         </span>
       </div>

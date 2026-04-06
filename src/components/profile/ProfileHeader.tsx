@@ -8,10 +8,10 @@ function VerifiedBadge() {
   return (
     <div title="Verified trader" style={{
       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      width: 18, height: 18, borderRadius: '50%',
-      background: '#3b82f6', flexShrink: 0,
+      width: 16, height: 16, borderRadius: '50%',
+      background: '#0d1f12', border: '0.5px solid #1a3a22', flexShrink: 0,
     }}>
-      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#22c55e" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="2,6 5,9 10,3"/>
       </svg>
     </div>
@@ -37,10 +37,10 @@ function ShareButton({ username }: { username: string }) {
       <button
         onClick={handleShare}
         style={{
-          width: 36, height: 36, borderRadius: 10, border: '1px solid var(--border)',
-          background: copied ? 'var(--green-bg)' : 'transparent',
+          width: 30, height: 30, borderRadius: 4, border: '0.5px solid var(--border)',
+          background: copied ? '#0d1f12' : 'transparent',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', color: copied ? 'var(--green)' : 'var(--text-2)',
+          cursor: 'pointer', color: copied ? '#22c55e' : 'var(--border-emphasis)',
           flexShrink: 0, transition: 'all 0.15s',
         }}
         title="Share profile"
@@ -58,9 +58,10 @@ function ShareButton({ username }: { username: string }) {
       </button>
       {copied && (
         <div style={{
-          position: 'absolute', bottom: 44, left: '50%', transform: 'translateX(-50%)',
-          background: 'var(--text)', color: 'var(--bg)', fontSize: 10, fontWeight: 700,
-          padding: '4px 8px', borderRadius: 5, whiteSpace: 'nowrap', pointerEvents: 'none',
+          position: 'absolute', bottom: 38, left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--surface)', color: 'var(--text-2)', fontSize: 10, fontWeight: 500,
+          padding: '4px 8px', borderRadius: 4, whiteSpace: 'nowrap', pointerEvents: 'none',
+          border: '0.5px solid var(--border)',
         }}>
           Link copied!
         </div>
@@ -113,11 +114,11 @@ function AchievementCard({ a }: { a: typeof ACHIEVEMENTS[0] }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'relative',
-        background: a.unlocked ? 'var(--surface2)' : 'var(--bg)',
-        border: `1px solid ${a.unlocked && hovered ? a.color + '66' : 'var(--border)'}`,
-        borderRadius: 10, padding: '12px 10px',
-        display: 'flex', flexDirection: 'column', gap: 8,
-        opacity: a.unlocked ? 1 : 0.45,
+        background: a.unlocked ? 'var(--surface)' : 'var(--bg)',
+        border: `0.5px solid ${a.unlocked && hovered ? a.color + '44' : 'var(--border)'}`,
+        borderRadius: 4, padding: '10px 8px',
+        display: 'flex', flexDirection: 'column', gap: 6,
+        opacity: a.unlocked ? 1 : 0.4,
         transition: 'border-color 0.15s',
         cursor: 'default',
         overflow: 'hidden',
@@ -129,14 +130,14 @@ function AchievementCard({ a }: { a: typeof ACHIEVEMENTS[0] }) {
       )}
       {/* Icon circle */}
       <div style={{
-        width: 32, height: 32, borderRadius: 9,
-        background: a.unlocked ? a.color + '22' : 'var(--border2)',
-        border: `1px solid ${a.unlocked ? a.color + '44' : 'var(--border)'}`,
+        width: 28, height: 28, borderRadius: 4,
+        background: a.unlocked ? a.color + '15' : 'var(--surface)',
+        border: `0.5px solid ${a.unlocked ? a.color + '33' : 'var(--border)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: a.unlocked ? a.color : 'var(--text4)',
+        color: a.unlocked ? a.color : 'var(--border-emphasis)',
       }}>
         {a.unlocked ? a.icon : (
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <rect x="3" y="11" width="18" height="11" rx="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
@@ -144,10 +145,10 @@ function AchievementCard({ a }: { a: typeof ACHIEVEMENTS[0] }) {
       </div>
       {/* Text */}
       <div>
-        <div style={{ fontSize: 11, fontWeight: 700, color: a.unlocked ? 'var(--text)' : 'var(--text4)', lineHeight: 1.2, marginBottom: 2 }}>
+        <div style={{ fontSize: 11, fontWeight: 500, color: a.unlocked ? 'var(--text-2)' : 'var(--border-emphasis)', lineHeight: 1.2, marginBottom: 2 }}>
           {a.label}
         </div>
-        <div style={{ fontSize: 9, color: a.unlocked ? 'var(--text4)' : 'var(--border)', lineHeight: 1.3 }}>
+        <div style={{ fontSize: 9, color: 'var(--border-emphasis)', lineHeight: 1.3 }}>
           {a.meta}
         </div>
       </div>
@@ -167,10 +168,10 @@ function RightPanelContent() {
   return (
     <>
       {/* Achievements */}
-      <div style={{ marginBottom: 22 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--text4)', textTransform: 'uppercase' }}>Achievements</span>
-          <span style={{ fontSize: 10, color: 'var(--text4)' }}>{ACHIEVEMENTS.filter(a => a.unlocked).length}/{ACHIEVEMENTS.length} unlocked</span>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--border-emphasis)', textTransform: 'uppercase' }}>Achievements</span>
+          <span style={{ fontSize: 10, color: 'var(--border-emphasis)' }}>{ACHIEVEMENTS.filter(a => a.unlocked).length}/{ACHIEVEMENTS.length} unlocked</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
           {ACHIEVEMENTS.map(a => <AchievementCard key={a.label} a={a} />)}
@@ -179,21 +180,22 @@ function RightPanelContent() {
 
       {/* Favorite tickers */}
       <div>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 12 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--border-emphasis)', textTransform: 'uppercase', marginBottom: 10 }}>
           Favorite Tickers
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {FAV_TICKERS.map(({ t, p, c }) => (
             <div key={t} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{t}</span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-2)', fontVariantNumeric: 'tabular-nums' }}>{t}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-2)' }}>${p.toFixed(2)}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-3)', fontVariantNumeric: 'tabular-nums' }}>${p.toFixed(2)}</span>
                 <span style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600,
-                  color: c >= 0 ? 'var(--green)' : 'var(--red)',
-                  background: c >= 0 ? 'var(--green-bg)' : 'var(--red-bg)',
-                  border: `1px solid ${c >= 0 ? 'var(--green-border)' : 'var(--red-border)'}`,
-                  borderRadius: 5, padding: '1px 6px',
+                  fontSize: 11, fontWeight: 500,
+                  color: c >= 0 ? '#22c55e' : '#ef4444',
+                  background: c >= 0 ? '#0d1f12' : '#1f0d0d',
+                  border: `0.5px solid ${c >= 0 ? '#1a3a22' : '#3a1a1a'}`,
+                  borderRadius: 3, padding: '1px 5px',
+                  fontVariantNumeric: 'tabular-nums',
                 }}>
                   {c >= 0 ? '+' : ''}{c.toFixed(2)}%
                 </span>
@@ -211,10 +213,10 @@ function ActivityBadge({ userId }: { userId: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <div style={{
-        width: 7, height: 7, borderRadius: '50%',
-        background: active ? 'var(--green)' : 'var(--text4)',
+        width: 6, height: 6, borderRadius: '50%',
+        background: active ? '#22c55e' : 'var(--border-emphasis)',
       }} />
-      <span style={{ fontSize: 11, color: active ? 'var(--green)' : 'var(--text4)' }}>
+      <span style={{ fontSize: 11, color: active ? '#22c55e' : 'var(--border-emphasis)' }}>
         {active ? 'Active today' : 'Last active 3d ago'}
       </span>
     </div>
@@ -233,31 +235,31 @@ function CompletenessCard({ user, postsCount }: { user: User; postsCount: number
 
   return (
     <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 12, padding: '14px 16px', marginTop: 12,
+      background: 'var(--bg)', border: '0.5px solid var(--border)',
+      borderRadius: 4, padding: '12px 14px', marginTop: 10,
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>Complete your profile</span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green)', fontFamily: 'JetBrains Mono, monospace' }}>{pct}%</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-2)' }}>Complete your profile</span>
+        <span style={{ fontSize: 12, fontWeight: 500, color: '#22c55e', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
       </div>
-      <div style={{ height: 4, borderRadius: 2, background: 'var(--border2)', marginBottom: 10, overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', borderRadius: 2, background: 'var(--green)', transition: 'width 0.4s' }} />
+      <div style={{ height: 2, background: 'var(--border)', marginBottom: 8, overflow: 'hidden' }}>
+        <div style={{ width: `${pct}%`, height: '100%', background: '#22c55e', transition: 'width 0.4s' }} />
       </div>
       {checks.map(({ label, done }) => (
-        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '3px 0' }}>
           <div style={{
-            width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
-            background: done ? 'var(--green)' : 'transparent',
-            border: done ? 'none' : '1.5px solid var(--border)',
+            width: 14, height: 14, borderRadius: '50%', flexShrink: 0,
+            background: done ? '#0d1f12' : 'transparent',
+            border: `0.5px solid ${done ? '#1a3a22' : 'var(--border)'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {done && (
-              <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+              <svg width="8" height="8" viewBox="0 0 12 12" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round">
                 <polyline points="2,6 5,9 10,3"/>
               </svg>
             )}
           </div>
-          <span style={{ fontSize: 12, color: done ? 'var(--text-2)' : 'var(--text4)', textDecoration: done ? 'line-through' : 'none' }}>
+          <span style={{ fontSize: 11, color: done ? 'var(--border-emphasis)' : 'var(--text-3)', textDecoration: done ? 'line-through' : 'none' }}>
             {label}
           </span>
         </div>
@@ -287,60 +289,54 @@ export default function ProfileHeader({ user, postsCount, following, onFollowCha
     : followBack ? 'Follow back'
     : (isPrivate ? 'Request to follow' : 'Follow');
   const followBg = following
-    ? (hovered ? 'var(--red-bg)' : 'var(--blue)')
+    ? (hovered ? '#1f0d0d' : '#0d1a27')
     : 'transparent';
   const followColor = following
-    ? (hovered ? 'var(--red)' : '#fff')
-    : 'var(--text)';
+    ? (hovered ? '#ef4444' : '#1d9bf0')
+    : 'var(--text-2)';
   const followBorder = following
-    ? (hovered ? 'var(--red-border)' : 'var(--blue)')
+    ? (hovered ? '#3a1a1a' : '#1a3a5c')
     : 'var(--border)';
 
   if (isMobile) {
     return (
       <>
-        <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', paddingBottom: 20 }}>
-          {/* Rainbow top line */}
-          <div style={{ height: 3, background: 'linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6)' }} />
+        <div style={{ background: 'var(--bg)', borderBottom: '0.5px solid var(--border)', paddingBottom: 20 }}>
 
           <div style={{ padding: '20px 20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {/* Avatar */}
             <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: `linear-gradient(135deg, ${user.avatarGradient[0]}, ${user.avatarGradient[1]})`,
+              width: 64, height: 64, borderRadius: '50%',
+              background: 'var(--border)', border: '0.5px solid var(--border-emphasis)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 28, fontWeight: 800, marginBottom: 12,
+              color: 'var(--text-3)', fontSize: 20, fontWeight: 500, marginBottom: 10,
             }}>
               {user.initials}
             </div>
 
             {/* Name */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-              <span style={{ fontSize: 19, fontWeight: 800, color: 'var(--text)' }}>{user.name}</span>
-              {user.verified && (
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="var(--blue)">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              )}
+              <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--text)' }}>{user.name}</span>
+              {user.verified && <VerifiedBadge />}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 12, color: 'var(--text4)' }}>@{user.username}</span>
-              <span style={{ color: 'var(--text4)' }}>·</span>
+              <span style={{ fontSize: 12, color: 'var(--border-emphasis)' }}>@{user.username}</span>
+              <span style={{ color: 'var(--border-emphasis)' }}>·</span>
               <ActivityBadge userId={user.id} />
             </div>
 
             {/* Bio */}
-            <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6, textAlign: 'center', margin: '0 0 12px', maxWidth: 280 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6, textAlign: 'center', margin: '0 0 12px', maxWidth: 280 }}>
               {user.bio}
             </p>
 
             {/* Tags */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, justifyContent: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, justifyContent: 'center', marginBottom: 14 }}>
               {tags.map((tag, i) => (
                 <span key={tag} style={{
-                  fontSize: 11, fontWeight: 600, padding: '4px 13px', borderRadius: 20,
-                  border: `1px solid ${i < 2 ? 'var(--green)' : 'var(--border)'}`,
-                  color: i < 2 ? 'var(--green)' : 'var(--text-2)',
+                  fontSize: 11, fontWeight: 500, padding: '2px 10px', borderRadius: 3,
+                  border: `0.5px solid ${i < 2 ? '#1a3a22' : 'var(--border)'}`,
+                  color: i < 2 ? '#22c55e' : 'var(--text-3)',
                   background: 'transparent',
                 }}>
                   {tag}
@@ -349,7 +345,7 @@ export default function ProfileHeader({ user, postsCount, following, onFollowCha
             </div>
 
             {/* Stats */}
-            <div style={{ display: 'flex', gap: 0, width: '100%', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: 14 }}>
+            <div style={{ display: 'flex', gap: 0, width: '100%', borderTop: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)', marginBottom: 12 }}>
               {[
                 { label: 'Followers', value: user.followersCount.toLocaleString() },
                 { label: 'Following', value: user.followingCount.toLocaleString() },
@@ -357,23 +353,23 @@ export default function ProfileHeader({ user, postsCount, following, onFollowCha
               ].map(({ label, value }, i, arr) => (
                 <div key={label} style={{
                   flex: 1, padding: '10px 0', textAlign: 'center',
-                  borderRight: i < arr.length - 1 ? '1px solid var(--border)' : 'none',
+                  borderRight: i < arr.length - 1 ? '0.5px solid var(--border)' : 'none',
                 }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '-0.5px' }}>{value}</div>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--text4)', textTransform: 'uppercase', marginTop: 2 }}>{label}</div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+                  <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--border-emphasis)', textTransform: 'uppercase', marginTop: 2 }}>{label}</div>
                 </div>
               ))}
             </div>
 
             {/* Follow + Share */}
-            <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+            <div style={{ display: 'flex', gap: 6, width: '100%' }}>
               {isOwn ? (
                 <button
                   onClick={() => setEditOpen(true)}
                   style={{
-                    flex: 1, padding: '10px 0', borderRadius: 10,
-                    border: '1px solid var(--border)', background: 'transparent',
-                    fontSize: 13, fontWeight: 700, color: 'var(--text)',
+                    flex: 1, padding: '8px 0', borderRadius: 4,
+                    border: '0.5px solid var(--border)', background: 'transparent',
+                    fontSize: 12, fontWeight: 500, color: 'var(--text-2)',
                     cursor: 'pointer', fontFamily: 'Inter, sans-serif',
                   }}
                 >
@@ -385,9 +381,9 @@ export default function ProfileHeader({ user, postsCount, following, onFollowCha
                   onMouseEnter={() => setHovered(true)}
                   onMouseLeave={() => setHovered(false)}
                   style={{
-                    flex: 1, padding: '10px 0', borderRadius: 10,
-                    border: `1px solid ${followBorder}`, background: followBg,
-                    fontSize: 13, fontWeight: 700, color: followColor,
+                    flex: 1, padding: '8px 0', borderRadius: 4,
+                    border: `0.5px solid ${followBorder}`, background: followBg,
+                    fontSize: 12, fontWeight: 500, color: followColor,
                     cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.15s',
                   }}
                 >
@@ -419,46 +415,44 @@ export default function ProfileHeader({ user, postsCount, following, onFollowCha
   return (
     <>
       <div style={{
-        background: 'var(--surface)', border: '1px solid var(--border)',
-        borderRadius: 16, overflow: 'hidden', marginBottom: 16,
+        background: 'var(--surface)', border: '0.5px solid var(--border)',
+        borderRadius: 8, overflow: 'hidden', marginBottom: 14,
       }}>
-        <div style={{ height: 4, background: 'linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6)' }} />
-
-        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr' }}>
           {/* Left */}
           <div style={{
-            padding: '24px 24px 28px',
-            borderRight: '1px solid var(--border)',
-            display: 'flex', flexDirection: 'column', gap: 12,
+            padding: '20px 20px 24px',
+            borderRight: '0.5px solid var(--border)',
+            display: 'flex', flexDirection: 'column', gap: 10,
           }}>
             <div style={{
-              width: 72, height: 72, borderRadius: '50%',
-              background: `linear-gradient(135deg, ${user.avatarGradient[0]}, ${user.avatarGradient[1]})`,
+              width: 40, height: 40, borderRadius: '50%',
+              background: 'var(--border)', border: '0.5px solid var(--border-emphasis)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 26, fontWeight: 800,
+              color: 'var(--text-3)', fontSize: 14, fontWeight: 500,
             }}>
               {user.initials}
             </div>
 
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.3px' }}>{user.name}</span>
+                <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--text)' }}>{user.name}</span>
                 {user.verified && <VerifiedBadge />}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{ fontSize: 12, color: 'var(--text4)' }}>@{user.username}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                <span style={{ fontSize: 12, color: 'var(--border-emphasis)' }}>@{user.username}</span>
                 <ActivityBadge userId={user.id} />
               </div>
             </div>
 
-            <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6, margin: 0 }}>{user.bio}</p>
+            <p style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6, margin: 0 }}>{user.bio}</p>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {tags.map((tag, i) => (
                 <span key={tag} style={{
-                  fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 20,
-                  border: `1px solid ${i < 2 ? 'var(--green)' : 'var(--border)'}`,
-                  color: i < 2 ? 'var(--green)' : 'var(--text-2)',
+                  fontSize: 11, fontWeight: 500, padding: '2px 9px', borderRadius: 3,
+                  border: `0.5px solid ${i < 2 ? '#1a3a22' : 'var(--border)'}`,
+                  color: i < 2 ? '#22c55e' : 'var(--text-3)',
                   background: 'transparent',
                 }}>
                   {tag}
@@ -466,14 +460,14 @@ export default function ProfileHeader({ user, postsCount, following, onFollowCha
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
               {isOwn ? (
                 <button
                   onClick={() => setEditOpen(true)}
                   style={{
-                    flex: 1, padding: '9px 0', borderRadius: 10,
-                    border: '1px solid var(--border)', background: 'transparent',
-                    fontSize: 12, fontWeight: 700, color: 'var(--text)',
+                    flex: 1, padding: '7px 0', borderRadius: 4,
+                    border: '0.5px solid var(--border)', background: 'transparent',
+                    fontSize: 12, fontWeight: 500, color: 'var(--text-2)',
                     cursor: 'pointer', fontFamily: 'Inter, sans-serif',
                   }}
                 >
@@ -485,9 +479,9 @@ export default function ProfileHeader({ user, postsCount, following, onFollowCha
                   onMouseEnter={() => setHovered(true)}
                   onMouseLeave={() => setHovered(false)}
                   style={{
-                    flex: 1, padding: '9px 0', borderRadius: 10,
-                    border: `1px solid ${followBorder}`, background: followBg,
-                    fontSize: 12, fontWeight: 700, color: followColor,
+                    flex: 1, padding: '7px 0', borderRadius: 4,
+                    border: `0.5px solid ${followBorder}`, background: followBg,
+                    fontSize: 12, fontWeight: 500, color: followColor,
                     cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.15s',
                   }}
                 >
@@ -501,24 +495,24 @@ export default function ProfileHeader({ user, postsCount, following, onFollowCha
           </div>
 
           {/* Right */}
-          <div style={{ padding: '24px 28px 28px' }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 16 }}>
+          <div style={{ padding: '20px 24px 24px' }}>
+            <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--border-emphasis)', textTransform: 'uppercase', marginBottom: 14 }}>
               Community
             </div>
-            <div style={{ display: 'flex', gap: 32, marginBottom: 24 }}>
+            <div style={{ display: 'flex', gap: 28, marginBottom: 20 }}>
               {[
                 { label: 'Followers', value: user.followersCount.toLocaleString() },
                 { label: 'Following', value: user.followingCount.toLocaleString() },
                 { label: 'Posts',     value: String(postsCount) },
               ].map(({ label, value }) => (
                 <div key={label}>
-                  <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '-1px', lineHeight: 1 }}>{value}</div>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'var(--text4)', textTransform: 'uppercase', marginTop: 4 }}>{label}</div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{value}</div>
+                  <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--border-emphasis)', textTransform: 'uppercase', marginTop: 3 }}>{label}</div>
                 </div>
               ))}
             </div>
 
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20 }}>
+            <div style={{ borderTop: '0.5px solid var(--border)', paddingTop: 16 }}>
               <RightPanelContent />
             </div>
           </div>

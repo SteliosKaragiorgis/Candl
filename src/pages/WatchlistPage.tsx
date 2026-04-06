@@ -283,7 +283,7 @@ export default function WatchlistPage() {
                     <div style={{ fontSize: 14, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)' }}>
                       {row.price > 0 ? `$${row.price.toFixed(2)}` : '—'}
                     </div>
-                    <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: up ? 'rgba(22,163,74,0.12)' : 'rgba(220,38,38,0.12)', color: changeColor, marginTop: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: changeColor, fontVariantNumeric: 'tabular-nums', marginTop: 2 }}>
                       {row.changePct >= 0 ? '+' : ''}{row.changePct.toFixed(2)}%
                     </span>
                   </div>
@@ -322,7 +322,7 @@ export default function WatchlistPage() {
 
               {/* Change */}
               <div>
-                <span style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, padding: '3px 9px', borderRadius: 6, background: up ? 'rgba(22,163,74,0.12)' : 'rgba(220,38,38,0.12)', color: changeColor }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: changeColor, fontVariantNumeric: 'tabular-nums' }}>
                   {row.changePct >= 0 ? '+' : ''}{row.changePct.toFixed(2)}%
                 </span>
               </div>

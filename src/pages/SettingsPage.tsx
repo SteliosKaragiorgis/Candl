@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { currentUser } from '../data/demo';
 import { useMobile } from '../hooks/useMobile';
+import { useMT5Accounts, connectMT5Account } from '../hooks/useMT5Accounts';
+import type { MT5Account } from '../types/mt5account';
 
-type Tab = 'profile' | 'notifications' | 'security' | 'billing';
+type Tab = 'profile' | 'notifications' | 'security' | 'billing' | 'connections';
 
 function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
   return (
@@ -10,7 +12,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
       onClick={onChange}
       style={{
         width: 36, height: 20, borderRadius: 10, flexShrink: 0,
-        background: on ? 'var(--blue)' : 'var(--border2)',
+        background: on ? '#1d9bf0' : 'var(--border-emphasis)',
         position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
       }}
     >
@@ -18,7 +20,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
         position: 'absolute', top: 3,
         left: on ? 19 : 3,
         width: 14, height: 14, borderRadius: '50%',
-        background: '#fff', transition: 'left 0.2s',
+        background: '#e8e8e8', transition: 'left 0.2s',
         boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
       }} />
     </div>
@@ -26,7 +28,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
 }
 
 const inputStyle: React.CSSProperties = {
-  background: 'var(--bg)', border: '1px solid var(--border)',
+  background: 'var(--bg)', border: '0.5px solid var(--border)',
   borderRadius: 8, padding: '7px 12px', fontSize: 13,
   color: 'var(--text)', fontFamily: 'Inter, sans-serif',
   width: 220, outline: 'none',
@@ -42,12 +44,12 @@ function FieldRow({ label, hint, children }: {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '12px 0', borderBottom: '1px solid var(--border2)',
+      padding: '12px 0', borderBottom: '0.5px solid var(--border-emphasis)',
       gap: 12,
     }}>
       <div>
         <div style={{ fontSize: 13, color: 'var(--text)' }}>{label}</div>
-        {hint && <div style={{ fontSize: 11, color: 'var(--text4)', marginTop: 2 }}>{hint}</div>}
+        {hint && <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 2 }}>{hint}</div>}
       </div>
       {children}
     </div>
@@ -58,7 +60,7 @@ function Card({ children, danger }: { children: React.ReactNode; danger?: boolea
   return (
     <div style={{
       background: 'var(--surface)',
-      border: `1px solid ${danger ? 'rgba(239,68,68,0.35)' : 'var(--border)'}`,
+      border: `0.5px solid ${danger ? 'rgba(239,68,68,0.35)' : 'var(--border)'}`,
       borderRadius: 14, padding: '20px 24px', marginBottom: 16,
     }}>
       {children}
@@ -68,7 +70,7 @@ function Card({ children, danger }: { children: React.ReactNode; danger?: boolea
 
 function CardTitle({ children, danger }: { children: React.ReactNode; danger?: boolean }) {
   return (
-    <div style={{ fontSize: 14, fontWeight: 700, color: danger ? 'var(--red)' : 'var(--text)', marginBottom: 4 }}>
+    <div style={{ fontSize: 14, fontWeight: 700, color: danger ? '#ef4444' : 'var(--text)', marginBottom: 4 }}>
       {children}
     </div>
   );
@@ -76,7 +78,7 @@ function CardTitle({ children, danger }: { children: React.ReactNode; danger?: b
 
 function CardDesc({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 12, color: 'var(--text4)', marginBottom: 16, lineHeight: 1.5 }}>
+    <div style={{ fontSize: 12, color: 'var(--text-4)', marginBottom: 16, lineHeight: 1.5 }}>
       {children}
     </div>
   );
@@ -91,12 +93,423 @@ function Btn({ children, onClick, variant = 'default' }: {
     padding: '7px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600,
     fontFamily: 'Inter, sans-serif', cursor: 'pointer', transition: 'all 0.15s', flexShrink: 0,
     ...(variant === 'primary'
-      ? { background: 'var(--blue)', color: '#fff', border: '1px solid var(--blue)' }
+      ? { background: '#0d1a27', color: '#1d9bf0', border: '0.5px solid #1a3a5c' }
       : variant === 'danger'
-      ? { background: 'transparent', color: 'var(--red)', border: '1px solid rgba(239,68,68,0.4)' }
-      : { background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }),
+      ? { background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.4)' }
+      : { background: 'var(--surface2)', color: 'var(--text)', border: '0.5px solid var(--border)' }),
   };
   return <button onClick={onClick} style={styles}>{children}</button>;
+}
+
+// ── Tab: Connections ─────────────────────────────────────────────────────────
+
+// Known servers grouped by firm for the dropdown
+const KNOWN_SERVERS = [
+  { group: 'FTMO',       servers: ['FTMO-Demo', 'FTMO-Demo2', 'FTMO-Server', 'FTMO-Server2'] },
+  { group: 'TFT',        servers: ['TheFundedTrader-Live', 'TheFundedTrader-Demo'] },
+  { group: 'Apex',       servers: ['ApexFuturesUSA', 'Apex-Live'] },
+  { group: 'E8',         servers: ['E8FundingFX-Live', 'E8FundingFX-Demo'] },
+  { group: 'FundedNext', servers: ['FundedNext-Live', 'FundedNext-Demo'] },
+  { group: 'Other',      servers: ['Other (type below)'] },
+];
+
+const STATUS_CFG = {
+  connected:  { color: '#22c55e',  bg: '#0d1f12',  border: '#1a3a22',  dot: '#22c55e',  label: 'Connected' },
+  connecting: { color: '#1d9bf0',   bg: '#0d1a27',   border: '#1a3a5c',   dot: '#1d9bf0',   label: 'Connecting…' },
+  syncing:    { color: '#1d9bf0',   bg: '#0d1a27',   border: '#1a3a5c',   dot: '#1d9bf0',   label: 'Syncing…' },
+  error:      { color: '#ef4444',    bg: '#1f0d0d',    border: '#3a1a1a',    dot: '#ef4444',    label: 'Error' },
+};
+
+function ConnectModal({ onClose, onConnected }: {
+  onClose: () => void;
+  onConnected: (account: MT5Account) => void;
+}) {
+  const [login,     setLogin]     = useState('');
+  const [password,  setPassword]  = useState('');
+  const [server,    setServer]    = useState('');
+  const [customServer, setCustomServer] = useState('');
+  const [showPass,  setShowPass]  = useState(false);
+  const [loading,   setLoading]   = useState(false);
+  const [error,     setError]     = useState('');
+
+  const effectiveServer = server === 'Other (type below)' ? customServer.trim() : server;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!login || !password || !effectiveServer) return;
+    setLoading(true);
+    setError('');
+    try {
+      const account = await connectMT5Account(login, password, effectiveServer);
+      onConnected(account);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Connection failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const fieldStyle: React.CSSProperties = {
+    width: '100%', background: 'var(--bg)',
+    border: '0.5px solid var(--border)', borderRadius: 8,
+    padding: '9px 12px', fontSize: 13, color: 'var(--text)',
+    fontFamily: 'Inter, sans-serif', outline: 'none', boxSizing: 'border-box',
+  };
+
+  return (
+    /* Backdrop */
+    <div
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.6)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 16,
+      }}
+    >
+      <div style={{
+        background: 'var(--surface)', border: '0.5px solid var(--border)',
+        borderRadius: 14, padding: 28, width: '100%', maxWidth: 420,
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)' }}>Connect MT5 account</div>
+            <div style={{ fontSize: 12, color: 'var(--text-4)', marginTop: 3 }}>
+              Same credentials you use to log into MetaTrader 5
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-4)', padding: 4 }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          {/* Login */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'block', marginBottom: 6 }}>
+              Login ID
+            </label>
+            <input
+              value={login}
+              onChange={e => setLogin(e.target.value)}
+              placeholder="e.g. 1234567"
+              style={fieldStyle}
+              inputMode="numeric"
+              autoComplete="off"
+            />
+          </div>
+
+          {/* Password */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'block', marginBottom: 6 }}>
+              Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPass ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Your MT5 password"
+                style={{ ...fieldStyle, paddingRight: 38 }}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(v => !v)}
+                style={{
+                  position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-4)', padding: 0,
+                }}
+              >
+                {showPass ? (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                ) : (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                )}
+              </button>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 5 }}>
+              Your password is sent directly to the MT5 server for validation and is never stored.
+            </div>
+          </div>
+
+          {/* Server */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 12, color: 'var(--text-3)', display: 'block', marginBottom: 6 }}>
+              Broker server
+            </label>
+            <select
+              value={server}
+              onChange={e => setServer(e.target.value)}
+              style={{ ...fieldStyle, cursor: 'pointer', appearance: 'none' as const }}
+            >
+              <option value="" disabled>Select your prop firm server…</option>
+              {KNOWN_SERVERS.map(({ group, servers }) => (
+                <optgroup key={group} label={group}>
+                  {servers.map(s => <option key={s} value={s}>{s}</option>)}
+                </optgroup>
+              ))}
+            </select>
+
+            {server === 'Other (type below)' && (
+              <input
+                value={customServer}
+                onChange={e => setCustomServer(e.target.value)}
+                placeholder="e.g. MyBroker-Server"
+                style={{ ...fieldStyle, marginTop: 8 }}
+                autoComplete="off"
+              />
+            )}
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div style={{
+              fontSize: 12, color: '#ef4444', background: '#1f0d0d',
+              border: '0.5px solid #3a1a1a', borderRadius: 8,
+              padding: '9px 12px', marginBottom: 16,
+            }}>
+              {error}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading || !login || !password || !effectiveServer}
+            style={{
+              width: '100%', padding: '10px 0', borderRadius: 8,
+              background: loading ? '#1a1a1a' : '#0d1a27',
+              color: loading ? '#505050' : '#1d9bf0',
+              border: '0.5px solid #1a3a5c',
+              fontSize: 13, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
+              fontFamily: 'Inter, sans-serif',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'background 0.15s',
+            }}
+          >
+            {loading && (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}>
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            )}
+            {loading ? 'Connecting…' : 'Connect account'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function AccountCard({ account, onRemove }: { account: MT5Account; onRemove: (id: string) => void }) {
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const cfg = STATUS_CFG[account.status];
+
+  const formatSync = (iso: string | null) => {
+    if (!iso) return 'Never';
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1)  return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  return (
+    <div style={{
+      background: 'var(--bg)', border: '0.5px solid var(--border)',
+      borderRadius: 10, padding: '14px 16px',
+      display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+    }}>
+      {/* Icon */}
+      <div style={{
+        width: 38, height: 38, borderRadius: 9, flexShrink: 0,
+        background: '#0d1a27', border: '0.5px solid #1a3a5c',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d9bf0" strokeWidth="1.8" strokeLinecap="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+
+      {/* Main info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>
+            {account.firm} · #{account.login}
+          </span>
+          <span style={{
+            fontSize: 10, padding: '2px 7px', borderRadius: 20,
+            background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color,
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: cfg.dot, display: 'inline-block', flexShrink: 0 }} />
+            {cfg.label}
+          </span>
+          {account.accountType === 'demo' && (
+            <span style={{
+              fontSize: 10, padding: '2px 7px', borderRadius: 20,
+              background: 'var(--surface2)', border: '0.5px solid var(--border)',
+              color: 'var(--text-4)',
+            }}>
+              Demo
+            </span>
+          )}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 4, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+          <span>{account.server}</span>
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+            Balance: <span style={{ color: 'var(--text-3)' }}>${account.balance.toLocaleString()}</span>
+          </span>
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+            Equity: <span style={{ color: 'var(--text-3)' }}>${account.equity.toLocaleString()}</span>
+          </span>
+          <span>Synced: {formatSync(account.lastSync)}</span>
+        </div>
+        {account.status === 'error' && account.errorMessage && (
+          <div style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{account.errorMessage}</div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+        {!confirmRemove ? (
+          <button
+            onClick={() => setConfirmRemove(true)}
+            style={{
+              background: 'none', border: '0.5px solid var(--border)',
+              borderRadius: 7, padding: '5px 12px', fontSize: 12,
+              color: 'var(--text-4)', cursor: 'pointer', fontFamily: 'inherit',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; (e.currentTarget as HTMLButtonElement).style.borderColor = '#3a1a1a'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-4)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)'; }}
+          >
+            Disconnect
+          </button>
+        ) : (
+          <>
+            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Remove?</span>
+            <button
+              onClick={() => onRemove(account.id)}
+              style={{
+                background: '#1f0d0d', border: '0.5px solid #3a1a1a',
+                borderRadius: 7, padding: '5px 12px', fontSize: 12,
+                color: '#ef4444', cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              Yes
+            </button>
+            <button
+              onClick={() => setConfirmRemove(false)}
+              style={{
+                background: 'none', border: '0.5px solid var(--border)',
+                borderRadius: 7, padding: '5px 12px', fontSize: 12,
+                color: 'var(--text-4)', cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              Cancel
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ConnectionsTab() {
+  const { accounts, addAccount, removeAccount } = useMT5Accounts();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  return (
+    <>
+      <Card>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, gap: 12 }}>
+          <div>
+            <CardTitle>MetaTrader 5 accounts</CardTitle>
+            <CardDesc>
+              Connect your prop firm accounts directly. Trades sync automatically — no EA required.
+            </CardDesc>
+          </div>
+          <button
+            onClick={() => setModalOpen(true)}
+            style={{
+              flexShrink: 0, background: '#0d1a27', color: '#1d9bf0',
+              border: '0.5px solid #1a3a5c', borderRadius: 8,
+              padding: '7px 16px', fontSize: 12, fontWeight: 500,
+              cursor: 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Connect account
+          </button>
+        </div>
+
+        {/* Account list or empty state */}
+        {accounts.length === 0 ? (
+          <div style={{
+            border: '1px dashed var(--border)', borderRadius: 10,
+            padding: '32px 24px', textAlign: 'center', marginTop: 8,
+          }}>
+            <div style={{ marginBottom: 8 }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-4)" strokeWidth="1.5" strokeLinecap="round" style={{ margin: '0 auto' }}>
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 4 }}>No accounts connected</div>
+            <div style={{ fontSize: 12, color: 'var(--text-4)' }}>
+              Add your MT5 login to start syncing trades and tracking challenge progress
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
+            {accounts.map(a => (
+              <AccountCard key={a.id} account={a} onRemove={removeAccount} />
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* How it works */}
+      <Card>
+        <CardTitle>How it works</CardTitle>
+        <CardDesc>Your credentials are used only to fetch account data — never stored.</CardDesc>
+        {[
+          { icon: '1', text: 'Enter the login ID, password, and server name from your MT5 terminal' },
+          { icon: '2', text: 'Candl. connects to the MT5 server and fetches your account info and trade history' },
+          { icon: '3', text: 'Closed trades appear in your feed automatically. Challenge rules update in real time' },
+          { icon: '4', text: 'Your password is transmitted over HTTPS and never stored on Candl. servers' },
+        ].map(({ icon, text }) => (
+          <div key={icon} style={{
+            display: 'flex', alignItems: 'flex-start', gap: 12,
+            padding: '10px 0', borderBottom: icon !== '4' ? '0.5px solid var(--border-emphasis)' : 'none',
+          }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+              background: '#1a1a1a', border: '0.5px solid #2a2a2a',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11, fontWeight: 700, color: '#555555',
+            }}>
+              {icon}
+            </div>
+            <span style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.5 }}>{text}</span>
+          </div>
+        ))}
+      </Card>
+
+      {modalOpen && (
+        <ConnectModal
+          onClose={() => setModalOpen(false)}
+          onConnected={addAccount}
+        />
+      )}
+    </>
+  );
 }
 
 // ── Tab: Profile ─────────────────────────────────────────────────────────────
@@ -127,7 +540,7 @@ function ProfileTab() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <Btn>Change photo</Btn>
-            <span style={{ fontSize: 11, color: 'var(--text4)' }}>JPG, PNG · max 2MB</span>
+            <span style={{ fontSize: 11, color: 'var(--text-4)' }}>JPG, PNG · max 2MB</span>
           </div>
         </div>
 
@@ -136,7 +549,7 @@ function ProfileTab() {
         </FieldRow>
         <FieldRow label="Username" hint={`tradeflow.io/@${username}`}>
           <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: 'var(--text4)' }}>@</span>
+            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: 'var(--text-4)' }}>@</span>
             <input value={username} onChange={e => setUsername(e.target.value)} style={{ ...inputStyle, paddingLeft: 24 }} />
           </div>
         </FieldRow>
@@ -168,11 +581,11 @@ function ProfileTab() {
             { val: '2.4',  lbl: 'Avg R:R' },
           ].map(({ val, lbl }) => (
             <div key={lbl} style={{
-              flex: 1, background: 'var(--blue-bg)', border: '1px solid var(--blue-border)',
+              flex: 1, background: '#0d1a27', border: '0.5px solid #1a3a5c',
               borderRadius: 10, padding: '12px 14px', textAlign: 'center',
             }}>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: 'var(--blue)', lineHeight: 1 }}>{val}</div>
-              <div style={{ fontSize: 10, color: 'var(--text4)', marginTop: 4, letterSpacing: '0.5px' }}>{lbl}</div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: '#1d9bf0', lineHeight: 1 }}>{val}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-4)', marginTop: 4, letterSpacing: '0.5px' }}>{lbl}</div>
             </div>
           ))}
         </div>
@@ -264,9 +677,9 @@ function SecurityTab() {
         <div style={{
           display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px',
           background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)',
-          borderRadius: 9, marginBottom: 16, fontSize: 12, color: 'var(--green)',
+          borderRadius: 9, marginBottom: 16, fontSize: 12, color: '#22c55e',
         }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }} />
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
           Account security is strong · 2FA enabled
         </div>
 
@@ -325,11 +738,11 @@ function BillingTab() {
         {/* Plan badge */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: 'var(--blue-bg)', border: '1px solid var(--blue-border)',
+          background: '#0d1a27', border: '0.5px solid #1a3a5c',
           borderRadius: 20, padding: '4px 12px', marginBottom: 14,
         }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--blue)' }} />
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue)' }}>Pro Plan · active</span>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#1d9bf0' }} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#1d9bf0' }}>Pro Plan · active</span>
         </div>
 
         <CardTitle>Current plan</CardTitle>
@@ -344,11 +757,11 @@ function BillingTab() {
             'Custom watchlist alerts',
           ].map((f, i, arr) => (
             <li key={f} style={{
-              fontSize: 12, color: 'var(--text3)', padding: '6px 0',
+              fontSize: 12, color: 'var(--text-3)', padding: '6px 0',
               display: 'flex', alignItems: 'center', gap: 8,
-              borderBottom: i < arr.length - 1 ? '1px solid var(--border2)' : 'none',
+              borderBottom: i < arr.length - 1 ? '0.5px solid var(--border-emphasis)' : 'none',
             }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }} />
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
               {f}
             </li>
           ))}
@@ -383,13 +796,13 @@ function BillingTab() {
             key={date}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '12px 0', borderBottom: '1px solid var(--border2)',
+              padding: '12px 0', borderBottom: '0.5px solid var(--border-emphasis)',
               gap: 12,
             }}
           >
             <div>
               <div style={{ fontSize: 13, color: 'var(--text)' }}>{date}</div>
-              <div style={{ fontSize: 11, color: 'var(--text4)', marginTop: 2 }}>{desc}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 2 }}>{desc}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
@@ -427,6 +840,11 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     label: 'Billing',
     icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>,
   },
+  {
+    id: 'connections',
+    label: 'Connections',
+    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  },
 ];
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -440,6 +858,7 @@ export default function SettingsPage() {
     notifications: 'Notifications',
     security: 'Security & privacy',
     billing: 'Billing & subscription',
+    connections: 'Connections & integrations',
   };
 
   return (
@@ -464,10 +883,10 @@ export default function SettingsPage() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '7px 14px', borderRadius: 20, flexShrink: 0,
-                background: tab === id ? 'var(--blue)' : 'var(--surface)',
-                color: tab === id ? '#fff' : 'var(--text3)',
+                background: tab === id ? '#0d1a27' : 'var(--surface)',
+                color: tab === id ? '#1d9bf0' : 'var(--text-3)',
                 fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                border: tab === id ? 'none' : '1px solid var(--border)',
+                border: tab === id ? 'none' : '0.5px solid var(--border)',
               } as React.CSSProperties}
             >
               {icon}
@@ -479,12 +898,12 @@ export default function SettingsPage() {
         // Desktop: left sidebar
         <div style={{
           width: 200, flexShrink: 0,
-          borderRight: '1px solid var(--border)',
+          borderRight: '0.5px solid var(--border)',
           padding: '20px 0',
         }}>
           <div style={{
             fontSize: 9, fontWeight: 700, letterSpacing: '1.5px',
-            color: 'var(--text4)', textTransform: 'uppercase',
+            color: 'var(--text-4)', textTransform: 'uppercase',
             padding: '4px 20px 10px',
           }}>
             Settings
@@ -496,9 +915,9 @@ export default function SettingsPage() {
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                 padding: '9px 20px', border: 'none',
-                borderLeft: `2px solid ${tab === id ? 'var(--blue)' : 'transparent'}`,
+                borderLeft: `2px solid ${tab === id ? '#1d9bf0' : 'transparent'}`,
                 background: tab === id ? 'rgba(0,71,255,0.05)' : 'transparent',
-                color: tab === id ? 'var(--blue)' : 'var(--text3)',
+                color: tab === id ? '#1d9bf0' : 'var(--text-3)',
                 fontSize: 13, cursor: 'pointer', textAlign: 'left',
                 transition: 'all 0.15s', fontFamily: 'Inter, sans-serif',
               } as React.CSSProperties}
@@ -520,9 +939,9 @@ export default function SettingsPage() {
         {/* Section title */}
         <div style={{
           fontSize: 9, fontWeight: 700, letterSpacing: 2,
-          color: 'var(--text4)', textTransform: 'uppercase',
+          color: 'var(--text-4)', textTransform: 'uppercase',
           marginBottom: 24, paddingBottom: 10,
-          borderBottom: '1px solid var(--border)',
+          borderBottom: '0.5px solid var(--border)',
         }}>
           {sectionLabel[tab]}
         </div>
@@ -531,6 +950,7 @@ export default function SettingsPage() {
         {tab === 'notifications' && <NotificationsTab />}
         {tab === 'security'      && <SecurityTab />}
         {tab === 'billing'       && <BillingTab />}
+        {tab === 'connections'   && <ConnectionsTab />}
       </div>
     </div>
   );

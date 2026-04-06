@@ -7,10 +7,10 @@ import NewsCountdown from './NewsCountdown';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: '20px' }}>
+    <div style={{ marginBottom: '18px' }}>
       <div style={{
-        fontSize: '9px', fontWeight: 700, letterSpacing: '1px',
-        color: 'var(--text-3)', textTransform: 'uppercase',
+        fontSize: 10, fontWeight: 500, letterSpacing: '0.06em',
+        color: '#555555', textTransform: 'uppercase',
         marginBottom: '8px',
       }}>
         {title}
@@ -18,19 +18,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       {children}
     </div>
   );
-}
-
-function getHeatStyle(changeNum: number): React.CSSProperties {
-  const abs = Math.abs(changeNum);
-  if (changeNum > 0) {
-    if (abs >= 3) return { background: 'rgba(22,163,74,0.20)', border: '1px solid rgba(22,163,74,0.28)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
-    if (abs >= 1) return { background: 'rgba(22,163,74,0.11)', border: '1px solid rgba(22,163,74,0.18)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
-    return { background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.12)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
-  } else {
-    if (abs >= 3) return { background: 'rgba(220,38,38,0.18)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
-    if (abs >= 1) return { background: 'rgba(220,38,38,0.10)', border: '1px solid rgba(220,38,38,0.16)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
-    return { background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.10)', borderRadius: 9, padding: '9px 10px', cursor: 'pointer', transition: 'opacity 0.15s' };
-  }
 }
 
 // ── Ticker-specific right panel data ─────────────────────────────────────────
@@ -111,7 +98,6 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
   const navigate = useNavigate();
   const { financials } = useTickerData();
 
-  // Build key stats: use real financials when available, fall back to static demo
   const demoStats = TICKER_STATS[ticker] ?? TICKER_STATS.NVDA;
   const stats: { label: string; value: string }[] = financials
     ? [
@@ -131,105 +117,105 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
   return (
     <div style={{
       gridArea: 'right',
-      background: 'var(--surface)',
-      borderLeft: '1px solid var(--border)',
-      padding: '14px 14px',
+      background: 'var(--bg)',
+      borderLeft: '0.5px solid var(--border)',
+      padding: '14px',
       overflowY: 'auto',
     }} className="scrollbar-hide">
 
       {/* KEY STATS */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 10 }}>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase', marginBottom: 8 }}>
           Key Stats
         </div>
         {stats.map(s => (
           <div key={s.label} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '7px 0', borderBottom: '1px solid var(--border)',
+            padding: '6px 0', borderBottom: 'var(--bw) solid var(--border-subtle)',
           }}>
             <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{s.label}</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{s.value}</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-2)', fontVariantNumeric: 'tabular-nums' }}>{s.value}</span>
           </div>
         ))}
       </div>
 
       {/* CANDL SENTIMENT */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 10 }}>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase', marginBottom: 8 }}>
           Candl Sentiment
         </div>
         {[
-          { label: 'Bullish',  pct: sentiment.bull,    color: '#16a34a' },
-          { label: 'Neutral',  pct: sentiment.neutral, color: '#6b7280' },
-          { label: 'Bearish',  pct: sentiment.bear,    color: '#dc2626' },
+          { label: 'Bullish',  pct: sentiment.bull,    color: 'var(--green)' },
+          { label: 'Neutral',  pct: sentiment.neutral, color: 'var(--text-3)' },
+          { label: 'Bearish',  pct: sentiment.bear,    color: 'var(--red)' },
         ].map(row => (
-          <div key={row.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <div key={row.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
             <span style={{ fontSize: 11, color: 'var(--text-3)', width: 52, flexShrink: 0 }}>{row.label}</span>
-            <div style={{ flex: 1, height: 6, background: 'var(--surface2)', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ width: `${row.pct}%`, height: '100%', background: row.color, borderRadius: 3 }} />
+            <div style={{ flex: 1, height: 3, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ width: `${row.pct}%`, height: '100%', background: row.color }} />
             </div>
-            <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: row.color, width: 30, textAlign: 'right' }}>
+            <span style={{ fontSize: 11, fontWeight: 500, color: row.color, width: 30, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
               {row.pct}%
             </span>
           </div>
         ))}
-        <div style={{ marginTop: 8, fontSize: 10, color: 'var(--text-3)', lineHeight: 1.5 }}>
+        <div style={{ marginTop: 6, fontSize: 10, color: 'var(--text-4)', lineHeight: 1.5 }}>
           Based on {sentiment.posts.toLocaleString()} posts today<br />
           {sentiment.newBuys} new buy trades opened
         </div>
       </div>
 
       {/* RELATED TICKERS */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 10 }}>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase', marginBottom: 8 }}>
           Related Tickers
         </div>
         {related.map(r => (
           <div
             key={r.ticker}
             onClick={() => navigate(`/ticker/${r.ticker}`)}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: 'var(--bw) solid var(--border-subtle)', cursor: 'pointer' }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.65')}
             onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
           >
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)' }}>{r.ticker}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-3)' }}>{r.label}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-2)', fontVariantNumeric: 'tabular-nums' }}>{r.ticker}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-4)' }}>{r.label}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)' }}>{r.price}</div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: r.up ? '#16a34a' : '#dc2626', fontFamily: 'JetBrains Mono, monospace' }}>{r.change}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-2)', fontVariantNumeric: 'tabular-nums' }}>{r.price}</div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: r.up ? 'var(--green)' : 'var(--red)', fontVariantNumeric: 'tabular-nums' }}>{r.change}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* TOP TRADERS */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 10 }}>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase', marginBottom: 8 }}>
           Top {ticker} Traders
         </div>
         {traders.map(t => (
           <div
             key={t.user.id}
             onClick={() => navigate(`/profile/${t.user.id}`)}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: 'var(--bw) solid var(--border-subtle)', cursor: 'pointer' }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.65')}
             onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
           >
             <div style={{
               width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-              background: `linear-gradient(135deg, ${t.user.avatarGradient[0]}, ${t.user.avatarGradient[1]})`,
+              background: 'var(--border)', border: 'var(--bw) solid var(--border-emphasis)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 10, fontWeight: 700,
+              color: 'var(--text-3)', fontSize: 9, fontWeight: 500,
             }}>
               {t.user.initials}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>{t.user.name}</div>
-              <div style={{ fontSize: 9, color: 'var(--text-3)' }}>{t.posts} {ticker} posts · {t.style}</div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: '#c8c8c8' }}>{t.user.name}</div>
+              <div style={{ fontSize: 10, color: '#555555' }}>{t.posts} {ticker} posts · {t.style}</div>
             </div>
-            <div style={{ fontSize: 10, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-3)' }}>
+            <div style={{ fontSize: 11, fontWeight: 500, color: '#666666', fontVariantNumeric: 'tabular-nums' }}>
               {t.user.followersCount >= 1000 ? `${(t.user.followersCount / 1000).toFixed(1)}K` : t.user.followersCount}
             </div>
           </div>
@@ -240,13 +226,13 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
       <button
         onClick={() => {}}
         style={{
-          width: '100%', padding: '11px', borderRadius: 10,
-          background: 'var(--surface2)', border: '1px solid var(--border)',
-          color: 'var(--text)', fontSize: 13, fontWeight: 600,
-          cursor: 'pointer', transition: 'all 0.15s',
+          width: '100%', padding: '8px',
+          background: 'transparent', border: 'var(--bw) solid var(--border)',
+          borderRadius: 4, color: 'var(--text-4)', fontSize: 12, fontWeight: 500,
+          cursor: 'pointer', transition: 'border-color 0.15s',
         }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
+        onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-emphasis)')}
+        onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
       >
         Set price alert for {ticker}
       </button>
@@ -260,7 +246,6 @@ export default function RightPanel() {
   const [followed, setFollowed] = useState<Record<string, boolean>>({});
   const { quotes } = useMarketData();
 
-  // Route-specific panel
   const tickerMatch = location.pathname.match(/^\/ticker\/([A-Z]+)$/i);
   if (tickerMatch) {
     return <TickerRightPanel ticker={tickerMatch[1].toUpperCase()} />;
@@ -269,9 +254,9 @@ export default function RightPanel() {
   return (
     <div style={{
       gridArea: 'right',
-      background: 'var(--surface)',
-      borderLeft: '1px solid var(--border)',
-      padding: '14px 14px',
+      background: 'var(--bg)',
+      borderLeft: '0.5px solid var(--border)',
+      padding: '14px',
       overflowY: 'auto',
     }} className="scrollbar-hide">
 
@@ -280,36 +265,29 @@ export default function RightPanel() {
         {DEMO_LEADERBOARD.map(entry => (
           <div key={entry.rank} className="lb-row" onClick={() => navigate(`/profile/${entry.user.id}`)}>
             <div style={{
-              width: '16px', fontSize: '10px', fontWeight: 700,
-              color: entry.rank === 1 ? '#f59e0b' : 'var(--text-3)',
-              fontFamily: 'JetBrains Mono, monospace', flexShrink: 0, textAlign: 'center',
+              width: '14px', fontSize: 10, fontWeight: 500,
+              color: entry.rank === 1 ? 'var(--gold)' : 'var(--text-4)',
+              fontVariantNumeric: 'tabular-nums', flexShrink: 0, textAlign: 'center',
             }}>
               {entry.rank}
             </div>
             <div style={{
-              width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
-              background: `linear-gradient(135deg, ${entry.user.avatarGradient[0]}, ${entry.user.avatarGradient[1]})`,
+              width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+              background: 'var(--border)', border: 'var(--bw) solid var(--border-emphasis)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: '10px', fontWeight: 700,
+              color: 'var(--text-3)', fontSize: 9, fontWeight: 500,
             }}>
               {entry.user.initials}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontSize: '11px', fontWeight: 600, color: 'var(--text)',
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>
+              <div style={{ fontSize: 12, fontWeight: 500, color: '#c8c8c8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {entry.user.name}
               </div>
-              <div style={{ fontSize: '9px', color: 'var(--text4)' }}>
+              <div style={{ fontSize: 10, color: '#555555' }}>
                 {entry.user.mostActive}
               </div>
             </div>
-            <div style={{
-              fontSize: '11px', fontWeight: 700,
-              fontFamily: 'JetBrains Mono, monospace',
-              color: 'var(--text3)', flexShrink: 0,
-            }}>
+            <div style={{ fontSize: 11, fontWeight: 500, fontVariantNumeric: 'tabular-nums', color: '#666666', flexShrink: 0 }}>
               {entry.followersCount >= 1000
                 ? `${(entry.followersCount / 1000).toFixed(1)}K`
                 : entry.followersCount}
@@ -319,56 +297,72 @@ export default function RightPanel() {
       </Section>
 
       {/* Trending */}
-      <div style={{ marginBottom: '20px' }}>
+      <div style={{ marginBottom: '18px' }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: 9, paddingBottom: 7, borderBottom: '1px solid var(--border2)',
+          marginBottom: 8, paddingBottom: 6, borderBottom: 'var(--bw) solid var(--border-subtle)',
         }}>
-          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--text4)', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase' }}>
             Trending
           </span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--blue)', cursor: 'pointer' }}>
+          <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--blue)', cursor: 'pointer' }}>
             See all →
           </span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5, marginBottom: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3, marginBottom: 12 }}>
           {DEMO_TRENDING.map(t => {
             const q = quotes[t.ticker];
             const changePct = q?.price > 0 ? q.changePct : t.changeNum;
             const changeStr = q?.price > 0
               ? `${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%`
               : t.change;
+            const isPos = changePct >= 0;
+            // heat map: clamp intensity 0–1 over ±5%
+            const intensity = Math.min(Math.abs(changePct) / 5, 1);
+            const alpha = 0.12 + intensity * 0.38; // 0.12 → 0.50
+            const heatBg = isPos
+              ? `rgba(34,197,94,${alpha})`
+              : `rgba(239,68,68,${alpha})`;
+            const heatBorder = isPos
+              ? `rgba(34,197,94,${alpha + 0.15})`
+              : `rgba(239,68,68,${alpha + 0.15})`;
             return (
-            <div
-              key={t.ticker}
-              style={getHeatStyle(changePct)}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-            >
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>
-                {t.ticker}
+              <div
+                key={t.ticker}
+                onClick={() => navigate(`/ticker/${t.ticker}`)}
+                style={{
+                  background: heatBg,
+                  border: `0.5px solid ${heatBorder}`,
+                  borderRadius: 4, padding: '7px 8px',
+                  cursor: 'pointer', transition: 'filter 0.15s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.15)')}
+                onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
+              >
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 2, fontVariantNumeric: 'tabular-nums' }}>
+                  {t.ticker}
+                </div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 3 }}>
+                  {t.posts}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: isPos ? '#4ade80' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
+                  {changeStr}
+                </div>
               </div>
-              <div style={{ fontSize: 10, color: 'var(--text4)', marginBottom: 3 }}>
-                {t.posts}
-              </div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, color: changePct >= 0 ? 'var(--green)' : 'var(--red)' }}>
-                {changeStr}
-              </div>
-            </div>
             );
           })}
         </div>
       </div>
 
       {/* Economic Calendar */}
-      <div style={{ marginBottom: '20px' }}>
+      <div style={{ marginBottom: '18px' }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: 9, paddingBottom: 7, borderBottom: '1px solid var(--border2)',
+          marginBottom: 8, paddingBottom: 6, borderBottom: 'var(--bw) solid var(--border-subtle)',
         }}>
           <span style={{
-            fontSize: 9, fontWeight: 700, letterSpacing: 2,
-            color: 'var(--text4)', textTransform: 'uppercase',
+            fontSize: 10, fontWeight: 500, letterSpacing: '0.06em',
+            color: '#555555', textTransform: 'uppercase',
           }}>
             Economic Calendar
           </span>
@@ -381,22 +375,22 @@ export default function RightPanel() {
         {SUGGESTED_USERS.map(user => (
           <div key={user.id} style={{
             display: 'flex', alignItems: 'center', gap: '8px',
-            padding: '5px 0', marginBottom: '4px',
+            padding: '5px 0', marginBottom: '3px',
           }}>
             <div
               style={{
-                width: '30px', height: '30px', borderRadius: '50%', flexShrink: 0,
-                background: `linear-gradient(135deg, ${user.avatarGradient[0]}, ${user.avatarGradient[1]})`,
+                width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                background: 'var(--border)', border: 'var(--bw) solid var(--border-emphasis)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+                color: 'var(--text-3)', fontSize: 9, fontWeight: 500, cursor: 'pointer',
               }}
               onClick={() => navigate(`/profile/${user.id}`)}
             >
               {user.initials}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text)' }}>{user.name}</div>
-              <div style={{ fontSize: '9px', color: 'var(--text4)' }}>{user.mostActive}</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: '#c8c8c8' }}>{user.name}</div>
+              <div style={{ fontSize: 10, color: '#555555' }}>{user.mostActive}</div>
             </div>
             <button
               className={`follow-btn ${followed[user.id] ? 'follow-btn-active' : ''}`}

@@ -317,11 +317,11 @@ export default function NewsPage() {
             </span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            <select style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
+            <select style={{ fontSize: 11, fontWeight: 600, color: '#888888', background: '#161616', border: '1px solid #1e1e1e', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
               <option>My wall</option>
               <option>All sources</option>
             </select>
-            <select style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
+            <select style={{ fontSize: 11, fontWeight: 600, color: '#888888', background: '#161616', border: '1px solid #1e1e1e', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
               <option>Sort: Latest</option>
               <option>Sort: Relevance</option>
             </select>
@@ -330,27 +330,19 @@ export default function NewsPage() {
 
         {/* Filter tabs */}
         <div className="scrollbar-hide" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
-          {FILTER_TABS.map(({ id, label, color }) => {
-            const active    = activeFilter === id
-            const isGreen   = color === 'green'
-            const isRed     = color === 'red'
-            const isOrange  = color === 'orange'
-            const isYellow  = color === 'yellow'
-            const activeColor   = isGreen ? 'var(--green)' : isRed ? 'var(--red)' : isOrange ? '#f97316' : isYellow ? '#ca8a04' : 'var(--blue)'
-            const inactiveBg    = isGreen ? 'var(--green-bg)' : isRed ? 'var(--red-bg)' : isOrange ? 'rgba(249,115,22,0.1)' : isYellow ? 'rgba(202,138,4,0.1)' : 'transparent'
-            const inactiveColor = isGreen ? 'var(--green)' : isRed ? 'var(--red)' : isOrange ? '#f97316' : isYellow ? '#ca8a04' : 'var(--text-2)'
-            const inactiveBorder= isGreen ? 'var(--green-border)' : isRed ? 'var(--red-border)' : isOrange ? 'rgba(249,115,22,0.3)' : isYellow ? 'rgba(202,138,4,0.3)' : 'var(--border)'
+          {FILTER_TABS.map(({ id, label }) => {
+            const active = activeFilter === id
             return (
               <button
                 key={id}
                 onClick={() => setActiveFilter(id)}
                 style={{
-                  padding: '5px 13px', borderRadius: 20, border: '1px solid',
+                  padding: '5px 13px', borderRadius: 4, border: '1px solid',
                   fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                   fontFamily: 'Inter, sans-serif',
-                  background: active ? activeColor : inactiveBg,
-                  color:      active ? '#fff' : inactiveColor,
-                  borderColor: active ? activeColor : inactiveBorder,
+                  background: active ? '#161616' : 'transparent',
+                  color:      active ? '#e8e8e8' : '#555555',
+                  borderColor: active ? '#2a2a2a' : '#1e1e1e',
                 }}
               >
                 {label}
@@ -403,7 +395,7 @@ export default function NewsPage() {
                       ))}
                     </div>
                   )}
-                  <button style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
+                  <button style={{ background: 'transparent', border: '1px solid #1e1e1e', borderRadius: 4, padding: '8px 16px', fontSize: 12, fontWeight: 600, color: '#555555', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
                     Read full story →
                   </button>
                 </div>

@@ -3,38 +3,49 @@ import { useNavigate } from 'react-router-dom';
 import { APP_NAME } from '../data/demo';
 
 const TICKERS_ROW1 = [
-  { sym: '$NVDA', change: '+4.2%', price: '892.40', up: true },
-  { sym: '$AAPL', change: '+1.1%', price: '189.30', up: true },
-  { sym: '$TSLA', change: '-2.3%', price: '172.10', up: false },
-  { sym: '$MSFT', change: '+0.8%', price: '415.20', up: true },
-  { sym: '$QQQ',  change: '+1.4%', price: '444.80', up: true },
-  { sym: '$SPY',  change: '+0.6%', price: '521.30', up: true },
-  { sym: '$XLE',  change: '-0.9%', price: '91.40',  up: false },
-  { sym: '$AMZN', change: '+2.1%', price: '182.60', up: true },
-  { sym: '$GOOG', change: '+1.7%', price: '165.80', up: true },
-  { sym: '$META', change: '+3.2%', price: '492.10', up: true },
+  { sym: '$NVDA', change: '+4.2%', price: '892.40' },
+  { sym: '$AAPL', change: '+1.1%', price: '189.30' },
+  { sym: '$TSLA', change: '-2.3%', price: '172.10' },
+  { sym: '$MSFT', change: '+0.8%', price: '415.20' },
+  { sym: '$QQQ',  change: '+1.4%', price: '444.80' },
+  { sym: '$SPY',  change: '+0.6%', price: '521.30' },
+  { sym: '$XLE',  change: '-0.9%', price: '91.40'  },
+  { sym: '$AMZN', change: '+2.1%', price: '182.60' },
+  { sym: '$GOOG', change: '+1.7%', price: '165.80' },
+  { sym: '$META', change: '+3.2%', price: '492.10' },
 ];
 
 const TICKERS_ROW2 = [
-  { sym: '$JPM',   change: '+0.5%', price: '198.20', up: true },
-  { sym: '$GS',    change: '-0.4%', price: '441.70', up: false },
-  { sym: '$BRK.B', change: '+1.2%', price: '367.40', up: true },
-  { sym: '$AMD',   change: '+3.8%', price: '164.90', up: true },
-  { sym: '$COIN',  change: '-5.1%', price: '181.30', up: false },
-  { sym: '$PLTR',  change: '+2.6%', price: '24.80',  up: true },
-  { sym: '$NFLX',  change: '+1.9%', price: '628.50', up: true },
-  { sym: '$DIS',   change: '-0.7%', price: '113.20', up: false },
+  { sym: '$JPM',   change: '+0.5%', price: '198.20' },
+  { sym: '$GS',    change: '-0.4%', price: '441.70' },
+  { sym: '$BRK.B', change: '+1.2%', price: '367.40' },
+  { sym: '$AMD',   change: '+3.8%', price: '164.90' },
+  { sym: '$COIN',  change: '-5.1%', price: '181.30' },
+  { sym: '$PLTR',  change: '+2.6%', price: '24.80'  },
+  { sym: '$NFLX',  change: '+1.9%', price: '628.50' },
+  { sym: '$DIS',   change: '-0.7%', price: '113.20' },
 ];
 
 const TICKERS_ROW3 = [
-  { sym: '$UBER', change: '+1.3%', price: '71.20',  up: true },
-  { sym: '$SNAP', change: '-3.2%', price: '11.40',  up: false },
-  { sym: '$SHOP', change: '+2.4%', price: '74.80',  up: true },
-  { sym: '$SQ',   change: '-1.8%', price: '62.30',  up: false },
-  { sym: '$PYPL', change: '+0.9%', price: '63.90',  up: true },
-  { sym: '$RBLX', change: '+4.1%', price: '38.70',  up: true },
-  { sym: '$SPOT', change: '+2.0%', price: '291.40', up: true },
-  { sym: '$V',    change: '+0.4%', price: '274.80', up: true },
+  { sym: '$UBER', change: '+1.3%', price: '71.20'  },
+  { sym: '$SNAP', change: '-3.2%', price: '11.40'  },
+  { sym: '$SHOP', change: '+2.4%', price: '74.80'  },
+  { sym: '$SQ',   change: '-1.8%', price: '62.30'  },
+  { sym: '$PYPL', change: '+0.9%', price: '63.90'  },
+  { sym: '$RBLX', change: '+4.1%', price: '38.70'  },
+  { sym: '$SPOT', change: '+2.0%', price: '291.40' },
+  { sym: '$V',    change: '+0.4%', price: '274.80' },
+];
+
+const TICKERS_ROW4 = [
+  { sym: '$WMT',  change: '+0.3%', price: '68.90'  },
+  { sym: '$BA',   change: '-1.5%', price: '193.40' },
+  { sym: '$F',    change: '+2.2%', price: '12.80'  },
+  { sym: '$GM',   change: '+1.0%', price: '47.60'  },
+  { sym: '$INTC', change: '-2.7%', price: '31.20'  },
+  { sym: '$T',    change: '+0.6%', price: '17.40'  },
+  { sym: '$VZ',   change: '-0.3%', price: '40.10'  },
+  { sym: '$PFE',  change: '+1.1%', price: '28.60'  },
 ];
 
 type Tab = 'signin' | 'signup';
@@ -51,7 +62,7 @@ export default function SignInPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#070b14',
+      background: '#0a1f10',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -67,120 +78,97 @@ export default function SignInPage() {
           0%   { transform: translateX(-50%); }
           100% { transform: translateX(0); }
         }
-        .tf-ticker-fwd {
+        .tf-ticker-l {
           display: flex;
           width: max-content;
-          animation: ticker-fwd 30s linear infinite;
+          animation: ticker-fwd 40s linear infinite;
         }
-        .tf-ticker-rev {
+        .tf-ticker-r {
           display: flex;
           width: max-content;
-          animation: ticker-rev 24s linear infinite;
-        }
-        .tf-ticker-fwd2 {
-          display: flex;
-          width: max-content;
-          animation: ticker-fwd 36s linear infinite;
+          animation: ticker-rev 55s linear infinite;
         }
         .tf-field input {
           width: 100%;
           padding: 10px 13px;
-          border-radius: 9px;
-          border: 1px solid rgba(255,255,255,0.1);
-          background: rgba(255,255,255,0.05);
+          border-radius: 6px;
+          border: 0.5px solid rgba(255,255,255,0.08);
+          background: rgba(0,0,0,0.3);
+          backdrop-filter: blur(4px);
           font-size: 14px;
-          color: #fff;
+          color: #c8c8c8;
           font-family: 'Inter', sans-serif;
           outline: none;
           transition: border-color 0.15s;
+          box-sizing: border-box;
         }
-        .tf-field input::placeholder { color: rgba(255,255,255,0.22); }
-        .tf-field input:focus { border-color: rgba(0,71,255,0.7); }
+        .tf-field input::placeholder { color: #2e2e2e; }
+        .tf-field input:focus { border-color: rgba(34,197,94,0.4); }
         .tf-cta {
           width: 100%;
           padding: 12px;
-          border-radius: 10px;
-          background: linear-gradient(135deg, #0047FF, #2563eb);
-          color: #fff;
+          border-radius: 6px;
+          background: #22c55e;
+          color: #000;
           font-size: 14px;
-          font-weight: 600;
+          font-weight: 700;
           border: none;
           cursor: pointer;
           font-family: 'Inter', sans-serif;
           letter-spacing: 0.01em;
-          transition: opacity 0.15s;
-          box-shadow: 0 4px 18px rgba(0,71,255,0.35);
+          transition: background 0.15s;
+          box-shadow: 0 4px 18px rgba(34,197,94,0.25);
         }
-        .tf-cta:hover { opacity: 0.88; }
+        .tf-cta:hover { background: #1ea34a; }
         .tf-oauth {
           width: 100%;
           padding: 10px;
-          border-radius: 10px;
-          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 6px;
+          border: 0.5px solid rgba(255,255,255,0.1);
           background: rgba(255,255,255,0.05);
           font-size: 13px;
-          color: rgba(255,255,255,0.85);
+          color: #888;
           font-family: 'Inter', sans-serif;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 9px;
-          transition: background 0.15s;
+          transition: border-color 0.15s;
         }
-        .tf-oauth:hover { background: rgba(255,255,255,0.09); }
+        .tf-oauth:hover { border-color: rgba(255,255,255,0.2); }
       `}</style>
 
-      {/* Radial blue glow */}
+      {/* Radial green glow */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse at 50% 45%, rgba(0,71,255,0.14) 0%, transparent 65%)',
+        background: 'radial-gradient(ellipse at 50% 45%, rgba(34,197,94,0.15) 0%, transparent 65%)',
       }} />
 
       {/* Animated ticker bands */}
       <div style={{
         position: 'absolute', inset: 0, overflow: 'hidden',
         display: 'flex', flexDirection: 'column', justifyContent: 'space-around',
-        opacity: 0.14, pointerEvents: 'none',
+        pointerEvents: 'none',
       }}>
-        {/* Row 1 — forward */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)', padding: '8px 0', overflow: 'hidden' }}>
-          <div className="tf-ticker-fwd">
-            {[...TICKERS_ROW1, ...TICKERS_ROW1].map(({ sym, change, price, up }, i) => (
-              <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0 20px', borderRight: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: '#fff' }}>{sym}</span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: up ? '#4ade80' : '#f87171' }}>{up ? '▲' : '▼'} {change}</span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{price}</span>
-              </div>
-            ))}
+        {[
+          { data: TICKERS_ROW1, cls: 'tf-ticker-l' },
+          { data: TICKERS_ROW2, cls: 'tf-ticker-r' },
+          { data: TICKERS_ROW3, cls: 'tf-ticker-l' },
+          { data: TICKERS_ROW4, cls: 'tf-ticker-r' },
+        ].map(({ data, cls }, ri) => (
+          <div key={ri} style={{ borderTop: '1px solid rgba(34,197,94,0.04)', borderBottom: '1px solid rgba(34,197,94,0.04)', padding: '8px 0', overflow: 'hidden' }}>
+            <div className={cls}>
+              {[...data, ...data].map(({ sym, change, price }, i) => (
+                <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0 20px', borderRight: '1px solid rgba(34,197,94,0.05)', flexShrink: 0 }}>
+                  <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, fontWeight: 600, color: 'rgba(34,197,94,0.25)' }}>{sym}</span>
+                  <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: 'rgba(34,197,94,0.25)' }}>{change}</span>
+                  <span style={{ fontFamily: "'Courier New', monospace", fontSize: 11, color: 'rgba(34,197,94,0.25)' }}>{price}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Row 2 — reverse */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)', padding: '8px 0', overflow: 'hidden' }}>
-          <div className="tf-ticker-rev">
-            {[...TICKERS_ROW2, ...TICKERS_ROW2].map(({ sym, change, price, up }, i) => (
-              <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0 20px', borderRight: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: '#fff' }}>{sym}</span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: up ? '#4ade80' : '#f87171' }}>{up ? '▲' : '▼'} {change}</span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{price}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Row 3 — forward (slower) */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)', padding: '8px 0', overflow: 'hidden' }}>
-          <div className="tf-ticker-fwd2">
-            {[...TICKERS_ROW3, ...TICKERS_ROW3].map(({ sym, change, price, up }, i) => (
-              <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0 20px', borderRight: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: '#fff' }}>{sym}</span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: up ? '#4ade80' : '#f87171' }}>{up ? '▲' : '▼'} {change}</span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{price}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Auth card */}
@@ -188,20 +176,23 @@ export default function SignInPage() {
         position: 'relative', zIndex: 2,
         width: '100%', maxWidth: 400,
         margin: '0 16px',
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 18,
-        padding: '32px 28px',
-        backdropFilter: 'blur(2px)',
+        background: 'rgba(10,20,13,0.8)',
+        border: '0.5px solid rgba(34,197,94,0.1)',
+        borderTop: '1px solid rgba(34,197,94,0.3)',
+        borderRadius: 12,
+        padding: 28,
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
         display: 'flex', flexDirection: 'column', gap: 20,
+        boxShadow: '0 0 80px rgba(34,197,94,0.07)',
       }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 9,
-            background: 'linear-gradient(135deg, #2563EB, #0EA5E9)',
+            background: 'linear-gradient(135deg, #16a34a, #22c55e)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 14px rgba(37,99,235,0.45)',
+            boxShadow: '0 2px 14px rgba(34,197,94,0.4)',
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <line x1="5"  y1="2"  x2="5"  y2="22" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
@@ -218,18 +209,17 @@ export default function SignInPage() {
         </div>
 
         {/* Tab switcher */}
-        <div style={{
-          display: 'flex', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, overflow: 'hidden',
-        }}>
+        <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: 6, padding: 3 }}>
           {(['signin', 'signup'] as Tab[]).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
               style={{
-                flex: 1, padding: '9px', border: 'none', cursor: 'pointer',
+                flex: 1, padding: '8px', border: 'none', cursor: 'pointer',
+                borderRadius: 4,
                 fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600,
-                background: tab === t ? '#0047FF' : 'transparent',
-                color: tab === t ? '#fff' : 'rgba(255,255,255,0.45)',
+                background: tab === t ? '#22c55e' : 'transparent',
+                color: tab === t ? '#000' : '#555',
                 transition: 'all 0.15s',
               }}
             >
@@ -242,13 +232,13 @@ export default function SignInPage() {
         {tab === 'signin' ? (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="tf-field" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)' }}>Email</label>
+              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>Email</label>
               <input type="email" placeholder="you@example.com" required />
             </div>
             <div className="tf-field" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)' }}>Password</label>
+              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>Password</label>
               <input type="password" placeholder="••••••••" required />
-              <a style={{ fontSize: 12, color: '#60a5fa', textAlign: 'right', cursor: 'pointer', marginTop: 2 }}>Forgot password?</a>
+              <a style={{ fontSize: 12, color: '#22c55e', textAlign: 'right', cursor: 'pointer', marginTop: 2 }}>Forgot password?</a>
             </div>
             <button type="submit" className="tf-cta">Sign in</button>
             <Divider />
@@ -257,24 +247,24 @@ export default function SignInPage() {
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="tf-field" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)' }}>Full name</label>
+              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>Full name</label>
               <input type="text" placeholder="Jamie D." required />
             </div>
             <div className="tf-field" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)' }}>Email</label>
+              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>Email</label>
               <input type="email" placeholder="you@example.com" required />
             </div>
             <div className="tf-field" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)' }}>Password</label>
+              <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>Password</label>
               <input type="password" placeholder="Min. 8 characters" required />
             </div>
             <button type="submit" className="tf-cta">Create account</button>
             <Divider />
             <GoogleButton label="Sign up with Google" />
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', textAlign: 'center', lineHeight: 1.5 }}>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', textAlign: 'center', lineHeight: 1.5 }}>
               By signing up you agree to our{' '}
-              <a href="#" style={{ color: 'rgba(255,255,255,0.5)' }}>Terms</a>{' '}and{' '}
-              <a href="#" style={{ color: 'rgba(255,255,255,0.5)' }}>Privacy Policy</a>
+              <a href="#" style={{ color: 'rgba(255,255,255,0.45)' }}>Terms</a>{' '}and{' '}
+              <a href="#" style={{ color: 'rgba(255,255,255,0.45)' }}>Privacy Policy</a>
             </p>
           </form>
         )}
@@ -286,9 +276,9 @@ export default function SignInPage() {
 function Divider() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)' }}>or</span>
-      <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
+      <div style={{ flex: 1, height: '0.5px', background: 'rgba(255,255,255,0.07)' }} />
+      <span style={{ fontSize: 12, color: '#2e2e2e' }}>or</span>
+      <div style={{ flex: 1, height: '0.5px', background: 'rgba(255,255,255,0.07)' }} />
     </div>
   );
 }

@@ -4,11 +4,14 @@ import type { SocialPost } from '../../types';
 import { useMobile } from '../../hooks/useMobile';
 import ShareDropdown from './ShareDropdown';
 
-const SENTIMENT_COLOR: Record<string, string> = {
-  Bullish: '#16a34a',
-  Neutral: '#d97706',
-  Bearish: '#dc2626',
-};
+function renderBody(text: string) {
+  return text.split(/(\$[A-Z]+|#\w+)/g).map((part, i) => {
+    if (/^\$[A-Z]+$/.test(part) || /^#\w+$/.test(part)) {
+      return <span key={i} style={{ color: '#1d9bf0', fontWeight: 500 }}>{part}</span>;
+    }
+    return part;
+  });
+}
 
 export default function SocialCard({ post }: { post: SocialPost }) {
   const navigate = useNavigate();
@@ -16,9 +19,13 @@ export default function SocialCard({ post }: { post: SocialPost }) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [animating, setAnimating] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [hovered, setHovered] = useState(false);
+  const [likeHov, setLikeHov] = useState(false);
+  const [commentHov, setCommentHov] = useState(false);
+  const [shareHov, setShareHov] = useState(false);
+  const [bookmarkHov, setBookmarkHov] = useState(false);
   const shareButtonRef = useRef<HTMLButtonElement>(null);
 
   function handleLike(e: React.MouseEvent) {
@@ -40,28 +47,23 @@ export default function SocialCard({ post }: { post: SocialPost }) {
 
   const images = post.images ?? [];
 
-  // Image grid layout: 1 = full width, 2 = side by side, 3 = left full + 2 right stacked, 4 = 2×2
   function renderImages() {
     if (!images.length) return null;
 
     const gridStyle: React.CSSProperties =
       images.length === 1
         ? { display: 'block' }
-        : images.length === 2
-        ? { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }
-        : images.length === 3
-        ? { display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: 2 }
-        : { display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: 2 };
+        : { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 };
 
     return (
       <div
         style={{
           ...gridStyle,
-          margin: '10px 0',
-          borderRadius: 12,
+          marginBottom: 12,
+          borderRadius: 16,
           overflow: 'hidden',
-          border: '1px solid var(--border)',
-          maxHeight: isMobile ? 280 : 340,
+          border: '0.5px solid var(--border)',
+          maxHeight: isMobile ? 280 : 320,
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -84,18 +86,17 @@ export default function SocialCard({ post }: { post: SocialPost }) {
               style={{
                 width: '100%',
                 height: images.length === 1 ? 'auto' : '100%',
-                maxHeight: images.length === 1 ? (isMobile ? 280 : 340) : undefined,
+                maxHeight: images.length === 1 ? (isMobile ? 280 : 320) : undefined,
                 objectFit: 'cover',
                 display: 'block',
               }}
             />
-            {/* +N overlay on 4th image if more than 4 */}
             {i === 3 && post.images!.length > 4 && (
               <div style={{
                 position: 'absolute', inset: 0,
-                background: 'rgba(0,0,0,0.55)',
+                background: 'rgba(0,0,0,0.65)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontSize: 22, fontWeight: 700,
+                color: 'var(--text)', fontSize: 20, fontWeight: 500,
               }}>
                 +{post.images!.length - 4}
               </div>
@@ -113,71 +114,91 @@ export default function SocialCard({ post }: { post: SocialPost }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
-          background: 'var(--surface)', border: '1px solid var(--border)',
-          borderRadius: 14, marginBottom: 16, cursor: 'pointer',
-          transition: 'box-shadow 0.2s, transform 0.15s',
-          boxShadow: hovered ? '0 6px 24px rgba(0,0,0,0.1)' : '0 1px 4px rgba(0,0,0,0.06)',
-          transform: hovered ? 'translateY(-1px)' : 'none',
+          display: 'flex', gap: 12,
+          paddingTop: '14px', paddingBottom: '14px', paddingRight: '16px', paddingLeft: '12px',
+          borderLeft: '2px solid #2a2a2a',
+          borderBottom: '0.5px solid #1e1e1e',
+          background: hovered ? 'var(--surface)' : 'transparent',
+          cursor: 'pointer', transition: 'background 0.1s',
         }}
       >
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px 10px' }}>
-          <div
-            onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
-            style={{
-              width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-              background: `linear-gradient(135deg, ${post.user.avatarGradient[0]}, ${post.user.avatarGradient[1]})`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 13, fontWeight: 700,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.18)', cursor: 'pointer',
-            }}
-          >
-            {post.user.initials}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <span
-                onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
-                style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', cursor: 'pointer' }}
-              >
-                {post.user.name}
-              </span>
-              {post.user.verified && (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--blue)">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              )}
-              {post.sentiment && (
-                <span style={{
-                  fontSize: 9, fontWeight: 700, letterSpacing: '0.8px', padding: '2px 7px',
-                  borderRadius: 20, border: `1px solid ${SENTIMENT_COLOR[post.sentiment]}44`,
-                  background: `${SENTIMENT_COLOR[post.sentiment]}18`,
-                  color: SENTIMENT_COLOR[post.sentiment],
-                }}>
-                  {post.sentiment.toUpperCase()}
-                </span>
-              )}
-              {post.ticker && (
-                <span style={{
-                  fontSize: 10, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
-                  color: 'var(--blue)', background: 'var(--blue-bg)',
-                  border: '1px solid var(--blue-border)',
-                  padding: '2px 8px', borderRadius: 6,
-                }}>
-                  ${post.ticker}
-                </span>
-              )}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text4)', fontFamily: 'JetBrains Mono, monospace', marginTop: 1 }}>
-              @{post.user.username} · {post.createdAt}
-            </div>
-          </div>
+        {/* Avatar */}
+        <div
+          onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
+          style={{
+            width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+            background: 'var(--surface2)', border: '0.5px solid var(--border-emphasis)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-3)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+          }}
+        >
+          {post.user.initials}
         </div>
 
-        {/* Body */}
-        <div style={{ padding: '0 16px' }}>
-          <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text)', margin: 0, whiteSpace: 'pre-wrap' }}>
-            {post.body}
+        {/* Right column */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+            <span
+              onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
+              style={{ fontSize: 14, fontWeight: 600, color: '#e0e0e0', cursor: 'pointer' }}
+              onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              {post.user.name}
+            </span>
+            {post.user.verified && (
+              <span style={{
+                width: 16, height: 16, borderRadius: '50%', background: '#1d9bf0',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                marginLeft: 2, flexShrink: 0,
+              }}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+            )}
+            <span style={{ fontSize: 13, color: 'var(--text-3)' }}>@{post.user.username}</span>
+            <span style={{ fontSize: 13, color: 'var(--text-3)' }}>·</span>
+            <span style={{ fontSize: 13, color: 'var(--text-3)' }}>{post.createdAt}</span>
+            <span style={{
+              fontSize: 10, fontWeight: 500, color: '#555',
+              padding: '1px 6px', borderRadius: 4,
+              background: '#161616', border: '0.5px solid #222',
+              marginLeft: 6,
+            }}>
+              SOCIAL
+            </span>
+            {post.ticker && (
+              <span style={{
+                fontSize: 11, fontWeight: 500, color: '#1d9bf0',
+                padding: '1px 6px', borderRadius: 3,
+                background: 'var(--blue-bg)', border: '0.5px solid var(--blue-border)', marginLeft: 6,
+              }}>
+                ${post.ticker}
+              </span>
+            )}
+          </div>
+
+          {/* Sentiment tag */}
+          {post.sentiment && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              marginBottom: 8,
+              background: post.sentiment === 'Bullish' ? 'var(--green-bg)' : post.sentiment === 'Bearish' ? 'var(--red-bg)' : 'var(--amber-bg)',
+              border: `0.5px solid ${post.sentiment === 'Bullish' ? 'var(--green-border)' : post.sentiment === 'Bearish' ? 'var(--red-border)' : 'var(--amber-border)'}`,
+              borderRadius: 4, padding: '2px 8px',
+            }}>
+              <span style={{
+                fontSize: 11, fontWeight: 500,
+                color: post.sentiment === 'Bullish' ? '#22c55e' : post.sentiment === 'Bearish' ? '#ef4444' : '#f59e0b',
+              }}>
+                {post.sentiment}
+              </span>
+            </div>
+          )}
+
+          {/* Body */}
+          <p style={{ fontSize: 14, color: '#c0c0c0', lineHeight: 1.6, margin: '0 0 12px 0', whiteSpace: 'pre-wrap' }}>
+            {renderBody(post.body)}
           </p>
 
           {/* Images */}
@@ -185,49 +206,50 @@ export default function SocialCard({ post }: { post: SocialPost }) {
 
           {/* Hashtags */}
           {post.hashtags.length > 0 && (
-            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: images.length ? 0 : 10 }}>
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 }}>
               {post.hashtags.map(tag => (
-                <span key={tag} onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: 'var(--blue)', fontWeight: 500, cursor: 'pointer' }}>
-                  {tag}
-                </span>
+                <span key={tag} onClick={e => e.stopPropagation()} style={{ fontSize: 13, color: '#1d9bf0', cursor: 'pointer' }}>{tag}</span>
               ))}
             </div>
           )}
-        </div>
 
-        {/* Footer */}
-        <div style={{ padding: '8px 16px 12px', marginTop: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2, paddingTop: 8, borderTop: '1px solid var(--border2)' }}>
-            <button
-              onClick={handleLike}
-              style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 7px', borderRadius: 6, border: 'none', background: 'none', fontSize: 11, color: liked ? 'var(--red)' : 'var(--text4)', cursor: 'pointer', transition: 'all 0.15s' }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}
-            >
-              <svg className={animating ? 'like-pop' : ''} width="13" height="13" viewBox="0 0 24 24" fill={liked ? 'var(--red)' : 'none'} stroke={liked ? 'var(--red)' : 'currentColor'} strokeWidth="2" strokeLinecap="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-              {likeCount.toLocaleString()}
-            </button>
+          {/* Action bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 380, marginTop: 4 }}>
             <button
               onClick={handleComment}
-              style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 7px', borderRadius: 6, border: 'none', background: 'none', fontSize: 11, color: 'var(--text4)', cursor: 'pointer', transition: 'all 0.15s' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'; (e.currentTarget as HTMLElement).style.color = 'var(--text2)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = 'var(--text4)'; }}
+              onMouseEnter={() => setCommentHov(true)}
+              onMouseLeave={() => setCommentHov(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: commentHov ? 'var(--text-2)' : 'var(--text-3)', padding: 4, borderRadius: 4 }}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              {post.comments}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span style={{ fontSize: 12 }}>{post.comments}</span>
             </button>
+
+            <button
+              onClick={handleLike}
+              onMouseEnter={() => setLikeHov(true)}
+              onMouseLeave={() => setLikeHov(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: liked || likeHov ? '#f91880' : 'var(--text-3)', padding: 4, borderRadius: 4 }}
+            >
+              <svg className={animating ? 'like-pop' : ''} width="18" height="18" viewBox="0 0 24 24" fill={liked ? '#f91880' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span style={{ fontSize: 12 }}>{likeCount.toLocaleString()}</span>
+            </button>
+
             <div style={{ position: 'relative' }}>
               <button
                 ref={shareButtonRef}
                 onClick={handleShare}
-                style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 7px', borderRadius: 6, border: 'none', background: 'none', fontSize: 11, color: shareOpen ? 'var(--blue)' : 'var(--text4)', cursor: 'pointer', transition: 'all 0.15s' }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}
+                onMouseEnter={() => setShareHov(true)}
+                onMouseLeave={() => setShareHov(false)}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: shareOpen || shareHov ? 'var(--text-2)' : 'var(--text-3)', padding: 4, borderRadius: 4 }}
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                {post.shares}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                <span style={{ fontSize: 12 }}>{post.shares}</span>
               </button>
               {shareOpen && (
                 <ShareDropdown
@@ -238,6 +260,17 @@ export default function SocialCard({ post }: { post: SocialPost }) {
                 />
               )}
             </div>
+
+            <button
+              onClick={e => e.stopPropagation()}
+              onMouseEnter={() => setBookmarkHov(true)}
+              onMouseLeave={() => setBookmarkHov(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: bookmarkHov ? 'var(--text-2)' : 'var(--text-3)', padding: 4, borderRadius: 4 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -247,7 +280,7 @@ export default function SocialCard({ post }: { post: SocialPost }) {
         <div
           onClick={() => setLightboxSrc(null)}
           style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)',
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)',
             zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: 16, cursor: 'zoom-out',
           }}
@@ -255,15 +288,15 @@ export default function SocialCard({ post }: { post: SocialPost }) {
           <img
             src={lightboxSrc}
             alt=""
-            style={{ maxWidth: '100%', maxHeight: '90dvh', borderRadius: 10, objectFit: 'contain', boxShadow: '0 8px 40px rgba(0,0,0,0.6)' }}
+            style={{ maxWidth: '100%', maxHeight: '90dvh', borderRadius: 4, objectFit: 'contain' }}
           />
           <button
             onClick={() => setLightboxSrc(null)}
             style={{
               position: 'absolute', top: 16, right: 16,
-              width: 36, height: 36, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.15)', border: 'none',
-              color: '#fff', fontSize: 18, cursor: 'pointer',
+              width: 32, height: 32, borderRadius: 4,
+              background: 'var(--surface)', border: '0.5px solid var(--border)',
+              color: 'var(--text)', fontSize: 16, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
