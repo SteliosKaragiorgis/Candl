@@ -312,7 +312,7 @@ export default function RightPanel() {
             See all →
           </span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3, marginBottom: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2, marginBottom: 12 }}>
           {DEMO_TRENDING.map(t => {
             const q = quotes[t.ticker];
             const changePct = q?.price > 0 ? q.changePct : t.changeNum;
@@ -320,35 +320,51 @@ export default function RightPanel() {
               ? `${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%`
               : t.change;
             const isPos = changePct >= 0;
-            // heat map (dark mode only): clamp intensity 0–1 over ±5%
             const intensity = Math.min(Math.abs(changePct) / 5, 1);
-            const alpha = 0.12 + intensity * 0.38;
-            const heatBg = isLight
-              ? '#f9fafb'
-              : isPos ? `rgba(34,197,94,${alpha})` : `rgba(239,68,68,${alpha})`;
-            const heatBorder = isLight
-              ? '#e8e8e8'
-              : isPos ? `rgba(34,197,94,${alpha + 0.15})` : `rgba(239,68,68,${alpha + 0.15})`;
+
+            let bg: string;
+            let tickerColor: string;
+            let postColor: string;
+            let changeColor: string;
+
+            if (isLight) {
+              const lightness = Math.round(96 - intensity * 52);
+              const hue = isPos ? 142 : 0;
+              const sat = isPos ? 71 : 84;
+              bg = `hsl(${hue}, ${sat}%, ${lightness}%)`;
+              const highIntensity = intensity > 0.45;
+              tickerColor  = highIntensity ? '#ffffff' : (isPos ? '#14532d' : '#7f1d1d');
+              postColor    = highIntensity ? 'rgba(255,255,255,0.65)' : (isPos ? '#16a34a' : '#b91c1c');
+              changeColor  = highIntensity ? '#ffffff' : (isPos ? '#14532d' : '#7f1d1d');
+            } else {
+              const alpha = 0.14 + intensity * 0.56;
+              bg = isPos ? `rgba(34,197,94,${alpha})` : `rgba(239,68,68,${alpha})`;
+              const highIntensity = intensity > 0.5;
+              tickerColor  = highIntensity ? '#ffffff' : 'var(--text)';
+              postColor    = 'rgba(255,255,255,0.38)';
+              changeColor  = highIntensity ? '#ffffff' : (isPos ? '#4ade80' : '#f87171');
+            }
+
             return (
               <div
                 key={t.ticker}
                 onClick={() => navigate(`/ticker/${t.ticker}`)}
                 style={{
-                  background: heatBg,
-                  border: `0.5px solid ${heatBorder}`,
-                  borderRadius: 4, padding: '7px 8px',
-                  cursor: 'pointer', transition: 'filter 0.15s',
+                  background: bg,
+                  borderRadius: 4, padding: '8px 8px 7px',
+                  cursor: 'pointer', transition: 'filter 0.12s',
+                  border: 'none',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(0.97)')}
+                onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(0.93)')}
                 onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
               >
-                <div style={{ fontSize: 12, fontWeight: 500, color: isLight ? '#111111' : 'var(--text)', marginBottom: 2, fontVariantNumeric: 'tabular-nums' }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: tickerColor, marginBottom: 2, fontVariantNumeric: 'tabular-nums' }}>
                   {t.ticker}
                 </div>
-                <div style={{ fontSize: 10, color: isLight ? '#888888' : 'rgba(255,255,255,0.4)', marginBottom: 3 }}>
+                <div style={{ fontSize: 9, color: postColor, marginBottom: 4 }}>
                   {t.posts}
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: isPos ? (isLight ? '#16a34a' : '#4ade80') : (isLight ? '#dc2626' : '#f87171'), fontVariantNumeric: 'tabular-nums' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: changeColor, fontVariantNumeric: 'tabular-nums' }}>
                   {changeStr}
                 </div>
               </div>
