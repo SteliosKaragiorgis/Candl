@@ -11,20 +11,20 @@ export default function StatBar() {
     <div style={{
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '8px',
-      marginBottom: '14px',
+      gap: '6px',
+      marginBottom: '12px',
     }}>
       {stats.map(({ label, value }) => (
         <div key={label} className="stat-tile">
           <div style={{
-            fontSize: '10px', color: 'var(--text3)', fontWeight: 500,
-            marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.5px',
+            fontSize: 10, color: 'var(--text-3)', fontWeight: 500,
+            marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.06em',
           }}>
             {label}
           </div>
           <div style={{
-            fontSize: '13px', fontWeight: 700,
-            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: 12, fontWeight: 500,
+            fontVariantNumeric: 'tabular-nums',
             color: 'var(--text)',
           }}>
             {value}

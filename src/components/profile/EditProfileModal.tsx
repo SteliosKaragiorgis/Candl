@@ -17,7 +17,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
         position: 'absolute', top: 3,
         left: on ? 23 : 3,
         width: 18, height: 18, borderRadius: '50%',
-        background: '#fff',
+        background: '#e8e8e8',
         transition: 'left 0.2s',
         boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
       }} />

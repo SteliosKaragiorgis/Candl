@@ -1,138 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* Candl design tokens — dark only */
 :root {
-  --brand: #0047FF;
-  --brand-bg: rgba(0,71,255,0.05);
-  --brand-border: rgba(0,71,255,0.18);
-  --border: #ebebeb;
-  --surface: #f5f5f7;
-}
+  --bg-page:      #111111;
+  --bg-card:      #161616;
+  --bg-surface:   #1a1a1a;
+  --bg-input:     #0d0d0d;
+  --bg-elevated:  #1e1e1e;
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  overflow-x: hidden;
+  --border:       #1e1e1e;
+  --border-soft:  #222222;
+  --border-hard:  #2a2a2a;
+
+  --text-1:       #e8e8e8;
+  --text-2:       #b0b0b0;
+  --text-3:       #707070;
+  --text-4:       #505050;
+
+  --green:        #22c55e;
+  --green-bg:     #0d1f12;
+  --green-border: #1a3a22;
+  --red:          #ef4444;
+  --red-bg:       #1f0d0d;
+  --red-border:   #3a1a1a;
+  --blue:         #1d9bf0;
+  --blue-bg:      #0d1a27;
+  --blue-border:  #1a3a5c;
+  --amber:        #f59e0b;
+  --amber-bg:     #1f1400;
+  --amber-border: #3a2800;
+
+  --ftmo-bg:      #0d1627;
+  --ftmo-color:   #3b82f6;
+  --ftmo-border:  #1a3a5c;
+  --tft-bg:       #1a0d27;
+  --tft-color:    #8b5cf6;
+  --tft-border:   #2d1a5c;
+  --apex-bg:      #1f1200;
+  --apex-color:   #f59e0b;
+  --apex-border:  #3a2200;
+  --e8-bg:        #0d1f12;
+  --e8-color:     #22c55e;
+  --e8-border:    #1a3a22;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background: var(--surface);
-  color: #0a0a0a;
-  -webkit-font-smoothing: antialiased;
+  background: #111111 !important;
+  color: #e8e8e8 !important;
+  font-family: -apple-system, 'Inter', sans-serif;
 }
-
-/* ── Scrollbar ── */
-.scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-
-/* ── Icon rail ── */
-.icon-btn {
-  width: 28px; height: 28px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  color: #ddd; background: transparent; border: none; cursor: pointer;
-  transition: background 0.1s, color 0.1s;
-}
-.icon-btn:hover { background: #f5f5f5; color: #666; }
-.icon-btn-active { background: rgba(0,71,255,0.05); color: #0047FF; }
-
-/* ── Sidebar nav ── */
-.sidebar-nav-item {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 6px; border-radius: 5px;
-  font-size: 11px; font-weight: 500; color: #aaa;
-  font-family: 'Inter', sans-serif;
-  background: transparent; border: none; cursor: pointer; width: 100%;
-  text-align: left; transition: background 0.1s, color 0.1s;
-}
-.sidebar-nav-item:hover { background: #f7f7f7; color: #333; }
-.sidebar-nav-item-active { background: rgba(0,71,255,0.05); color: #0047FF; font-weight: 600; }
-
-/* ── Post button ── */
-.post-trade-btn {
-  width: 100%; background: #0047FF; color: white;
-  border-radius: 6px; padding: 9px;
-  font-size: 10px; font-weight: 700; font-family: 'Inter', sans-serif;
-  letter-spacing: 0.5px; border: none; cursor: pointer;
-  transition: background 0.12s;
-}
-.post-trade-btn:hover { background: #0035cc; }
-
-/* ── Watchlist rows ── */
-.watchlist-row {
-  display: flex; align-items: center; gap: 6px;
-  padding: 4px 4px; border-radius: 4px; cursor: pointer;
-  transition: background 0.1s;
-}
-.watchlist-row:hover { background: #f7f7f7; }
-
-/* ── Stat tiles ── */
-.stat-tile {
-  background: #fff; border: 1px solid #ebebeb; border-radius: 7px;
-  padding: 8px 10px; transition: border-color 0.12s; cursor: default;
-}
-.stat-tile:hover { border-color: #0047FF; }
-
-/* ── Compose tag buttons ── */
-.compose-tag {
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 3px 8px; border-radius: 4px;
-  font-size: 9px; font-weight: 600; font-family: 'Inter', sans-serif;
-  color: #888; border: 1px solid #e8e8e8; background: transparent;
-  cursor: pointer; letter-spacing: 0.3px;
-  transition: color 0.1s, background 0.1s, border-color 0.1s;
-}
-.compose-tag:hover { color: #0047FF; background: rgba(0,71,255,0.04); border-color: rgba(0,71,255,0.2); }
-
-/* ── Trade card ── */
-.trade-card {
-  background: #ffffff; border: 1px solid #e8e8e8; border-radius: 14px;
-  padding: 20px 22px; margin-bottom: 12px; position: relative;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  transition: box-shadow 0.15s, border-color 0.15s; overflow: hidden;
-}
-.trade-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: rgba(0,71,255,0.2); }
-.trade-card-accent {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-  background: #0047FF; border-radius: 14px 0 0 14px;
-  opacity: 0; transition: opacity 0.15s;
-}
-.trade-card:hover .trade-card-accent { opacity: 1; }
-
-/* ── Leaderboard rows ── */
-.lb-row {
-  display: flex; align-items: center; gap: 7px;
-  padding: 5px 3px; cursor: pointer; border-radius: 4px;
-  transition: background 0.1s;
-}
-.lb-row:hover { background: #f9f9f9; }
-
-/* ── Trending chips ── */
-.trend-chip {
-  background: #fafafa; border: 1px solid #ebebeb; border-radius: 5px;
-  padding: 6px 7px; cursor: pointer;
-  transition: border-color 0.12s, background 0.12s;
-}
-.trend-chip:hover { border-color: #0047FF; background: rgba(0,71,255,0.03); }
-
-/* ── Follow button ── */
-.follow-btn {
-  font-size: 8px; font-weight: 700; font-family: 'Inter', sans-serif;
-  color: #0047FF; border: 1px solid #0047FF; border-radius: 4px;
-  padding: 3px 8px; background: transparent; cursor: pointer;
-  flex-shrink: 0; letter-spacing: 0.3px; transition: background 0.12s, color 0.12s;
-}
-.follow-btn:hover { background: #0047FF; color: #fff; }
-
-/* ── User pill ── */
-.user-pill {
-  display: flex; align-items: center; gap: 6px;
-  border: 1px solid #ebebeb; border-radius: 20px;
-  padding: 3px 8px 3px 3px; cursor: pointer;
-  transition: border-color 0.12s;
-}
-.user-pill:hover { border-color: #0047FF; }

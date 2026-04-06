@@ -28,29 +28,28 @@ function PinnedPost({ post }: { post: Post }) {
 
   return (
     <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 12, overflow: 'hidden', marginBottom: 10,
-      borderLeft: '3px solid #f43f5e',
+      background: 'var(--surface)', border: '0.5px solid var(--border)',
+      borderRadius: 8, overflow: 'hidden', marginBottom: 10,
     }}>
-      <div style={{ padding: '12px 16px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="#f43f5e">
+      <div style={{ padding: '10px 14px 12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-3)' }}>
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
           </svg>
-          <span style={{ fontSize: 10, fontWeight: 800, color: '#f43f5e', letterSpacing: 1.5, textTransform: 'uppercase' }}>Pinned</span>
+          <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Pinned</span>
         </div>
-        <p style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.6, margin: '0 0 10px' }}>{post.body}</p>
+        <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6, margin: '0 0 8px' }}>{post.body}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {ticker && (
             <span style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700,
-              padding: '2px 8px', borderRadius: 5,
-              background: 'var(--surface2)', color: 'var(--text-2)', border: '1px solid var(--border)',
+              fontSize: 11, fontWeight: 500, fontVariantNumeric: 'tabular-nums',
+              padding: '1px 6px', borderRadius: 3,
+              background: 'var(--bg)', color: 'var(--text-2)', border: '0.5px solid var(--border)',
             }}>
               ${ticker}
             </span>
           )}
-          <span style={{ fontSize: 10, color: 'var(--text4)', fontFamily: 'JetBrains Mono, monospace' }}>
+          <span style={{ fontSize: 10, color: 'var(--text-4)' }}>
             Pinned · {post.createdAt}
           </span>
         </div>
@@ -65,34 +64,34 @@ function PrivateProfile({ following, onFollowChange }: {
 }) {
   return (
     <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 14, padding: '48px 24px', textAlign: 'center',
+      background: 'var(--surface)', border: '0.5px solid var(--border)',
+      borderRadius: 8, padding: '48px 24px', textAlign: 'center',
     }}>
       <div style={{
-        width: 56, height: 56, borderRadius: '50%',
-        background: 'var(--surface2)', border: '1px solid var(--border)',
+        width: 48, height: 48, borderRadius: '50%',
+        background: 'var(--surface)', border: '0.5px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        margin: '0 auto 16px', color: 'var(--text4)',
+        margin: '0 auto 14px', color: 'var(--text-4)',
       }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
           <rect x="3" y="11" width="18" height="11" rx="2"/>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
       </div>
-      <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
+      <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-2)', marginBottom: 6 }}>
         This account is private
       </div>
-      <div style={{ fontSize: 13, color: 'var(--text4)', lineHeight: 1.6, maxWidth: 260, margin: '0 auto 20px' }}>
+      <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6, maxWidth: 260, margin: '0 auto 18px' }}>
         Send a follow request to see their trades, investments and commentary.
       </div>
       <button
         onClick={() => onFollowChange(!following)}
         style={{
-          padding: '9px 28px', borderRadius: 10,
-          border: `1px solid ${following ? 'var(--blue)' : 'var(--border)'}`,
-          background: following ? 'var(--blue)' : 'transparent',
-          fontSize: 13, fontWeight: 700,
-          color: following ? '#fff' : 'var(--text)',
+          padding: '7px 22px', borderRadius: 4,
+          border: `0.5px solid ${following ? 'var(--blue-border)' : 'var(--border)'}`,
+          background: following ? 'var(--blue-bg)' : 'transparent',
+          fontSize: 12, fontWeight: 500,
+          color: following ? '#1d9bf0' : 'var(--text-2)',
           cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.15s',
         }}
       >
@@ -109,32 +108,32 @@ function FollowRequestBanner({ user, onAccept, onDecline }: {
 }) {
   return (
     <div style={{
-      background: 'var(--surface)', border: '1px solid var(--blue-border)',
-      borderRadius: 12, padding: '14px 18px', marginBottom: 14,
-      display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+      background: 'var(--surface)', border: '0.5px solid var(--blue-border)',
+      borderRadius: 8, padding: '12px 14px', marginBottom: 12,
+      display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
     }}>
       {/* Avatar */}
       <div style={{
-        width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-        background: `linear-gradient(135deg, ${user.avatarGradient[0]}, ${user.avatarGradient[1]})`,
+        width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
+        background: 'var(--border)', border: '0.5px solid var(--border-emphasis)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#fff', fontSize: 11, fontWeight: 700,
+        color: 'var(--text-3)', fontSize: 10, fontWeight: 500,
       }}>
         {user.initials}
       </div>
       {/* Text */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{user.name}</span>
-        <span style={{ fontSize: 13, color: 'var(--text-2)' }}> has requested to follow you</span>
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-2)' }}>{user.name}</span>
+        <span style={{ fontSize: 12, color: 'var(--text-3)' }}> has requested to follow you</span>
       </div>
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
         <button
           onClick={onAccept}
           style={{
-            padding: '6px 16px', borderRadius: 8, border: 'none',
-            background: 'var(--blue)', fontSize: 12, fontWeight: 700,
-            color: '#fff', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            padding: '5px 14px', borderRadius: 4, border: '0.5px solid var(--green-border)',
+            background: 'var(--green-bg)', fontSize: 11, fontWeight: 500,
+            color: '#22c55e', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
           }}
         >
           Accept
@@ -142,9 +141,9 @@ function FollowRequestBanner({ user, onAccept, onDecline }: {
         <button
           onClick={onDecline}
           style={{
-            padding: '6px 16px', borderRadius: 8, border: '1px solid var(--border)',
-            background: 'transparent', fontSize: 12, fontWeight: 700,
-            color: 'var(--text-2)', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+            padding: '5px 14px', borderRadius: 4, border: '0.5px solid var(--border)',
+            background: 'transparent', fontSize: 11, fontWeight: 500,
+            color: 'var(--text-4)', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
           }}
         >
           Decline
@@ -163,31 +162,31 @@ function EmptyState({ user, following, onFollowChange, followBack }: {
   const label = following ? 'Following' : followBack ? 'Follow back' : `Follow ${user.name.split(' ')[0]}`;
   return (
     <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 14, padding: '48px 24px', textAlign: 'center',
+      background: 'var(--surface)', border: '0.5px solid var(--border)',
+      borderRadius: 8, padding: '48px 24px', textAlign: 'center',
     }}>
       <div style={{
-        width: 52, height: 52, borderRadius: '50%',
-        background: 'var(--surface2)', border: '1px solid var(--border)',
+        width: 44, height: 44, borderRadius: '50%',
+        background: 'var(--surface)', border: '0.5px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        margin: '0 auto 14px', color: 'var(--text4)',
+        margin: '0 auto 12px', color: 'var(--text-4)',
       }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
       </div>
-      <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>No posts yet</div>
-      <div style={{ fontSize: 13, color: 'var(--text4)', lineHeight: 1.6, maxWidth: 240, margin: '0 auto 20px' }}>
+      <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-2)', marginBottom: 6 }}>No posts yet</div>
+      <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6, maxWidth: 240, margin: '0 auto 18px' }}>
         {user.name.split(' ')[0]} hasn't posted anything. Follow them to get notified when they do.
       </div>
       <button
         onClick={() => onFollowChange(!following)}
         style={{
-          padding: '9px 24px', borderRadius: 10,
-          border: `1px solid ${following ? 'var(--blue)' : 'var(--border)'}`,
-          background: following ? 'var(--blue)' : 'transparent',
-          fontSize: 13, fontWeight: 700,
-          color: following ? '#fff' : 'var(--text)',
+          padding: '7px 22px', borderRadius: 4,
+          border: `0.5px solid ${following ? 'var(--blue-border)' : 'var(--border)'}`,
+          background: following ? 'var(--blue-bg)' : 'transparent',
+          fontSize: 12, fontWeight: 500,
+          color: following ? '#1d9bf0' : 'var(--text-2)',
           cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.15s',
         }}
       >

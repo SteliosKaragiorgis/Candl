@@ -1,17 +1,28 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CommentaryPost } from '../../types';
-import { useMobile } from '../../hooks/useMobile';
 import ShareDropdown from './ShareDropdown';
+
+function renderBody(text: string) {
+  return text.split(/(\$[A-Z]+|#\w+)/g).map((part, i) => {
+    if (/^\$[A-Z]+$/.test(part) || /^#\w+$/.test(part)) {
+      return <span key={i} style={{ color: '#1d9bf0', fontWeight: 500 }}>{part}</span>;
+    }
+    return part;
+  });
+}
 
 export default function CommentaryCard({ post }: { post: CommentaryPost }) {
   const navigate = useNavigate();
-  const isMobile = useMobile();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [animating, setAnimating] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [likeHov, setLikeHov] = useState(false);
+  const [commentHov, setCommentHov] = useState(false);
+  const [shareHov, setShareHov] = useState(false);
+  const [bookmarkHov, setBookmarkHov] = useState(false);
   const shareButtonRef = useRef<HTMLButtonElement>(null);
 
   function handleLike(e: React.MouseEvent) {
@@ -37,108 +48,133 @@ export default function CommentaryCard({ post }: { post: CommentaryPost }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: 'var(--surface)', border: '1px solid var(--border)',
-        borderLeft: '3px solid var(--gold)',
-        borderRadius: '14px', marginBottom: '16px', cursor: 'pointer',
-        transition: 'box-shadow 0.2s, transform 0.15s',
-        boxShadow: hovered ? '0 6px 24px rgba(0,0,0,0.1)' : '0 1px 4px rgba(0,0,0,0.06)',
-        transform: hovered ? 'translateY(-1px)' : 'none',
+        display: 'flex', gap: 12,
+        paddingTop: '14px', paddingBottom: '14px', paddingRight: '16px', paddingLeft: '12px',
+        borderLeft: '2px solid #2a2a2a',
+        borderBottom: '0.5px solid #1e1e1e',
+        background: hovered ? 'var(--surface)' : 'transparent',
+        cursor: 'pointer', transition: 'background 0.1s',
       }}
     >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '16px 16px 12px' }}>
-        <div
-          onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
-          style={{
-            width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
-            background: `linear-gradient(135deg, ${post.user.avatarGradient[0]}, ${post.user.avatarGradient[1]})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: '13px', fontWeight: 700,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.18)', cursor: 'pointer',
-          }}
-        >
-          {post.user.initials}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-            <span
-              onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
-              style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)', cursor: 'pointer' }}
-            >
-              {post.user.name}
-            </span>
+      {/* Avatar */}
+      <div
+        onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
+        style={{
+          width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+          background: 'var(--surface2)', border: '0.5px solid var(--border-emphasis)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'var(--text-3)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+        }}
+      >
+        {post.user.initials}
+      </div>
+
+      {/* Right column */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+          <span
+            onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
+            style={{ fontSize: 14, fontWeight: 600, color: '#e0e0e0', cursor: 'pointer' }}
+            onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
+            onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
+          >
+            {post.user.name}
+          </span>
+          {post.user.verified && (
             <span style={{
-              fontSize: '8px', fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px',
-              borderRadius: '20px', background: 'var(--gold-bg)', color: 'var(--gold)', border: '1px solid var(--gold-border)',
+              width: 16, height: 16, borderRadius: '50%', background: '#1d9bf0',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              marginLeft: 2, flexShrink: 0,
             }}>
-              COMMENTARY
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             </span>
-            {post.user.verified && (
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--blue)">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            )}
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--text4)', fontFamily: 'JetBrains Mono, monospace' }}>
-            @{post.user.username} · {post.createdAt}
-          </div>
-        </div>
-        {post.ticker && (
-          <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            background: 'var(--blue-bg)', border: '1px solid var(--blue-border)',
-            borderRadius: '8px', padding: '6px 10px', minWidth: '52px', flexShrink: 0,
+          )}
+          <span style={{ fontSize: 13, color: 'var(--text-3)' }}>@{post.user.username}</span>
+          <span style={{ fontSize: 13, color: 'var(--text-3)' }}>·</span>
+          <span style={{ fontSize: 13, color: 'var(--text-3)' }}>{post.createdAt}</span>
+          <span style={{
+            fontSize: 10, fontWeight: 500, color: '#555',
+            padding: '1px 6px', borderRadius: 4,
+            background: '#161616', border: '0.5px solid #222',
+            marginLeft: 6,
           }}>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '13px', fontWeight: 700, color: 'var(--blue)' }}>
-              {post.ticker}
+            COMMENTARY
+          </span>
+          {post.ticker && (
+            <span style={{
+              fontSize: 11, fontWeight: 500, color: '#1d9bf0',
+              padding: '1px 6px', borderRadius: 3,
+              background: 'var(--blue-bg)', border: '0.5px solid var(--blue-border)', marginLeft: 6,
+            }}>
+              ${post.ticker}
             </span>
+          )}
+        </div>
+
+        {/* News event tag */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          marginBottom: 10,
+          background: 'var(--amber-bg)', border: '0.5px solid var(--amber-border)',
+          borderRadius: 4, padding: '2px 8px',
+        }}>
+          <span style={{ fontSize: 11, fontWeight: 500, color: '#f59e0b' }}>
+            {post.newsEvent} · {post.newsDate}
+          </span>
+        </div>
+
+        {/* Body */}
+        <p style={{ fontSize: 14, color: '#c0c0c0', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+          {renderBody(post.body)}
+        </p>
+
+        {/* Hashtags */}
+        {post.hashtags.length > 0 && (
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 }}>
+            {post.hashtags.map(tag => (
+              <span key={tag} onClick={e => e.stopPropagation()} style={{ fontSize: 13, color: '#1d9bf0', cursor: 'pointer' }}>{tag}</span>
+            ))}
           </div>
         )}
-      </div>
 
-      {/* News event tag */}
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: '5px',
-        margin: '0 16px 12px',
-        background: 'var(--gold-bg)', border: '1px solid var(--gold-border)',
-        borderRadius: '6px', padding: '5px 10px',
-      }}>
-        <span style={{ fontSize: '10px', fontWeight: 700, color: '#92400e', letterSpacing: '0.3px' }}>
-          📰 {post.newsEvent} · {post.newsDate}
-        </span>
-      </div>
+        {/* Action bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 380, marginTop: 4 }}>
+          <button
+            onClick={handleComment}
+            onMouseEnter={() => setCommentHov(true)}
+            onMouseLeave={() => setCommentHov(false)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: commentHov ? 'var(--text-2)' : 'var(--text-3)', padding: 4, borderRadius: 4 }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span style={{ fontSize: 12 }}>{post.comments}</span>
+          </button>
 
-      {/* Body */}
-      <p style={{ padding: '0 16px 12px', fontSize: '14px', lineHeight: 1.65, color: 'var(--text)', margin: 0 }}>
-        {post.body}
-      </p>
-
-      {/* Hashtags */}
-      <div style={{ display: 'flex', gap: '5px', padding: '0 16px 10px', flexWrap: 'wrap' }}>
-        {post.hashtags.map(tag => (
-          <span key={tag} onClick={e => e.stopPropagation()} style={{ fontSize: '11px', color: 'var(--blue)', fontWeight: 500, cursor: 'pointer' }}>
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div style={{ padding: '0 16px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', paddingTop: '8px', borderTop: '1px solid var(--border2)' }}>
-          <button onClick={handleLike} style={{ display: 'flex', alignItems: 'center', gap: '3px', padding: '4px 7px', borderRadius: '6px', border: 'none', background: 'none', fontSize: '11px', color: liked ? 'var(--red)' : 'var(--text4)', cursor: 'pointer', transition: 'all 0.15s' }} onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}>
-            <svg className={animating ? 'like-pop' : ''} width="13" height="13" viewBox="0 0 24 24" fill={liked ? 'var(--red)' : 'none'} stroke={liked ? 'var(--red)' : 'currentColor'} strokeWidth="2" strokeLinecap="round">
+          <button
+            onClick={handleLike}
+            onMouseEnter={() => setLikeHov(true)}
+            onMouseLeave={() => setLikeHov(false)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: liked || likeHov ? '#f91880' : 'var(--text-3)', padding: 4, borderRadius: 4 }}
+          >
+            <svg className={animating ? 'like-pop' : ''} width="18" height="18" viewBox="0 0 24 24" fill={liked ? '#f91880' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
-            {likeCount.toLocaleString()}
+            <span style={{ fontSize: 12 }}>{likeCount.toLocaleString()}</span>
           </button>
-          <button onClick={handleComment} style={{ display: 'flex', alignItems: 'center', gap: '3px', padding: '4px 7px', borderRadius: '6px', border: 'none', background: 'none', fontSize: '11px', color: 'var(--text4)', cursor: 'pointer', transition: 'all 0.15s' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'; (e.currentTarget as HTMLElement).style.color = 'var(--text2)'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = 'var(--text4)'; }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            {post.comments}
-          </button>
+
           <div style={{ position: 'relative' }}>
-            <button ref={shareButtonRef} onClick={handleShare} style={{ display: 'flex', alignItems: 'center', gap: '3px', padding: '4px 7px', borderRadius: '6px', border: 'none', background: 'none', fontSize: '11px', color: shareOpen ? 'var(--blue)' : 'var(--text4)', cursor: 'pointer', transition: 'all 0.15s' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface2)'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-              {post.shares}
+            <button
+              ref={shareButtonRef}
+              onClick={handleShare}
+              onMouseEnter={() => setShareHov(true)}
+              onMouseLeave={() => setShareHov(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: shareOpen || shareHov ? 'var(--text-2)' : 'var(--text-3)', padding: 4, borderRadius: 4 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              <span style={{ fontSize: 12 }}>{post.shares}</span>
             </button>
             {shareOpen && (
               <ShareDropdown
@@ -149,6 +185,17 @@ export default function CommentaryCard({ post }: { post: CommentaryPost }) {
               />
             )}
           </div>
+
+          <button
+            onClick={e => e.stopPropagation()}
+            onMouseEnter={() => setBookmarkHov(true)}
+            onMouseLeave={() => setBookmarkHov(false)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: bookmarkHov ? 'var(--text-2)' : 'var(--text-3)', padding: 4, borderRadius: 4 }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>

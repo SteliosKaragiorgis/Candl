@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Topbar from './Topbar';
-import IconRail from './IconRail';
+
 import Sidebar from './Sidebar';
 import RightPanel from './RightPanel';
 import NotifPanel from './NotifPanel';
@@ -76,6 +76,7 @@ export default function AppShell() {
             setMobilePage(page);
             if (page === 'feed')      navigate('/');
             if (page === 'news')      navigate('/news');
+            if (page === 'propfirm')  navigate('/prop-firm');
             if (page === 'forum')     navigate('/forum');
             if (page === 'watchlist') navigate('/watchlist');
             if (page === 'portfolio') navigate('/portfolio');
@@ -99,25 +100,23 @@ export default function AppShell() {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'var(--rail-w) var(--sidebar-w) 1fr var(--right-w)',
+      gridTemplateColumns: 'var(--sidebar-w) 1fr var(--right-w)',
       gridTemplateRows: 'var(--topbar-h) 1fr',
       gridTemplateAreas: `
-        "topbar topbar topbar topbar"
-        "rail   sidebar feed  right"
+        "topbar topbar topbar"
+        "sidebar feed  right"
       `,
       height: '100vh',
       overflow: 'hidden',
     }}>
       <Topbar onNotifClick={() => setNotifOpen(o => !o)} notifOpen={notifOpen} />
-      <IconRail />
       <Sidebar />
 
       {/* Feed area */}
       <div style={{
         gridArea: 'feed',
         overflowY: 'auto',
-        background: 'var(--bg)',
-        padding: '28px 40px',
+        background: 'var(--x-bg)',
       }} className="scrollbar-hide">
         <Outlet />
       </div>

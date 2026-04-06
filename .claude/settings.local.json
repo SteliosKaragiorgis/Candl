@@ -24,7 +24,16 @@
       "Bash(cmd /c \"taskkill /PID 10516 /F\")",
       "Bash(powershell -Command \"Stop-Process -Id 16980 -Force; Stop-Process -Id 10516 -Force\")",
       "Bash(netstat -ano)",
-      "Bash(findstr :5173)"
+      "Bash(findstr :5173)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(ls \"c:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow\\\\node_modules\\\\lightweight-charts\\\\dist 2>&1 && grep CandlestickSeries\")",
+      "Bash(LineStyle)",
+      "Bash('addCandlestick c:UserssteliDocumentsTradeFlownode_moduleslightweight-chartsdisttypings.d.ts')",
+      "Bash(grep -r \"search\\\\|Search\" /c/Users/steli/Documents/TradeFlow/src --include=*.ts --include=*.tsx)"
     ]
   }
 }
