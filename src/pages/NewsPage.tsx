@@ -341,7 +341,7 @@ export default function NewsPage() {
                 onClick={() => setActiveFilter(id)}
                 style={{
                   padding: '5px 13px', borderRadius: 4, border: '1px solid',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                  fontSize: 12, cursor: 'pointer', transition: 'all 0.15s',
                   fontFamily: 'Inter, sans-serif',
                   background: active ? (isLight ? '#f0fdf4' : '#161616') : 'transparent',
                   color:      active ? (isLight ? '#16a34a' : '#e8e8e8') : (isLight ? '#666666' : '#555555'),

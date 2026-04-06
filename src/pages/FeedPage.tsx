@@ -286,7 +286,7 @@ export default function FeedPage() {
                   borderRadius: 4, border: `0.5px solid ${activeComposeType === id ? (isLight ? '#bbf7d0' : '#1d9bf0') : 'var(--border)'}`,
                   color: activeComposeType === id ? (isLight ? '#16a34a' : '#1d9bf0') : 'var(--text-3)',
                   background: activeComposeType === id ? (isLight ? '#f0fdf4' : 'transparent') : 'transparent',
-                  background: 'transparent', cursor: 'pointer', transition: 'all 0.1s',
+                  cursor: 'pointer', transition: 'all 0.1s',
                 }}
               >
                 {label}
