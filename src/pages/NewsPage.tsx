@@ -9,6 +9,7 @@ import { useAlphaVantageNews } from '../hooks/useAlphaVantageNews'
 import { useMarketData } from '../context/MarketDataContext'
 import type { Quote } from '../context/MarketDataContext'
 import { useCryptoQuotes } from '../hooks/useCryptoQuotes'
+import { useTheme } from '../context/ThemeContext'
 import type { ArticleNavState } from './NewsArticlePage'
 
 type FilterTab = 'all' | 'earnings' | 'macro' | 'regulatory' | 'analyst' | 'bullish' | 'bearish' | 'ma' | 'crypto' | 'commodity' | 'watchlist'
@@ -222,6 +223,8 @@ export default function NewsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all')
   const isMobile = useMobile()
   const navigate = useNavigate()
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
   const { items: finnhubItems, loading } = useNewsArticles()
   const avItems = useAlphaVantageNews()
 
@@ -317,11 +320,11 @@ export default function NewsPage() {
             </span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            <select style={{ fontSize: 11, fontWeight: 600, color: '#888888', background: '#161616', border: '1px solid #1e1e1e', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
+            <select style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
               <option>My wall</option>
               <option>All sources</option>
             </select>
-            <select style={{ fontSize: 11, fontWeight: 600, color: '#888888', background: '#161616', border: '1px solid #1e1e1e', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
+            <select style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
               <option>Sort: Latest</option>
               <option>Sort: Relevance</option>
             </select>
@@ -340,9 +343,10 @@ export default function NewsPage() {
                   padding: '5px 13px', borderRadius: 4, border: '1px solid',
                   fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                   fontFamily: 'Inter, sans-serif',
-                  background: active ? '#161616' : 'transparent',
-                  color:      active ? '#e8e8e8' : '#555555',
-                  borderColor: active ? '#2a2a2a' : '#1e1e1e',
+                  background: active ? (isLight ? '#f0fdf4' : '#161616') : 'transparent',
+                  color:      active ? (isLight ? '#16a34a' : '#e8e8e8') : (isLight ? '#666666' : '#555555'),
+                  borderColor: active ? (isLight ? '#bbf7d0' : '#2a2a2a') : (isLight ? '#e2e2e2' : '#1e1e1e'),
+                  fontWeight: active ? 500 : 400,
                 }}
               >
                 {label}

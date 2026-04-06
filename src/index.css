@@ -84,6 +84,74 @@
 }
 
 /* ──────────────────────────────────────────────────────────
+   Light mode overrides
+   ────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg:        #ffffff;
+  --surface:   #f9fafb;
+  --surface2:  #f3f4f6;
+  --surface-2: #f3f4f6;
+  --surface3:  #f9fafb;
+  --surface-3: #f9fafb;
+  --border:          #e5e7eb;
+  --border-subtle:   #f3f4f6;
+  --border-emphasis: #d1d5db;
+  --border-2:  #e5e7eb;
+  --border2:   #e5e7eb;
+  --text:   #111111;
+  --text-2: #374151;
+  --text-3: #6b7280;
+  --text-4: #9ca3af;
+  --text2:  #374151;
+  --text3:  #6b7280;
+  --text4:  #9ca3af;
+  --green:        #16a34a;
+  --green-bg:     #f0fdf4;
+  --green-border: #bbf7d0;
+  --blue:         #2563eb;
+  --blue-dim:     rgba(37,99,235,0.06);
+  --blue-bg:      #eff6ff;
+  --blue-border:  #bfdbfe;
+  --red:          #dc2626;
+  --red-bg:       #fef2f2;
+  --red-border:   #fecaca;
+  --amber:        #d97706;
+  --amber-bg:     #fffbeb;
+  --amber-border: #fde68a;
+  --gold:         #d97706;
+  --gold-bg:      #fffbeb;
+  --gold-border:  #fde68a;
+  --purple:        #7c3aed;
+  --purple-bg:     #f5f3ff;
+  --purple-border: #ddd6fe;
+  --x-bg:      #ffffff;
+  --x-surface: #f9fafb;
+  --x-border:  #e5e7eb;
+  --x-text:    #111111;
+  --x-muted:   #6b7280;
+  --x-blue:    #2563eb;
+  --x-green:   #16a34a;
+  --x-red:     #dc2626;
+  --x-amber:   #d97706;
+  --x-hover:   #f3f4f6;
+  --x-like:    #ec4899;
+}
+
+/* Light mode CSS class overrides */
+[data-theme="light"] .feed-tab-active {
+  color: #16a34a !important;
+  border-bottom-color: #16a34a !important;
+}
+[data-theme="light"] .feed-tab:hover { background: #f3f4f6; }
+[data-theme="light"] .nav-item:hover { background: #f3f4f6; }
+[data-theme="light"] .watchlist-row:hover { background: #f3f4f6; }
+[data-theme="light"] .lb-row:hover { background: #f3f4f6; }
+[data-theme="light"] .shimmer {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 800px 100%;
+}
+
+/* ──────────────────────────────────────────────────────────
    Reset
    ────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

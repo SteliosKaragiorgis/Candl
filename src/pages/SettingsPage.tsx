@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { currentUser } from '../data/demo';
 import { useMobile } from '../hooks/useMobile';
 import { useMT5Accounts, connectMT5Account } from '../hooks/useMT5Accounts';
@@ -12,7 +13,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
       onClick={onChange}
       style={{
         width: 36, height: 20, borderRadius: 10, flexShrink: 0,
-        background: on ? '#1d9bf0' : 'var(--border-emphasis)',
+        background: on ? '#16a34a' : 'var(--border-emphasis)',
         position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
       }}
     >
@@ -93,7 +94,7 @@ function Btn({ children, onClick, variant = 'default' }: {
     padding: '7px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600,
     fontFamily: 'Inter, sans-serif', cursor: 'pointer', transition: 'all 0.15s', flexShrink: 0,
     ...(variant === 'primary'
-      ? { background: '#0d1a27', color: '#1d9bf0', border: '0.5px solid #1a3a5c' }
+      ? { background: '#16a34a', color: '#ffffff', border: 'none' }
       : variant === 'danger'
       ? { background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.4)' }
       : { background: 'var(--surface2)', color: 'var(--text)', border: '0.5px solid var(--border)' }),
@@ -115,8 +116,8 @@ const KNOWN_SERVERS = [
 
 const STATUS_CFG = {
   connected:  { color: '#22c55e',  bg: '#0d1f12',  border: '#1a3a22',  dot: '#22c55e',  label: 'Connected' },
-  connecting: { color: '#1d9bf0',   bg: '#0d1a27',   border: '#1a3a5c',   dot: '#1d9bf0',   label: 'Connecting…' },
-  syncing:    { color: '#1d9bf0',   bg: '#0d1a27',   border: '#1a3a5c',   dot: '#1d9bf0',   label: 'Syncing…' },
+  connecting: { color: '#f59e0b',   bg: 'var(--amber-bg)',   border: 'var(--amber-border)',   dot: '#f59e0b',   label: 'Connecting…' },
+  syncing:    { color: '#f59e0b',   bg: 'var(--amber-bg)',   border: 'var(--amber-border)',   dot: '#f59e0b',   label: 'Syncing…' },
   error:      { color: '#ef4444',    bg: '#1f0d0d',    border: '#3a1a1a',    dot: '#ef4444',    label: 'Error' },
 };
 
@@ -576,15 +577,15 @@ function ProfileTab() {
         {/* Stat boxes */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
           {[
-            { val: '+31%', lbl: 'YTD return' },
-            { val: '68%',  lbl: 'Win rate' },
-            { val: '2.4',  lbl: 'Avg R:R' },
-          ].map(({ val, lbl }) => (
+            { val: '+31%', lbl: 'YTD return', positive: true },
+            { val: '68%',  lbl: 'Win rate',   positive: true },
+            { val: '2.4',  lbl: 'Avg R:R',    positive: false },
+          ].map(({ val, lbl, positive }) => (
             <div key={lbl} style={{
-              flex: 1, background: '#0d1a27', border: '0.5px solid #1a3a5c',
+              flex: 1, background: 'var(--surface)', border: '0.5px solid var(--border)',
               borderRadius: 10, padding: '12px 14px', textAlign: 'center',
             }}>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: '#1d9bf0', lineHeight: 1 }}>{val}</div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: positive ? 'var(--green)' : 'var(--text)', lineHeight: 1 }}>{val}</div>
               <div style={{ fontSize: 10, color: 'var(--text-4)', marginTop: 4, letterSpacing: '0.5px' }}>{lbl}</div>
             </div>
           ))}
@@ -738,11 +739,11 @@ function BillingTab() {
         {/* Plan badge */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: '#0d1a27', border: '0.5px solid #1a3a5c',
+          background: 'var(--green-bg)', border: '0.5px solid var(--green-border)',
           borderRadius: 20, padding: '4px 12px', marginBottom: 14,
         }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#1d9bf0' }} />
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#1d9bf0' }}>Pro Plan · active</span>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)' }} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--green)' }}>Pro Plan · active</span>
         </div>
 
         <CardTitle>Current plan</CardTitle>
@@ -851,6 +852,8 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 export default function SettingsPage() {
   const [tab, setTab] = useState<Tab>('profile');
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const isMobile = useMobile();
 
   const sectionLabel: Record<Tab, string> = {
@@ -883,10 +886,10 @@ export default function SettingsPage() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '7px 14px', borderRadius: 20, flexShrink: 0,
-                background: tab === id ? '#0d1a27' : 'var(--surface)',
-                color: tab === id ? '#1d9bf0' : 'var(--text-3)',
+                background: tab === id ? (isLight ? '#f0fdf4' : '#0d1a27') : 'var(--surface)',
+                color: tab === id ? '#16a34a' : 'var(--text-3)',
                 fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                border: tab === id ? 'none' : '0.5px solid var(--border)',
+                border: tab === id ? (isLight ? '0.5px solid #bbf7d0' : 'none') : '0.5px solid var(--border)',
               } as React.CSSProperties}
             >
               {icon}
@@ -915,9 +918,9 @@ export default function SettingsPage() {
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                 padding: '9px 20px', border: 'none',
-                borderLeft: `2px solid ${tab === id ? '#1d9bf0' : 'transparent'}`,
-                background: tab === id ? 'rgba(0,71,255,0.05)' : 'transparent',
-                color: tab === id ? '#1d9bf0' : 'var(--text-3)',
+                borderLeft: `2px solid ${tab === id ? '#16a34a' : 'transparent'}`,
+                background: tab === id ? (isLight ? '#f0fdf4' : 'rgba(22,163,74,0.06)') : 'transparent',
+                color: tab === id ? '#16a34a' : 'var(--text-3)',
                 fontSize: 13, cursor: 'pointer', textAlign: 'left',
                 transition: 'all 0.15s', fontFamily: 'Inter, sans-serif',
               } as React.CSSProperties}

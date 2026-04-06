@@ -4,6 +4,7 @@ import { privateUser, ryanC } from '../../data/demo';
 import { useWatchlist } from '../../context/WatchlistContext';
 import ComposerModal from '../feed/ComposerModal';
 import { useChallenges } from '../../hooks/useChallenge';
+import { useTheme } from '../../context/ThemeContext';
 
 const navItems = [
   { label: 'Feed', path: '/', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
@@ -36,6 +37,8 @@ export default function Sidebar() {
   const { tickers } = useWatchlist();
   const [composerOpen, setComposerOpen] = useState(false);
   const challenges = useChallenges();
+  const { theme, toggle } = useTheme();
+  const isLight = theme === 'light';
   const activeChallengesCount = challenges.filter(
     c => c.status === 'active' || c.status === 'near_limit',
   ).length;
@@ -57,29 +60,37 @@ export default function Sidebar() {
           const badge = label === 'Prop Firm' && activeChallengesCount > 0
             ? activeChallengesCount
             : null;
+          const activeColor  = isLight ? '#16a34a' : '#f0f0f0';
+          const inactiveColor = isLight ? '#374151' : '#c8c8c8';
+          const activeBg     = isLight ? '#f0fdf4' : 'transparent';
+          const hoverColor   = isLight ? '#111111' : '#e0e0e0';
           return (
-            <button
-              key={label}
-              onClick={() => navigate(path)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 16,
-                padding: '10px 12px', borderRadius: 4,
-                fontSize: 15, fontWeight: active ? 600 : 500,
-                color: active ? '#f0f0f0' : '#c8c8c8',
-                fontFamily: 'Inter, sans-serif',
-                background: 'transparent', border: 'none', width: '100%',
-                textAlign: 'left', cursor: 'pointer', transition: 'background 0.1s, color 0.1s',
-                justifyContent: 'space-between',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'var(--surface)';
-                e.currentTarget.style.color = '#e0e0e0';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = active ? '#f0f0f0' : '#c8c8c8';
-              }}
-            >
+            <div key={label} style={{ position: 'relative' }}>
+              {active && isLight && (
+                <div style={{ position: 'absolute', left: 0, top: 4, bottom: 4, width: 2, background: '#16a34a', borderRadius: '0 2px 2px 0' }} />
+              )}
+              <button
+                onClick={() => navigate(path)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 16,
+                  padding: '10px 12px', borderRadius: 4,
+                  fontSize: 15, fontWeight: active ? 600 : 500,
+                  color: active ? activeColor : inactiveColor,
+                  fontFamily: 'Inter, sans-serif',
+                  background: active ? activeBg : 'transparent',
+                  border: 'none', width: '100%',
+                  textAlign: 'left', cursor: 'pointer', transition: 'background 0.1s, color 0.1s',
+                  justifyContent: 'space-between',
+                }}
+                onMouseEnter={e => {
+                  if (!active) e.currentTarget.style.background = 'var(--surface2)';
+                  e.currentTarget.style.color = hoverColor;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = active ? activeBg : 'transparent';
+                  e.currentTarget.style.color = active ? activeColor : inactiveColor;
+                }}
+              >
               <span style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 {icon}
                 {label}
@@ -94,7 +105,8 @@ export default function Sidebar() {
                   {badge}
                 </span>
               )}
-            </button>
+              </button>
+            </div>
           );
         })}
       </div>
@@ -103,14 +115,17 @@ export default function Sidebar() {
       <button
         onClick={() => setComposerOpen(true)}
         style={{
-          width: '100%', background: 'var(--green-bg)', color: '#22c55e',
+          width: '100%',
+          background: isLight ? '#16a34a' : 'var(--green-bg)',
+          color: isLight ? '#ffffff' : '#22c55e',
           borderRadius: 6, padding: '10px 14px',
-          fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif',
-          border: '0.5px solid var(--green-border)', cursor: 'pointer', marginBottom: 16,
-          transition: 'opacity 0.12s',
+          fontSize: 13, fontWeight: 600, fontFamily: 'Inter, sans-serif',
+          border: isLight ? 'none' : '0.5px solid var(--green-border)',
+          cursor: 'pointer', marginBottom: 16,
+          transition: 'background 0.12s',
         }}
-        onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-        onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+        onMouseEnter={e => (e.currentTarget.style.background = isLight ? '#15803d' : 'var(--green-bg)')}
+        onMouseLeave={e => (e.currentTarget.style.background = isLight ? '#16a34a' : 'var(--green-bg)')}
       >
         + POST TRADE
       </button>
@@ -190,7 +205,7 @@ export default function Sidebar() {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 500, color: '#c8c8c8' }}>{u.name}</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-2)' }}>{u.name}</span>
                 {u.verified && (
                   <span style={{
                     width: 12, height: 12, borderRadius: '50%', background: '#1d9bf0',
@@ -206,6 +221,27 @@ export default function Sidebar() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Theme toggle */}
+      <div style={{ marginTop: 'auto', paddingTop: 12, borderTop: '0.5px solid var(--border)' }}>
+        <button
+          onClick={toggle}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+            padding: '8px 4px', background: 'transparent', border: 'none',
+            cursor: 'pointer', borderRadius: 4, color: 'var(--text-3)',
+            fontSize: 12, fontFamily: 'Inter, sans-serif', transition: 'background 0.1s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+        >
+          {isLight
+            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          }
+          {isLight ? 'Dark mode' : 'Light mode'}
+        </button>
       </div>
 
       <ComposerModal open={composerOpen} onClose={() => setComposerOpen(false)} />
