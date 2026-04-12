@@ -34,12 +34,42 @@ type HookReturn = {
   remindLater: () => void
 }
 
+const METAAPI_PENDING_KEY = 'candl_metaapi_pending';
+
+function loadMetaApiPending(): PendingTrade | null {
+  try {
+    const raw = localStorage.getItem(METAAPI_PENDING_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as PendingTrade;
+  } catch { return null; }
+}
+
 export function usePendingTrade(): HookReturn {
-  const [pendingTrade, setPendingTrade] = useState<PendingTrade>(DEMO_TRADE);
+  // Initialise from MetaAPI pending if available, otherwise demo
+  const [pendingTrade, setPendingTrade] = useState<PendingTrade>(() => loadMetaApiPending() ?? DEMO_TRADE);
   const [isLoading, setIsLoading] = useState(false);
   const remindTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dismissed = useRef(false);
   const lastProcessedTicket = useRef<number | null>(null);
+
+  function applyTrade(trade: PendingTrade) {
+    if (trade.ticket !== lastProcessedTicket.current) {
+      lastProcessedTicket.current = trade.ticket;
+      applyTradeToChallenge(trade);
+    }
+    setPendingTrade(trade);
+    dismissed.current = false;
+  }
+
+  useEffect(() => {
+    // Listen for trades detected via MetaAPI polling
+    function onMetaApiTrade() {
+      const trade = loadMetaApiPending();
+      if (trade) applyTrade(trade);
+    }
+    window.addEventListener('candl-metaapi-trade', onMetaApiTrade);
+    return () => window.removeEventListener('candl-metaapi-trade', onMetaApiTrade);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -51,12 +81,7 @@ export function usePendingTrade(): HookReturn {
         if (!res.ok) return;
         const data = await res.json() as { pending: boolean; trade?: PendingTrade };
         if (mounted && data.pending && data.trade) {
-          setPendingTrade(data.trade);
-          // Update challenge stats on each new unique trade
-          if (data.trade.ticket !== lastProcessedTicket.current) {
-            lastProcessedTicket.current = data.trade.ticket;
-            applyTradeToChallenge(data.trade);
-          }
+          applyTrade(data.trade);
         }
       } catch {
         // API not available (local dev without vercel dev) — keep demo trade
@@ -75,6 +100,7 @@ export function usePendingTrade(): HookReturn {
 
   function dismiss() {
     dismissed.current = true;
+    localStorage.removeItem(METAAPI_PENDING_KEY);
     fetch('/api/mt5/dismiss', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { DEMO_LEADERBOARD, DEMO_TRENDING, SUGGESTED_USERS, alexKim, saraR } from '../../data/demo';
 import { useTickerData } from '../../context/TickerDataContext';
 import { useMarketData } from '../../context/MarketDataContext';
 import NewsCountdown from './NewsCountdown';
+import { useLeaderboard, useFirmStats, useTips } from '../../hooks/usePropFirmCommunity';
+import { firmBadge } from '../propfirm/MilestonePost';
+import TipCard from '../propfirm/TipCard';
+import { useNewsArticles } from '../../hooks/useNewsArticles';
+import { useAlphaVantageNews } from '../../hooks/useAlphaVantageNews';
+import { useCryptoQuotes } from '../../hooks/useCryptoQuotes';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: '18px' }}>
       <div style={{
         fontSize: 10, fontWeight: 500, letterSpacing: '0.06em',
-        color: '#555555', textTransform: 'uppercase',
+        color: 'var(--text-muted)', textTransform: 'uppercase',
         marginBottom: '8px',
       }}>
         {title}
@@ -126,7 +132,7 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
 
       {/* KEY STATS */}
       <div style={{ marginBottom: 18 }}>
-        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase', marginBottom: 8 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
           Key Stats
         </div>
         {stats.map(s => (
@@ -142,7 +148,7 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
 
       {/* CANDL SENTIMENT */}
       <div style={{ marginBottom: 18 }}>
-        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase', marginBottom: 8 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
           Candl Sentiment
         </div>
         {[
@@ -168,7 +174,7 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
 
       {/* RELATED TICKERS */}
       <div style={{ marginBottom: 18 }}>
-        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase', marginBottom: 8 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
           Related Tickers
         </div>
         {related.map(r => (
@@ -193,7 +199,7 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
 
       {/* TOP TRADERS */}
       <div style={{ marginBottom: 18 }}>
-        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase', marginBottom: 8 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
           Top {ticker} Traders
         </div>
         {traders.map(t => (
@@ -214,7 +220,7 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 500, color: '#c8c8c8' }}>{t.user.name}</div>
-              <div style={{ fontSize: 10, color: '#555555' }}>{t.posts} {ticker} posts · {t.style}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t.posts} {ticker} posts · {t.style}</div>
             </div>
             <div style={{ fontSize: 11, fontWeight: 500, color: '#666666', fontVariantNumeric: 'tabular-nums' }}>
               {t.user.followersCount >= 1000 ? `${(t.user.followersCount / 1000).toFixed(1)}K` : t.user.followersCount}
@@ -241,6 +247,359 @@ function TickerRightPanel({ ticker }: { ticker: string }) {
   );
 }
 
+function PropFirmRightPanel() {
+  const navigate = useNavigate();
+  const traders = useLeaderboard('month', 'consistency').slice(0, 4);
+  const stats = useFirmStats();
+  const tips = useTips('all').slice(0, 3);
+
+  return (
+    <div style={{
+      gridArea: 'right',
+      background: 'var(--bg)',
+      borderLeft: '0.5px solid var(--border)',
+      padding: '14px',
+      overflowY: 'auto',
+    }} className="scrollbar-hide">
+
+      {/* ── This month — most consistent ── */}
+      <div style={{ marginBottom: 0 }}>
+        <div style={{
+          fontSize: 10, fontWeight: 600, letterSpacing: '0.07em',
+          textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 10,
+        }}>
+          This month — most consistent
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {traders.map((t, i) => (
+            <div key={t.id} style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              cursor: 'pointer', padding: '4px 0', marginBottom: 8,
+            }}>
+              <span style={{
+                fontSize: 11, color: 'var(--text-hint)',
+                fontVariantNumeric: 'tabular-nums', width: 14, flexShrink: 0,
+              }}>
+                {i + 1}
+              </span>
+              <div style={{
+                width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                background: 'var(--bg-surface)', border: '0.5px solid var(--border)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 9, fontWeight: 600, color: 'var(--text-muted)',
+              }}>
+                {t.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: 12, fontWeight: 500, color: 'var(--text-primary)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {t.name}
+                </div>
+              </div>
+              {firmBadge(t.firm)}
+              <span style={{
+                fontSize: 11, fontWeight: 600, color: 'var(--green)',
+                fontVariantNumeric: 'tabular-nums', flexShrink: 0, marginLeft: 'auto',
+              }}>
+                +{t.pnlPercent.toFixed(1)}%
+              </span>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => navigate('/prop-firm?tab=leaderboard')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            fontSize: 11, color: 'var(--green)', fontFamily: 'inherit',
+            marginTop: 6, display: 'block',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.75'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
+        >
+          See full leaderboard →
+        </button>
+      </div>
+
+      {/* ── Divider ── */}
+      <div style={{ height: '0.5px', background: 'var(--border-soft)', margin: '14px 0' }} />
+
+      {/* ── Community pass rates ── */}
+      <div>
+        <div style={{
+          fontSize: 10, fontWeight: 600, letterSpacing: '0.07em',
+          textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 10,
+        }}>
+          Community pass rates
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {stats.map((s, i) => (
+            <div key={i}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                <span style={{ fontSize: 12, color: 'var(--text-primary)' }}>
+                  {s.firm} ${(s.accountSize / 1000).toFixed(0)}k
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--green)', fontVariantNumeric: 'tabular-nums' }}>
+                  {s.passRate}%
+                </span>
+              </div>
+              <div style={{ height: 4, background: 'var(--bg-surface)', borderRadius: 2, overflow: 'hidden', marginBottom: 3 }}>
+                <div style={{ height: '100%', width: `${s.passRate}%`, background: 'var(--green)', borderRadius: 2 }} />
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+                {s.attempts.toLocaleString()} attempts · avg {s.avgDays} days
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Divider ── */}
+      <div style={{ height: '0.5px', background: 'var(--border-soft)', margin: '14px 0' }} />
+
+      {/* ── Top tips this week ── */}
+      <div>
+        <div style={{
+          fontSize: 10, fontWeight: 600, letterSpacing: '0.07em',
+          textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 10,
+        }}>
+          Top tips this week
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {tips.map(t => (
+            <TipCard key={t.id} tip={t} compact />
+          ))}
+        </div>
+        <button
+          onClick={() => navigate('/prop-firm?tab=tips')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            fontSize: 11, color: 'var(--text-muted)', fontFamily: 'inherit',
+            marginTop: 6, display: 'block',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
+        >
+          See all tips →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Static data shared with NewsPage ─────────────────────────────────────────
+
+const UPCOMING_EVENTS_DATA: { name: string; impact: 'high' | 'medium' | 'low'; time: string }[] = [
+  { name: 'FOMC Minutes',     impact: 'high',   time: 'Today, 2:00 PM ET' },
+  { name: 'CPI Data Release', impact: 'high',   time: 'Tomorrow, 8:30 AM ET' },
+  { name: 'NVDA Earnings',    impact: 'medium', time: 'May 22, After Close' },
+  { name: 'PCE Price Index',  impact: 'medium', time: 'May 23, 8:30 AM ET' },
+  { name: 'Apple WWDC',       impact: 'low',    time: 'Jun 9, 10:00 AM PT' },
+]
+
+const TICKER_NAMES_MAP: Record<string, string> = {
+  NVDA: 'NVIDIA Corp',    TSLA: 'Tesla Inc',      AAPL: 'Apple Inc',
+  MSFT: 'Microsoft',      AMZN: 'Amazon.com',     GOOGL: 'Alphabet',
+  META: 'Meta Platforms', COIN: 'Coinbase',        AMD: 'Adv. Micro Dev.',
+  MSTR: 'MicroStrategy',  SPY: 'S&P 500 ETF',     QQQ: 'Nasdaq ETF',
+  GLD: 'Gold ETF',        USO: 'Oil ETF',          BTC: 'Bitcoin',
+  ETH: 'Ethereum',        SOL: 'Solana',           XRP: 'XRP',
+  DOGE: 'Dogecoin',       TLT: 'Bond ETF',         COPX: 'Copper ETF',
+}
+
+function NewsRightPanel() {
+  const { items: finnhubItems } = useNewsArticles();
+  const avItems = useAlphaVantageNews();
+  const { quotes: stockQuotes } = useMarketData();
+  const cryptoQuotes = useCryptoQuotes();
+
+  const quotes = useMemo(
+    () => ({ ...stockQuotes, ...cryptoQuotes }),
+    [stockQuotes, cryptoQuotes],
+  );
+
+  const allItems = useMemo(() => {
+    const seen = new Set<number>();
+    const merged = [];
+    for (const item of [...finnhubItems, ...avItems]) {
+      if (!seen.has(item.id)) { seen.add(item.id); merged.push(item); }
+    }
+    return merged;
+  }, [finnhubItems, avItems]);
+
+  // Trending tickers — count mentions across recent articles
+  const trendingTickers = useMemo(() => {
+    const counts = new Map<string, { count: number; change: number }>();
+    for (const item of allItems.slice(0, 60)) {
+      const syms = item.related
+        ? item.related.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : [];
+      for (const sym of syms) {
+        const ex = counts.get(sym);
+        if (ex) ex.count++;
+        else counts.set(sym, { count: 1, change: quotes[sym]?.changePct ?? 0 });
+      }
+    }
+    const result = Array.from(counts.entries())
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 5)
+      .map(([symbol, { count, change }]) => ({
+        symbol, stories: count,
+        change: quotes[symbol]?.changePct ?? change,
+      }));
+    return result.length >= 3 ? result : [
+      { symbol: 'NVDA', stories: 24, change: +4.21 },
+      { symbol: 'TSLA', stories: 18, change: -2.14 },
+      { symbol: 'AAPL', stories: 15, change: +0.87 },
+      { symbol: 'META', stories: 11, change: +1.54 },
+      { symbol: 'BTC',  stories:  9, change: +3.12 },
+    ];
+  }, [allItems, quotes]);
+
+  // Top movers from live quotes
+  const topMovers = useMemo(() => {
+    const entries = Object.entries(quotes)
+      .filter(([, q]) => q.price > 0 && Math.abs(q.changePct) > 0)
+      .sort((a, b) => Math.abs(b[1].changePct) - Math.abs(a[1].changePct))
+      .slice(0, 5)
+      .map(([symbol, q], i) => ({
+        rank: i + 1, symbol,
+        name: TICKER_NAMES_MAP[symbol] ?? symbol,
+        change: q.changePct,
+      }));
+    return entries.length >= 3 ? entries : [
+      { rank: 1, symbol: 'NVDA', name: 'NVIDIA Corp',  change: +4.21 },
+      { rank: 2, symbol: 'TSLA', name: 'Tesla Inc',    change: -2.14 },
+      { rank: 3, symbol: 'GME',  name: 'GameStop',     change: +8.93 },
+      { rank: 4, symbol: 'AAPL', name: 'Apple Inc',    change: +0.87 },
+      { rank: 5, symbol: 'COIN', name: 'Coinbase',     change: -3.41 },
+    ];
+  }, [quotes]);
+
+  const sectionLabel: React.CSSProperties = {
+    fontSize: 10, fontWeight: 600, color: 'var(--text-4)',
+    letterSpacing: '0.07em', textTransform: 'uppercase',
+    marginBottom: 10,
+  };
+  const card: React.CSSProperties = {
+    background: 'var(--bg-card)',
+    border: '0.5px solid var(--border)',
+    borderRadius: 8, padding: 12, marginBottom: 10,
+  };
+
+  return (
+    <div style={{
+      gridArea: 'right',
+      background: 'var(--bg)',
+      borderLeft: '0.5px solid var(--border)',
+      padding: '14px',
+      overflowY: 'auto',
+    }} className="scrollbar-hide">
+
+      {/* Trending in your watchlist */}
+      <div style={card}>
+        <div style={sectionLabel}>Trending in your watchlist</div>
+        {trendingTickers.map((t, i) => (
+          <div key={t.symbol} style={{
+            display: 'flex', alignItems: 'center',
+            padding: '6px 0',
+            borderBottom: i < trendingTickers.length - 1
+              ? '0.5px solid var(--border-soft)' : 'none',
+            cursor: 'pointer',
+          }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', width: 44 }}>
+              {t.symbol}
+            </span>
+            <span style={{ fontSize: 11, color: 'var(--text-4)', flex: 1 }}>
+              {t.stories} {t.stories === 1 ? 'story' : 'stories'}
+            </span>
+            <span style={{
+              fontSize: 11, fontWeight: 500,
+              color: t.change >= 0 ? 'var(--green)' : 'var(--red)',
+            }}>
+              {t.change >= 0 ? '+' : ''}{t.change.toFixed(2)}%
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Today's market movers */}
+      <div style={card}>
+        <div style={sectionLabel}>Today's market movers</div>
+        {topMovers.map((m, i) => (
+          <div key={m.symbol} style={{
+            display: 'flex', alignItems: 'center',
+            padding: '5px 0',
+            borderBottom: i < topMovers.length - 1
+              ? '0.5px solid var(--border-soft)' : 'none',
+            cursor: 'pointer',
+          }}>
+            <span style={{ fontSize: 10, color: 'var(--text-4)', width: 14 }}>{m.rank}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', width: 42 }}>
+              {m.symbol}
+            </span>
+            <span style={{
+              fontSize: 11, color: 'var(--text-3)', flex: 1,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {m.name}
+            </span>
+            <span style={{
+              fontSize: 11, fontWeight: 600,
+              color: m.change >= 0 ? 'var(--green)' : 'var(--red)',
+            }}>
+              {m.change >= 0 ? '+' : ''}{m.change.toFixed(2)}%
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Upcoming events */}
+      <div style={card}>
+        <div style={sectionLabel}>Upcoming events</div>
+        {UPCOMING_EVENTS_DATA.map((ev, i) => (
+          <div key={ev.name} style={{
+            padding: '6px 0',
+            borderBottom: i < UPCOMING_EVENTS_DATA.length - 1
+              ? '0.5px solid var(--border-soft)' : 'none',
+            cursor: 'pointer',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>
+                {ev.name}
+              </span>
+              <span style={{
+                fontSize: 9, fontWeight: 700,
+                padding: '1px 5px', borderRadius: 3,
+                background: ev.impact === 'high'
+                  ? 'var(--red-bg)'
+                  : ev.impact === 'medium'
+                    ? 'var(--amber-bg)'
+                    : 'var(--bg-surface)',
+                color: ev.impact === 'high'
+                  ? 'var(--red)'
+                  : ev.impact === 'medium'
+                    ? 'var(--amber)'
+                    : 'var(--text-3)',
+                border: `0.5px solid ${ev.impact === 'high'
+                  ? 'var(--red-border)'
+                  : ev.impact === 'medium'
+                    ? 'var(--amber-border)'
+                    : 'var(--border)'}`,
+              }}>
+                {ev.impact.toUpperCase()}
+              </span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-4)' }}>{ev.time}</div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  );
+}
+
 export default function RightPanel() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -252,6 +611,14 @@ export default function RightPanel() {
   const tickerMatch = location.pathname.match(/^\/ticker\/([A-Z]+)$/i);
   if (tickerMatch) {
     return <TickerRightPanel ticker={tickerMatch[1].toUpperCase()} />;
+  }
+
+  if (location.pathname === '/prop-firm') {
+    return <PropFirmRightPanel />;
+  }
+
+  if (location.pathname.startsWith('/news')) {
+    return <NewsRightPanel />;
   }
 
   return (
@@ -286,7 +653,7 @@ export default function RightPanel() {
               <div style={{ fontSize: 12, fontWeight: 500, color: '#c8c8c8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {entry.user.name}
               </div>
-              <div style={{ fontSize: 10, color: '#555555' }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                 {entry.user.mostActive}
               </div>
             </div>
@@ -305,7 +672,7 @@ export default function RightPanel() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           marginBottom: 8, paddingBottom: 6, borderBottom: 'var(--bw) solid var(--border-subtle)',
         }}>
-          <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: '#555555', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.06em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
             Trending
           </span>
           <span style={{ fontSize: 11, fontWeight: 500, color: isLight ? '#16a34a' : 'var(--blue)', cursor: 'pointer' }}>
@@ -361,7 +728,7 @@ export default function RightPanel() {
                 <div style={{ fontSize: 12, fontWeight: 600, color: tickerColor, marginBottom: 2, fontVariantNumeric: 'tabular-nums' }}>
                   {t.ticker}
                 </div>
-                <div style={{ fontSize: 9, color: postColor, marginBottom: 4 }}>
+                <div style={{ fontSize: 10, color: postColor, marginBottom: 4 }}>
                   {t.posts}
                 </div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: changeColor, fontVariantNumeric: 'tabular-nums' }}>
@@ -381,7 +748,7 @@ export default function RightPanel() {
         }}>
           <span style={{
             fontSize: 10, fontWeight: 500, letterSpacing: '0.06em',
-            color: '#555555', textTransform: 'uppercase',
+            color: 'var(--text-muted)', textTransform: 'uppercase',
           }}>
             Economic Calendar
           </span>
@@ -409,7 +776,7 @@ export default function RightPanel() {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 12, fontWeight: 500, color: '#c8c8c8' }}>{user.name}</div>
-              <div style={{ fontSize: 10, color: '#555555' }}>{user.mostActive}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{user.mostActive}</div>
             </div>
             <button
               className={`follow-btn ${followed[user.id] ? 'follow-btn-active' : ''}`}

@@ -109,6 +109,7 @@ export default function AddChallengeModal({ onClose }: Props) {
       total_pnl: 0,
       rules,
       trading_days: [],
+      trade_ids: [],
       ...(mt5Account ? { mt5_account: mt5Account } : {}),
     };
 
@@ -204,7 +205,7 @@ export default function AddChallengeModal({ onClose }: Props) {
             <div>
               <div style={{
                 fontSize: 10, fontWeight: 500, letterSpacing: '0.05em',
-                color: 'var(--text-4)', textTransform: 'uppercase', marginBottom: 8,
+                color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8,
               }}>
                 Rules (auto-filled for {firm} ${size.toLocaleString()})
               </div>
@@ -280,7 +281,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <span style={{
-        fontSize: 10, color: 'var(--text-4)',
+        fontSize: 10, color: 'var(--text-muted)',
         textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500,
       }}>
         {label}

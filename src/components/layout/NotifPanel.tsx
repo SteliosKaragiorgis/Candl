@@ -37,7 +37,7 @@ export default function NotifPanel() {
                 <span style={{ fontWeight: 600 }}>{n.user.name}</span>{' '}
                 <span style={{ color: 'var(--text-2)' }}>{n.content}</span>
               </div>
-              <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '2px' }}>{n.time}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{n.time}</div>
             </div>
             {!n.read && (
               <div style={{

@@ -819,7 +819,7 @@ function SignalHub({ mobile }: { mobile: boolean }) {
                   { label: 'RISK/SHARE', val: '$32.40',  color: 'var(--text)' },
                 ].map(item => (
                   <div key={item.label} style={{ background: 'var(--surface)', borderRadius: 8, padding: '8px 10px' }}>
-                    <div style={{ fontSize: 9, color: 'var(--text-3)', marginBottom: 2 }}>{item.label}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-3)', marginBottom: 2 }}>{item.label}</div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: item.color }}>{item.val}</div>
                   </div>
                 ))}
@@ -853,7 +853,7 @@ function SignalHub({ mobile }: { mobile: boolean }) {
                 { label: 'HELD',     val: '18 hrs',  color: 'var(--text)' },
               ].map(item => (
                 <div key={item.label} style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 9, color: 'var(--text-3)', marginBottom: 2 }}>{item.label}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-3)', marginBottom: 2 }}>{item.label}</div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: item.color }}>{item.val}</div>
                 </div>
               ))}
@@ -948,7 +948,7 @@ function ReviewSheet({ sig, onClose }: { sig: SignalData; onClose: () => void })
             { label: 'HELD',     val: '18 hrs',                   color: 'var(--text)' },
           ].map(item => (
             <div key={item.label} style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-              <div style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>{item.label}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>{item.label}</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: item.color }}>{item.val}</div>
             </div>
           ))}
@@ -1491,15 +1491,15 @@ function SignalCard({ sig, mobile }: { sig: SignalData; mobile: boolean }) {
           <div style={{ marginBottom: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: 6, marginBottom: 6 }}>
               <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>ENTRY ZONE</div>
+                <div style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>ENTRY ZONE</div>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>${fmtP(entryLow)}–${fmtP(entryHigh)}</div>
               </div>
               <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>TARGET 1</div>
+                <div style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>TARGET 1</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#1D9E75' }}>${fmtP(sig.targets[0])}</div>
               </div>
               <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-                <div style={{ fontSize: 9, color: '#E24B4A', fontWeight: 600, marginBottom: 3 }}>STOP</div>
+                <div style={{ fontSize: 10, color: '#E24B4A', fontWeight: 600, marginBottom: 3 }}>STOP</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#E24B4A' }}>${fmtP(sig.stop)}</div>
               </div>
             </div>
@@ -1512,7 +1512,7 @@ function SignalCard({ sig, mobile }: { sig: SignalData; mobile: boolean }) {
             <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: 6, marginBottom: 10 }}>
               {/* Entry */}
               <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-                <div style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>{entryLabel}</div>
+                <div style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>{entryLabel}</div>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>${fmtP(entryLow)}</div>
               </div>
               {/* Targets */}
@@ -1520,7 +1520,7 @@ function SignalCard({ sig, mobile }: { sig: SignalData; mobile: boolean }) {
                 const isHit = sig.status === 't1-hit' && i === 0;
                 return (
                   <div key={i} style={{ background: isHit ? 'rgba(24,95,165,0.08)' : 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-                    <div style={{ fontSize: 9, fontWeight: 600, marginBottom: 3, color: isHit ? '#185FA5' : 'var(--text-3)' }}>
+                    <div style={{ fontSize: 10, fontWeight: 600, marginBottom: 3, color: isHit ? '#185FA5' : 'var(--text-3)' }}>
                       TARGET {i + 1}{isHit ? ' ✓' : ''}
                     </div>
                     <div style={{
@@ -1536,13 +1536,13 @@ function SignalCard({ sig, mobile }: { sig: SignalData; mobile: boolean }) {
               {/* P&L so far for t1-hit */}
               {sig.status === 't1-hit' && sig.pnlR && (
                 <div style={{ background: 'rgba(24,95,165,0.06)', borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 9, color: '#185FA5', fontWeight: 600, marginBottom: 3 }}>P&L SO FAR</div>
+                  <div style={{ fontSize: 10, color: '#185FA5', fontWeight: 600, marginBottom: 3 }}>P&L SO FAR</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#185FA5' }}>{sig.pnlR}</div>
                 </div>
               )}
               {/* Stop */}
               <div style={{ background: sig.status === 'stopped' ? 'rgba(226,75,74,0.08)' : 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-                <div style={{ fontSize: 9, color: '#E24B4A', fontWeight: 600, marginBottom: 3 }}>
+                <div style={{ fontSize: 10, color: '#E24B4A', fontWeight: 600, marginBottom: 3 }}>
                   {sig.status === 'stopped' ? 'STOP HIT' : 'STOP'}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#E24B4A' }}>${fmtP(sig.stop)}</div>
@@ -1928,17 +1928,17 @@ function InvestmentCard({ sig, mobile }: { sig: InvestmentSignalData; mobile: bo
         {/* 3-col price grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 10 }}>
           <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>ENTRY LIMIT</div>
+            <div style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>ENTRY LIMIT</div>
             <div style={{ fontSize: 13, fontWeight: 700 }}>${fmtP(sig.entryLimit)}</div>
           </div>
           <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-            <div style={{ fontSize: 9, color: '#1D9E75', fontWeight: 600, marginBottom: 3 }}>PRICE TARGET</div>
+            <div style={{ fontSize: 10, color: '#1D9E75', fontWeight: 600, marginBottom: 3 }}>PRICE TARGET</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#1D9E75' }}>${fmtP(sig.priceTarget)}</div>
           </div>
           <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '8px 10px' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>NOW</div>
+            <div style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600, marginBottom: 3 }}>NOW</div>
             <div style={{ fontSize: 13, fontWeight: 700 }}>${fmtP(sig.currentPrice)}</div>
-            <div style={{ fontSize: 9, color: '#1D9E75', fontWeight: 600, marginTop: 1 }}>+{upside}% upside</div>
+            <div style={{ fontSize: 10, color: '#1D9E75', fontWeight: 600, marginTop: 1 }}>+{upside}% upside</div>
           </div>
         </div>
 
@@ -1989,15 +1989,15 @@ function InvestmentCard({ sig, mobile }: { sig: InvestmentSignalData; mobile: bo
         {/* Metadata row */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
           <div style={{ background: 'var(--surface-2)', borderRadius: 7, padding: '5px 10px' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600, marginBottom: 2 }}>TIME HORIZON</div>
+            <div style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600, marginBottom: 2 }}>TIME HORIZON</div>
             <div style={{ fontSize: 11, fontWeight: 700 }}>{sig.timeHorizon}</div>
           </div>
           <div style={{ background: convictionBg, borderRadius: 7, padding: '5px 10px' }}>
-            <div style={{ fontSize: 9, color: convictionColor, fontWeight: 600, marginBottom: 2 }}>CONVICTION</div>
+            <div style={{ fontSize: 10, color: convictionColor, fontWeight: 600, marginBottom: 2 }}>CONVICTION</div>
             <div style={{ fontSize: 11, fontWeight: 700, color: convictionColor }}>{sig.conviction}</div>
           </div>
           <div style={{ background: 'var(--surface-2)', borderRadius: 7, padding: '5px 10px' }}>
-            <div style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600, marginBottom: 2 }}>POSITION SIZE</div>
+            <div style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600, marginBottom: 2 }}>POSITION SIZE</div>
             <div style={{ fontSize: 11, fontWeight: 700 }}>{sig.positionSize}</div>
           </div>
         </div>

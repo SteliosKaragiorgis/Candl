@@ -1,9 +1,35 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { TradePost } from '../../types';
+import type { Trade } from '../../types/trade';
 import { useMobile } from '../../hooks/useMobile';
 import ShareDropdown from './ShareDropdown';
 import TradeChart from './TradeChart';
+import ShareModal from '../share/ShareModal';
+import type { ShareCardUser } from '../share/ShareableTradeCard';
+
+// Adapt a feed TradePost into the Trade shape expected by ShareModal
+function postToTrade(post: TradePost): Trade {
+  return {
+    id:         post.id,
+    symbol:     post.ticker,
+    direction:  post.direction === 'BUY' ? 'LONG' : 'SHORT',
+    entry:      post.entry,
+    exit:       post.target,
+    stopLoss:   post.stop,
+    takeProfit: post.target,
+    pnl:        0,
+    rMultiple:  parseFloat(post.rrRatio) || 0,
+    duration:   post.timeframe,
+    durationMs: 0,
+    openedAt:   new Date().toISOString(),
+    closedAt:   new Date().toISOString(),
+    source:     'MANUAL',
+    instrument: 'OTHER',
+    isPublished: true,
+    postId:     post.id,
+  };
+}
 
 function renderBody(text: string) {
   return text.split(/(\$[A-Z]+|#\w+)/g).map((part, i) => {
@@ -22,6 +48,7 @@ export default function TradeCard({ post }: { post: TradePost }) {
   const [animating, setAnimating] = useState(false);
   const [thesisOpen, setThesisOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [chartOpen, setChartOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [likeHov, setLikeHov] = useState(false);
@@ -50,9 +77,12 @@ export default function TradeCard({ post }: { post: TradePost }) {
   const tvUrl = `https://www.tradingview.com/chart/?symbol=${post.tvSymbol}`;
   const isLong = post.direction === 'BUY';
   const colCount = isMobile ? 2 : 4;
+  // Format price without $ — let the value speak for itself (works for FX and stocks)
+  const fmtEntry  = post.entry  >= 100 ? post.entry.toFixed(2)  : post.entry.toFixed(4);
+  const fmtTarget = post.target >= 100 ? post.target.toFixed(2) : post.target.toFixed(4);
   const metaCells = [
-    { label: 'Entry',      value: `$${post.entry.toFixed(2)}` },
-    { label: 'Exit',       value: `$${post.target.toFixed(2)}` },
+    { label: 'Entry',      value: fmtEntry  },
+    { label: 'Exit',       value: fmtTarget },
     { label: 'R Multiple', value: post.rrRatio },
     { label: 'Timeframe',  value: post.timeframe },
   ];
@@ -64,11 +94,12 @@ export default function TradeCard({ post }: { post: TradePost }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', gap: 12,
-        paddingTop: '14px', paddingBottom: '14px', paddingRight: '16px', paddingLeft: '12px',
+        padding: '14px 16px 14px 12px',
+        border: `0.5px solid ${hovered ? 'var(--border-soft)' : 'var(--border)'}`,
         borderLeft: '2px solid #22c55e',
-        borderBottom: '0.5px solid #1e1e1e',
-        background: hovered ? 'var(--surface)' : 'transparent',
-        cursor: 'pointer', transition: 'background 0.1s',
+        borderRadius: 8,
+        background: 'var(--bg-card)',
+        cursor: 'pointer', transition: 'border-color 0.1s',
       }}
     >
       {/* Avatar */}
@@ -90,7 +121,7 @@ export default function TradeCard({ post }: { post: TradePost }) {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
           <span
             onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
-            style={{ fontSize: 14, fontWeight: 600, color: '#e0e0e0', cursor: 'pointer' }}
+            style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}
             onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
             onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
           >
@@ -120,7 +151,7 @@ export default function TradeCard({ post }: { post: TradePost }) {
 
         {/* Body */}
         {post.body && (
-          <p style={{ fontSize: 14, color: '#c0c0c0', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+          <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6, margin: '0 0 12px 0' }}>
             {renderBody(post.body)}
           </p>
         )}
@@ -142,10 +173,10 @@ export default function TradeCard({ post }: { post: TradePost }) {
             </span>
             <span style={{
               fontSize: 15, fontWeight: 600, marginLeft: 'auto',
-              color: isLong ? '#22c55e' : '#ef4444',
+              color: post.rrRatio.startsWith('-') ? '#ef4444' : '#22c55e',
               fontVariantNumeric: 'tabular-nums',
             }}>
-              {isLong ? '+' : '-'}{post.rrRatio}
+              {post.rrRatio}
             </span>
           </div>
 
@@ -157,42 +188,46 @@ export default function TradeCard({ post }: { post: TradePost }) {
                 borderRight: (isMobile ? i % 2 === 0 : i < metaCells.length - 1) ? '0.5px solid var(--border)' : 'none',
                 borderTop: '0.5px solid var(--border)',
               }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: '#c8c8c8', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-                <div style={{ fontSize: 9, color: '#444', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
               </div>
             ))}
           </div>
 
           {/* Chart toggle */}
-          <div style={{ padding: '8px 14px', borderTop: '0.5px solid var(--border)' }}>
-            <button
-              onClick={e => { e.stopPropagation(); setChartOpen(o => !o); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 4 }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-2)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-3)')}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
-              {chartOpen ? 'Hide chart' : 'View chart'}
-            </button>
-            <div style={{ maxHeight: chartOpen ? '320px' : '0', overflow: 'hidden', opacity: chartOpen ? 1 : 0, transition: 'max-height 0.3s ease, opacity 0.2s ease' }}>
-              <div style={{ marginTop: 8 }}>
-                <TradeChart
-                  symbol={post.ticker}
-                  direction={post.direction === 'BUY' ? 'long' : 'short'}
-                  entryPrice={post.entry}
-                  exitPrice={post.target}
-                  stopLoss={post.stop}
-                  takeProfit={post.target}
-                  entryTime=""
-                  exitTime=""
-                  rMultiple={parseFloat(post.rrRatio) || undefined}
-                  timeframe="H1"
-                />
-              </div>
-            </div>
-          </div>
+          <button
+            onClick={e => { e.stopPropagation(); setChartOpen(o => !o); }}
+            style={{
+              padding: '8px 12px',
+              borderTop: '0.5px solid var(--border)',
+              borderLeft: 'none',
+              borderRight: 'none',
+              borderBottom: 'none',
+              textAlign: 'center',
+              fontSize: 12,
+              color: 'var(--green)',
+              cursor: 'pointer',
+              background: 'transparent',
+              width: '100%',
+            }}
+          >
+            {chartOpen ? 'Hide chart ↑' : 'View chart ↓'}
+          </button>
+          {chartOpen && (
+            <TradeChart
+              symbol={post.ticker}
+              direction={post.direction === 'BUY' ? 'long' : 'short'}
+              entryPrice={post.entry}
+              exitPrice={post.target}
+              stopLoss={post.stop}
+              takeProfit={post.target}
+              entryTime=""
+              exitTime=""
+              rMultiple={parseFloat(post.rrRatio) || undefined}
+              timeframe="H1"
+              height={280}
+            />
+          )}
         </div>
 
         {/* TradingView link */}
@@ -214,7 +249,7 @@ export default function TradeCard({ post }: { post: TradePost }) {
             </svg>
             <div>
               <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{post.ticker} · Daily Chart</div>
-              <div style={{ fontSize: 12, color: 'var(--text-3)' }}>View on TradingView</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>View on TradingView</div>
             </div>
           </div>
           <span style={{ fontSize: 12, fontWeight: 500, color: '#1d9bf0' }}>Open →</span>
@@ -240,8 +275,8 @@ export default function TradeCard({ post }: { post: TradePost }) {
               <div key={label} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderBottom: i < arr.length - 1 ? '0.5px solid var(--border)' : 'none' }}>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, marginTop: 5, background: color }} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.04em', color: '#444', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
-                  <div style={{ fontSize: 13, color: '#c8c8c8', lineHeight: 1.5 }}>{value}</div>
+                  <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.04em', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5 }}>{value}</div>
                 </div>
               </div>
             ))}
@@ -315,8 +350,40 @@ export default function TradeCard({ post }: { post: TradePost }) {
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
             </svg>
           </button>
+
+          {/* Share card button */}
+          <button
+            onClick={e => { e.stopPropagation(); setShareModalOpen(true); }}
+            style={{
+              fontSize: 11, fontWeight: 500,
+              padding: '3px 9px', borderRadius: 4,
+              border: '0.5px solid var(--border-hard)',
+              background: 'transparent',
+              color: 'var(--text-3)',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            Share ↗
+          </button>
         </div>
       </div>
+
+      {shareModalOpen && (
+        <ShareModal
+          trade={postToTrade(post)}
+          user={{
+            displayName:    post.user.name,
+            handle:         post.user.username,
+            avatarInitials: post.user.initials,
+            isMT5Connected: false,
+            winRate:        62,
+            totalTrades:    post.user.tradesCount,
+            avgRR:          1.8,
+          } satisfies ShareCardUser}
+          onClose={() => setShareModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -23,6 +23,7 @@ import TickerPage from './pages/TickerPage';
 import SearchPage from './pages/SearchPage';
 import ConnectionsPage from './pages/ConnectionsPage';
 import PropFirmPage from './pages/PropFirmPage';
+import MyTradesPage from './pages/MyTradesPage';
 
 export default function App() {
   return (
@@ -52,6 +53,7 @@ export default function App() {
             <Route path="search" element={<SearchPage />} />
             <Route path="connections" element={<ConnectionsPage />} />
             <Route path="prop-firm" element={<PropFirmPage />} />
+            <Route path="trades" element={<MyTradesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

@@ -12,4 +12,6 @@ export type MT5Account = {
   status: MT5AccountStatus;
   lastSync: string | null;   // ISO timestamp
   errorMessage?: string;
+  metaApiAccountId?: string; // MetaAPI cloud account ID
+  metaApiRegion?: string;    // MetaAPI region (e.g. 'new-york')
 };

@@ -23,7 +23,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     stats: { pnl: 10820, pnlPercent: 10.82, winRate: 72, avgRR: 2.1, daysUsed: 22 },
     likes: 84,
     comments: 31,
-    createdAt: '3 hours ago',
+    createdAt: '2026-04-09T09:00:00.000Z',
     isVerified: true,
   },
   // Milestone: passed Phase 2 → Funded
@@ -41,7 +41,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     stats: { pnl: 5400, pnlPercent: 5.4, winRate: 69, avgRR: 1.9, daysUsed: 16 },
     likes: 112,
     comments: 44,
-    createdAt: '1 day ago',
+    createdAt: '2026-04-11T08:00:00.000Z',
     isVerified: true,
   },
   // Progress: FTMO Phase 1 day 8
@@ -65,7 +65,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     ],
     likes: 37,
     comments: 14,
-    createdAt: '5 hours ago',
+    createdAt: '2026-04-12T07:00:00.000Z',
     isVerified: false,
   },
   // Progress: Apex Phase 1 day 14, near warning
@@ -89,7 +89,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     ],
     likes: 22,
     comments: 9,
-    createdAt: '12 hours ago',
+    createdAt: '2026-04-12T00:00:00.000Z',
     isVerified: false,
   },
   // Progress: TFT Phase 2 day 5
@@ -113,7 +113,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     ],
     likes: 29,
     comments: 7,
-    createdAt: '2 days ago',
+    createdAt: '2026-04-10T12:00:00.000Z',
     isVerified: true,
   },
   // Failure post 1
@@ -131,7 +131,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     stats: { pnl: -4250, pnlPercent: -4.25, winRate: 61, avgRR: 1.8, daysUsed: 11 },
     likes: 147,
     comments: 63,
-    createdAt: '1 day ago',
+    createdAt: '2026-04-11T14:00:00.000Z',
     isVerified: false,
   },
   // Failure post 2
@@ -149,7 +149,7 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     stats: { pnl: -1900, pnlPercent: -3.8, winRate: 43, avgRR: 1.1, daysUsed: 6 },
     likes: 98,
     comments: 41,
-    createdAt: '3 days ago',
+    createdAt: '2026-04-09T10:00:00.000Z',
     isVerified: false,
   },
   // Funded announcement
@@ -167,22 +167,24 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     stats: { pnl: 15200, pnlPercent: 8.2, winRate: 74, avgRR: 2.3, daysUsed: 19 },
     likes: 231,
     comments: 87,
-    createdAt: '6 hours ago',
+    createdAt: '2026-04-12T06:00:00.000Z',
     isVerified: true,
   },
 ];
 
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
 
-export const LEADERBOARD_TRADERS: LeaderboardTrader[] = [
-  { id: 'lt1', name: 'Alex Kim', handle: 'swingkingAK', avatarColor: '#1a3a5c', firm: 'FTMO', accountSize: 100000, phase: 1, pnlPercent: 10.82, winRate: 72, avgRR: 2.1, days: 22, status: 'passed', rulesClean: 1.0 },
-  { id: 'lt2', name: 'Kay L.', handle: 'kayltrader', avatarColor: '#1a3a22', firm: 'E8', accountSize: 100000, phase: 2, pnlPercent: 5.4, winRate: 69, avgRR: 1.9, days: 16, status: 'passed', rulesClean: 1.0 },
-  { id: 'lt3', name: 'Priya V.', handle: 'priyav_fx', avatarColor: '#2d2d5c', firm: 'FundedNext', accountSize: 100000, phase: 3, pnlPercent: 8.2, winRate: 74, avgRR: 2.3, days: 19, status: 'passed', rulesClean: 1.0 },
-  { id: 'lt4', name: 'Sara R.', handle: 'macro_sara', avatarColor: '#2d1a5c', firm: 'FTMO', accountSize: 50000, phase: 1, pnlPercent: 3.64, winRate: 65, avgRR: 1.7, days: 8, status: 'active', rulesClean: 0.95 },
-  { id: 'lt5', name: 'Jamie T.', handle: 'longonlyjt', avatarColor: '#2d1a5c', firm: 'TFT', accountSize: 100000, phase: 2, pnlPercent: 2.1, winRate: 70, avgRR: 2.0, days: 5, status: 'active', rulesClean: 1.0 },
-  { id: 'lt6', name: 'Chris M.', handle: 'chrism_fx', avatarColor: '#3a2200', firm: 'Apex', accountSize: 50000, phase: 1, pnlPercent: 2.48, winRate: 54, avgRR: 1.4, days: 14, status: 'active', rulesClean: 0.8 },
-  { id: 'lt7', name: 'Mike W.', handle: 'optionsmike', avatarColor: '#1a3a22', firm: 'FTMO', accountSize: 100000, phase: 1, pnlPercent: -4.25, winRate: 61, avgRR: 1.8, days: 11, status: 'failed', rulesClean: 0.6 },
-  { id: 'lt8', name: 'Ryan C.', handle: 'ryanc_trades', avatarColor: '#1f0d0d', firm: 'Apex', accountSize: 50000, phase: 1, pnlPercent: -3.8, winRate: 43, avgRR: 1.1, days: 6, status: 'failed', rulesClean: 0.4 },
+export type LeaderboardTraderWithDate = LeaderboardTrader & { joinedDate: string };
+
+export const LEADERBOARD_TRADERS: LeaderboardTraderWithDate[] = [
+  { id: 'lt1', name: 'Alex Kim', handle: 'swingkingAK', avatarColor: '#1a3a5c', firm: 'FTMO', accountSize: 100000, phase: 1, pnlPercent: 10.82, winRate: 72, avgRR: 2.1, days: 22, status: 'passed', rulesClean: 1.0, joinedDate: '2026-04-09T09:00:00.000Z' },
+  { id: 'lt2', name: 'Kay L.', handle: 'kayltrader', avatarColor: '#1a3a22', firm: 'E8', accountSize: 100000, phase: 2, pnlPercent: 5.4, winRate: 69, avgRR: 1.9, days: 16, status: 'passed', rulesClean: 1.0, joinedDate: '2026-04-11T08:00:00.000Z' },
+  { id: 'lt3', name: 'Priya V.', handle: 'priyav_fx', avatarColor: '#2d2d5c', firm: 'FundedNext', accountSize: 100000, phase: 3, pnlPercent: 8.2, winRate: 74, avgRR: 2.3, days: 19, status: 'passed', rulesClean: 1.0, joinedDate: '2026-04-12T06:00:00.000Z' },
+  { id: 'lt4', name: 'Sara R.', handle: 'macro_sara', avatarColor: '#2d1a5c', firm: 'FTMO', accountSize: 50000, phase: 1, pnlPercent: 3.64, winRate: 65, avgRR: 1.7, days: 8, status: 'active', rulesClean: 0.95, joinedDate: '2026-04-12T07:00:00.000Z' },
+  { id: 'lt5', name: 'Jamie T.', handle: 'longonlyjt', avatarColor: '#2d1a5c', firm: 'TFT', accountSize: 100000, phase: 2, pnlPercent: 2.1, winRate: 70, avgRR: 2.0, days: 5, status: 'active', rulesClean: 1.0, joinedDate: '2026-04-10T12:00:00.000Z' },
+  { id: 'lt6', name: 'Chris M.', handle: 'chrism_fx', avatarColor: '#3a2200', firm: 'Apex', accountSize: 50000, phase: 1, pnlPercent: 2.48, winRate: 54, avgRR: 1.4, days: 14, status: 'active', rulesClean: 0.8, joinedDate: '2026-03-29T08:00:00.000Z' },
+  { id: 'lt7', name: 'Mike W.', handle: 'optionsmike', avatarColor: '#1a3a22', firm: 'FTMO', accountSize: 100000, phase: 1, pnlPercent: -4.25, winRate: 61, avgRR: 1.8, days: 11, status: 'failed', rulesClean: 0.6, joinedDate: '2026-04-11T14:00:00.000Z' },
+  { id: 'lt8', name: 'Ryan C.', handle: 'ryanc_trades', avatarColor: '#1f0d0d', firm: 'Apex', accountSize: 50000, phase: 1, pnlPercent: -3.8, winRate: 43, avgRR: 1.1, days: 6, status: 'failed', rulesClean: 0.4, joinedDate: '2026-03-10T10:00:00.000Z' },
 ];
 
 // ─── Firm stats ───────────────────────────────────────────────────────────────
@@ -207,4 +209,102 @@ export const TIPS: Tip[] = [
   { id: 't6', category: 'psychology', text: 'Treat the challenge like you\'re already funded. The moment you try to catch up, you blow it.', author: 'Alex K.', authorFirm: 'FTMO', authorResult: '$100k passed', likes: 119, isVerified: true },
   { id: 't7', category: 'risk', text: 'Calculate your max daily loss in pips before the session. Know exactly when you\'ll stop before you start.', author: 'Chris M.', authorFirm: 'Apex', authorResult: '$100k passed', likes: 98, isVerified: true },
   { id: 't8', category: 'compliance', text: 'Screenshot your account at session start and end every day. Proof of compliance in case of disputes.', author: 'Sara R.', authorFirm: 'FTMO', authorResult: '$50k Phase 2', likes: 76, isVerified: false },
+];
+
+// ─── Firm display info (#18 supplement) ──────────────────────────────────────
+
+export const FIRM_DISPLAY_INFO: Record<string, {
+  fullName: string;
+  website: string;
+  description: string;
+  color: string;
+}> = {
+  FTMO: {
+    fullName: 'FTMO',
+    website: 'https://ftmo.com',
+    description: 'Prague-based prop firm offering two-phase challenges with up to $200k funding. Known for strict rules and reliable payouts.',
+    color: '#1a56db',
+  },
+  TFT: {
+    fullName: 'The Funded Trader',
+    website: 'https://thefundedtrader.com',
+    description: 'US-based prop firm with multiple challenge tracks including Standard, Rapid, and Royal. Flexible scaling plan up to $1.5M.',
+    color: '#7c3aed',
+  },
+  Apex: {
+    fullName: 'Apex Trader Funding',
+    website: 'https://apextraderfunding.com',
+    description: 'Futures-focused prop firm with one-phase evaluations. Popular for its straightforward rules and frequent promotions.',
+    color: '#d97706',
+  },
+  E8: {
+    fullName: 'E8 Funding',
+    website: 'https://e8funding.com',
+    description: 'Two-phase prop firm with an 8% profit target and a strong emphasis on risk management and trader education.',
+    color: '#059669',
+  },
+  FundedNext: {
+    fullName: 'FundedNext',
+    website: 'https://fundednext.com',
+    description: 'Dubai-based prop firm offering Stellar and Express challenges. Unique profit-share model starting from evaluation phase.',
+    color: '#0ea5e9',
+  },
+  MFF: {
+    fullName: 'MyForexFunds',
+    website: 'https://myforexfunds.com',
+    description: 'Canadian prop firm formerly one of the largest in the industry. Offered Rapid, Accelerated, and Experienced programs.',
+    color: '#e11d48',
+  },
+  TFF: {
+    fullName: 'True Forex Funds',
+    website: 'https://trueforexfunds.com',
+    description: 'European prop firm offering one and two-phase challenges with competitive profit splits and a scaling plan.',
+    color: '#f59e0b',
+  },
+};
+
+// ─── Demo comments (seed data for #19) ───────────────────────────────────────
+
+export type Comment = {
+  id: string;
+  postId: string;
+  userId: string;
+  userName: string;
+  userHandle: string;
+  text: string;
+  createdAt: string;
+  likes: number;
+};
+
+export const DEMO_COMMENTS: Comment[] = [
+  {
+    id: 'dc1',
+    postId: 'cp1',
+    userId: 'u5',
+    userName: 'Kay L.',
+    userHandle: 'kayltrader',
+    text: 'London breakouts are so consistent on FTMO. What pairs were you trading?',
+    createdAt: '2026-04-09T10:30:00.000Z',
+    likes: 12,
+  },
+  {
+    id: 'dc2',
+    postId: 'cp1',
+    userId: 'u2',
+    userName: 'Sara R.',
+    userHandle: 'macro_sara',
+    text: 'That psychology point about protecting the account changing everything is real. Congrats on the pass.',
+    createdAt: '2026-04-09T11:15:00.000Z',
+    likes: 8,
+  },
+  {
+    id: 'dc3',
+    postId: 'cp2',
+    userId: 'u1',
+    userName: 'Alex Kim',
+    userHandle: 'swingkingAK',
+    text: 'Phase 2 being easier once the process is locked in is exactly my experience too. Well done.',
+    createdAt: '2026-04-11T09:00:00.000Z',
+    likes: 15,
+  },
 ];

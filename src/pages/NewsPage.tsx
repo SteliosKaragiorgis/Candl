@@ -9,22 +9,24 @@ import { useAlphaVantageNews } from '../hooks/useAlphaVantageNews'
 import { useMarketData } from '../context/MarketDataContext'
 import type { Quote } from '../context/MarketDataContext'
 import { useCryptoQuotes } from '../hooks/useCryptoQuotes'
-import { useTheme } from '../context/ThemeContext'
 import type { ArticleNavState } from './NewsArticlePage'
 
-type FilterTab = 'all' | 'earnings' | 'macro' | 'regulatory' | 'analyst' | 'bullish' | 'bearish' | 'ma' | 'crypto' | 'commodity' | 'watchlist'
 
-const FILTER_TABS: { id: FilterTab; label: string; color?: string }[] = [
+type FilterTab =
+  | 'all' | 'earnings' | 'macro' | 'regulatory' | 'analyst'
+  | 'bullish' | 'bearish' | 'ma' | 'crypto' | 'commodity' | 'watchlist'
+
+const FILTER_TABS: { id: FilterTab; label: string; sentiment?: 'bullish' | 'bearish' }[] = [
   { id: 'all',        label: 'All' },
   { id: 'earnings',   label: 'Earnings' },
   { id: 'macro',      label: 'Macro' },
-  { id: 'crypto',     label: 'Crypto',       color: 'orange' },
-  { id: 'commodity',  label: 'Commodities',  color: 'yellow' },
+  { id: 'crypto',     label: 'Crypto' },
+  { id: 'commodity',  label: 'Commodities' },
   { id: 'regulatory', label: 'Regulatory' },
   { id: 'ma',         label: 'M&A' },
   { id: 'analyst',    label: 'Analyst' },
-  { id: 'bullish',    label: 'Bullish moves', color: 'green' },
-  { id: 'bearish',    label: 'Bearish moves', color: 'red' },
+  { id: 'bullish',    label: 'Bullish moves', sentiment: 'bullish' },
+  { id: 'bearish',    label: 'Bearish moves', sentiment: 'bearish' },
   { id: 'watchlist',  label: 'Watchlist only' },
 ]
 
@@ -71,11 +73,8 @@ function inferCategoryType(item: FinnhubNewsItem): CategoryType {
   if (item.category === 'merger') return 'ma'
   if (item.category === 'commodity') return 'commodity'
   const text = (item.headline + ' ' + item.summary).toLowerCase()
-  // Crypto — check early so "crypto earnings" → crypto
   if (/\bbitcoin\b|\bbtc\b|\bethereum\b|\beth\b|\bcrypto(?:currency|currencies)?\b|\bblockchain\b|\bdefi\b|\bnft\b|\bsolana\b|\bxrp\b|\bdogecoin\b|\bripple\b|\bweb3\b/.test(text)) return 'crypto'
-  // Commodities
   if (/\bgold\b|\bsilver\b|\bcrude\b|\bwti\b|\boil\b|\bnatural gas\b|\bcopper\b|\bwheat\b|\bcorn\b|\bcommodit|\bopec\b|\bbarrel\b|\benergy price|\bfuel\b|\bgas price\b|\bxau\b|\bxag\b/.test(text)) return 'commodity'
-  // Standard categories
   if (/\bearnings\b|eps\b|\brevenue\b|guidance\b|beat\b|miss\b|profit\b|q[1-4]\s+\d|results\b/.test(text)) return 'earnings'
   if (/\bfed\b|\bfomc\b|interest rate|cpi\b|inflation\b|\bgdp\b|\bmacro\b|\beconomy\b|monetary|nonfarm|jobs report|unemployment/.test(text)) return 'macro'
   if (/recall\b|probe\b|\bsec\b|regulat|fda\b|ftc\b|doj\b|lawsuit|fine\b|penalty|violation|settlement/.test(text)) return 'regulatory'
@@ -101,45 +100,40 @@ function formatTimestamp(unix: number): string {
 }
 
 // ─── Keyword → ticker extraction ──────────────────────────────────────────────
-// Supplements the Finnhub `related` field which is often empty or just one ticker
 
 const KEYWORD_TICKER_MAP: Array<[RegExp, string]> = [
-  // ── Crypto (CoinGecko-backed) ───────────────────────────────────────────────
-  [/\bbitcoin\b|\bbtc\b/i,                             'BTC'],
-  [/\bethereum\b|\beth\b/i,                             'ETH'],
+  [/\bbitcoin\b|\bbtc\b/i,                                'BTC'],
+  [/\bethereum\b|\beth\b/i,                                'ETH'],
   [/\bcrypto(?:currency|currencies|market|purchases)?\b/i, 'BTC'],
-  [/\bsolana\b|\bsol\b/i,                              'SOL'],
-  [/\bxrp\b|\bripple\b/i,                              'XRP'],
-  [/\bdogecoin\b|\bdoge\b/i,                            'DOGE'],
-  [/\bcardano\b|\bada\b/i,                              'ADA'],
-  [/\bavalanche\b|\bavax\b/i,                           'AVAX'],
-  [/\bchainlink\b|\blink\b/i,                           'LINK'],
-  [/\bbinance\b|\bbnb\b/i,                              'BNB'],
-  // ── Commodities (Finnhub ETF proxies) ──────────────────────────────────────
-  [/\bgold\b/i,                                         'GLD'],   // SPDR Gold ETF
-  [/\bsilver\b/i,                                       'SLV'],   // iShares Silver ETF
-  [/\bcrude oil\b|\bwti\b|\boil price\b|\bpetroleum\b/i,'USO'],  // Oil ETF
-  [/\bnatural gas\b/i,                                  'UNG'],   // Natural Gas ETF
-  [/\bcopper\b/i,                                       'COPX'],  // Copper ETF
-  [/\bwheat\b|\bcorn\b|\bsoybeans?\b/i,                 'DBA'],   // Agricultural ETF
-  // ── Macro / index ETFs (Finnhub-backed) ────────────────────────────────────
+  [/\bsolana\b|\bsol\b/i,                                 'SOL'],
+  [/\bxrp\b|\bripple\b/i,                                 'XRP'],
+  [/\bdogecoin\b|\bdoge\b/i,                               'DOGE'],
+  [/\bcardano\b|\bada\b/i,                                 'ADA'],
+  [/\bavalanche\b|\bavax\b/i,                              'AVAX'],
+  [/\bchainlink\b|\blink\b/i,                              'LINK'],
+  [/\bbinance\b|\bbnb\b/i,                                 'BNB'],
+  [/\bgold\b/i,                                            'GLD'],
+  [/\bsilver\b/i,                                          'SLV'],
+  [/\bcrude oil\b|\bwti\b|\boil price\b|\bpetroleum\b/i,  'USO'],
+  [/\bnatural gas\b/i,                                     'UNG'],
+  [/\bcopper\b/i,                                          'COPX'],
+  [/\bwheat\b|\bcorn\b|\bsoybeans?\b/i,                    'DBA'],
   [/\bs&p 500\b|\bspx\b|\bstock market\b|\bwall street\b|\bequit(?:y|ies)\b/i, 'SPY'],
-  [/\bnasdaq\b/i,                                       'QQQ'],
-  [/\bdow\b|\bdow jones\b|\bdjia\b/i,                   'SPY'],   // Dow proxy
-  [/\btreasur(?:y|ies)\b|\b10.year yield\b/i,           'TLT'],
-  [/\bdollar index\b|\bdxy\b/i,                         'UUP'],   // Dollar ETF
-  [/\boil\b|\bcrude\b|\bmiddle east\b|\bgeopolit/i,     'USO'],   // Broad oil / geopolitical
-  // ── Mega-cap stocks ─────────────────────────────────────────────────────────
-  [/\bnvidia\b/i,                                       'NVDA'],
-  [/\btesla\b/i,                                        'TSLA'],
-  [/\bapple\b/i,                                        'AAPL'],
-  [/\bmeta platforms?\b|\bfacebook\b/i,                 'META'],
-  [/\bamazon\b/i,                                       'AMZN'],
-  [/\bmicrosoft\b/i,                                    'MSFT'],
-  [/\bgoogle\b|\balphabet\b/i,                          'GOOGL'],
-  [/\b(?:advanced micro devices?|amd\b)/i,              'AMD'],
-  [/\bmicrostrategy\b|\bstrategy.*(?:bitcoin|crypto)\b/i,'MSTR'],
-  [/\bcoinbase\b/i,                                     'COIN'],
+  [/\bnasdaq\b/i,                                          'QQQ'],
+  [/\bdow\b|\bdow jones\b|\bdjia\b/i,                      'SPY'],
+  [/\btreasur(?:y|ies)\b|\b10.year yield\b/i,              'TLT'],
+  [/\bdollar index\b|\bdxy\b/i,                            'UUP'],
+  [/\boil\b|\bcrude\b|\bmiddle east\b|\bgeopolit/i,        'USO'],
+  [/\bnvidia\b/i,                                          'NVDA'],
+  [/\btesla\b/i,                                           'TSLA'],
+  [/\bapple\b/i,                                           'AAPL'],
+  [/\bmeta platforms?\b|\bfacebook\b/i,                    'META'],
+  [/\bamazon\b/i,                                          'AMZN'],
+  [/\bmicrosoft\b/i,                                       'MSFT'],
+  [/\bgoogle\b|\balphabet\b/i,                             'GOOGL'],
+  [/\b(?:advanced micro devices?|amd\b)/i,                 'AMD'],
+  [/\bmicrostrategy\b|\bstrategy.*(?:bitcoin|crypto)\b/i,  'MSTR'],
+  [/\bcoinbase\b/i,                                        'COIN'],
 ]
 
 function extractTickers(headline: string, summary: string): string[] {
@@ -151,7 +145,6 @@ function extractTickers(headline: string, summary: string): string[] {
   return Array.from(found)
 }
 
-// Images that appear on 2+ articles are source logos/placeholders — filter them out
 function buildImageFilter(items: FinnhubNewsItem[]): Set<string> {
   const counts = new Map<string, number>()
   for (const item of items) {
@@ -159,17 +152,12 @@ function buildImageFilter(items: FinnhubNewsItem[]): Set<string> {
   }
   const logos = new Set<string>()
   for (const [url, n] of counts) {
-    if (n >= 2 || /logo|brand|icon|placeholder|default|fallback/i.test(url)) {
-      logos.add(url)
-    }
+    if (n >= 2 || /logo|brand|icon|placeholder|default|fallback/i.test(url)) logos.add(url)
   }
   return logos
 }
 
-function mapToArticles(
-  items: FinnhubNewsItem[],
-  quotes: Record<string, Quote>,
-): NewsArticle[] {
+function mapToArticles(items: FinnhubNewsItem[], quotes: Record<string, Quote>): NewsArticle[] {
   const logoUrls = buildImageFilter(items)
   return items.map((item, i) => {
     const relatedSymbols = item.related
@@ -197,9 +185,8 @@ function mapToArticles(
   })
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── OG image fetch ────────────────────────────────────────────────────────────
 
-// Fetch og:image from a URL via Microlink (no API key needed for basic usage)
 const ogImageCache = new Map<string, string | null>()
 
 async function fetchOgImage(articleUrl: string): Promise<string | null> {
@@ -219,16 +206,322 @@ async function fetchOgImage(articleUrl: string): Promise<string | null> {
   }
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function articleSentiment(article: NewsArticle): 'bullish' | 'bearish' | 'neutral' {
+  if (article.categoryType === 'bullish') return 'bullish'
+  if (article.categoryType === 'bearish') return 'bearish'
+  return 'neutral'
+}
+
+const SENTIMENT_BORDER_COLOR: Record<string, string> = {
+  bullish: 'var(--green)',
+  bearish: 'var(--red)',
+  neutral: 'var(--border)',
+}
+
+const THUMB_GRADIENT: Record<string, string> = {
+  bullish: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
+  bearish: 'linear-gradient(135deg, #1f0d0d 0%, #3a1a1a 100%)',
+  neutral: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-card) 100%)',
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function TickerChip({ symbol, changePct, quotes }: {
+  symbol: string
+  changePct: number
+  quotes: Record<string, Quote>
+}) {
+  const quote = quotes[symbol]
+  const pct = quote ? quote.changePct : changePct
+  const up = pct >= 0
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600,
+      padding: '2px 7px', borderRadius: 4,
+      background: up ? 'var(--green-bg)' : 'var(--red-bg)',
+      color: up ? 'var(--green)' : 'var(--red)',
+      border: `0.5px solid ${up ? 'var(--green-border)' : 'var(--red-border)'}`,
+    }}>
+      {symbol}
+      {(quote || pct !== 0) && (
+        <span style={{ fontWeight: 500 }}>{up ? '+' : ''}{pct.toFixed(2)}%</span>
+      )}
+    </span>
+  )
+}
+
+// ─── FeaturedCard ─────────────────────────────────────────────────────────────
+
+function FeaturedCard({ article, imageUrl, quotes, onOpen }: {
+  article: NewsArticle
+  imageUrl?: string
+  quotes: Record<string, Quote>
+  onOpen: (a: NewsArticle) => void
+}) {
+  return (
+    <div
+      style={{
+        background: 'var(--bg-card)',
+        border: '0.5px solid var(--border)',
+        borderRadius: 10, overflow: 'hidden',
+        marginBottom: 14, cursor: 'pointer',
+        transition: 'border-color 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-hard)')}
+      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+      onClick={() => onOpen(article)}
+    >
+      {/* Hero area */}
+      <div style={{
+        position: 'relative', height: 320,
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f4c2a 100%)',
+        overflow: 'hidden',
+      }}>
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt=""
+            loading="lazy"
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+            style={{
+              position: 'absolute', inset: 0,
+              width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'top',
+            }}
+          />
+        )}
+        {/* Dark overlay — always shown */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)',
+        }} />
+        {/* Text content over overlay */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          padding: '12px 14px', zIndex: 1,
+        }}>
+          <span style={{
+            fontSize: 10, fontWeight: 700,
+            background: '#ffffff', color: '#111111',
+            padding: '2px 6px', borderRadius: 3,
+            display: 'inline-block', marginBottom: 5,
+          }}>{article.source}</span>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#ffffff', lineHeight: 1.4 }}>
+            {article.headline}
+          </div>
+        </div>
+      </div>
+
+      {/* Article body */}
+      <div style={{ padding: '12px 14px' }}>
+        {article.body && (
+          <p style={{
+            fontSize: 13, color: 'var(--text-2)', lineHeight: 1.65,
+            marginBottom: 10,
+            display: '-webkit-box', WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>
+            {article.body}
+          </p>
+        )}
+
+        {article.tickers.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: 11, color: 'var(--text-muted)',
+              textTransform: 'uppercase', letterSpacing: '0.05em',
+            }}>Impact</span>
+            {article.tickers.slice(0, 5).map(t => (
+              <TickerChip key={t.symbol} symbol={t.symbol} changePct={t.change} quotes={quotes} />
+            ))}
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={{
+          borderTop: '0.5px solid var(--border-soft)',
+          paddingTop: 10,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <button
+            style={{
+              fontSize: 12, fontWeight: 500,
+              color: 'var(--green)', cursor: 'pointer',
+              background: 'none', border: 'none',
+              fontFamily: 'Inter, sans-serif', padding: 0,
+              transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+          >
+            Read full story →
+          </button>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            {article.publishedAt}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── GridCard ─────────────────────────────────────────────────────────────────
+
+function GridCard({ article, quotes, onOpen }: {
+  article: NewsArticle
+  quotes: Record<string, Quote>
+  onOpen: (a: NewsArticle) => void
+}) {
+  return (
+    <div
+      style={{
+        background: 'var(--bg-card)',
+        border: '0.5px solid var(--border)',
+        borderRadius: 8, padding: 12,
+        cursor: 'pointer', transition: 'border-color 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-hard)')}
+      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+      onClick={() => onOpen(article)}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <span style={{
+          fontSize: 10, fontWeight: 700,
+          background: 'var(--bg-surface)', color: 'var(--text-2)',
+          padding: '1px 6px', borderRadius: 3,
+        }}>{article.source}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+          {article.publishedAt}
+        </span>
+      </div>
+      <div style={{
+        fontSize: 12, fontWeight: 500, color: 'var(--text)',
+        lineHeight: 1.4,
+        marginBottom: article.tickers.length > 0 ? 8 : 0,
+      }}>
+        {article.headline}
+      </div>
+      {article.tickers.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {article.tickers.slice(0, 3).map(t => (
+            <TickerChip key={t.symbol} symbol={t.symbol} changePct={t.change} quotes={quotes} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── ArticleRow ───────────────────────────────────────────────────────────────
+
+function ArticleRow({ article, quotes, onOpen }: {
+  article: NewsArticle
+  quotes: Record<string, Quote>
+  onOpen: (a: NewsArticle) => void
+}) {
+  const sentiment = articleSentiment(article)
+  const leftColor = SENTIMENT_BORDER_COLOR[sentiment]
+
+  return (
+    <div
+      style={{
+        background: 'var(--bg-card)',
+        borderTop: '0.5px solid var(--border)',
+        borderRight: '0.5px solid var(--border)',
+        borderBottom: '0.5px solid var(--border)',
+        borderLeft: `2px solid ${leftColor}`,
+        borderRadius: 8,
+        padding: '12px 14px',
+        marginBottom: 8,
+        cursor: 'pointer',
+        display: 'flex', gap: 12,
+        transition: 'background 0.12s',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderTopColor = 'var(--border-hard)'
+        e.currentTarget.style.borderRightColor = 'var(--border-hard)'
+        e.currentTarget.style.borderBottomColor = 'var(--border-hard)'
+        e.currentTarget.style.background = 'var(--bg-surface)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderTopColor = 'var(--border)'
+        e.currentTarget.style.borderRightColor = 'var(--border)'
+        e.currentTarget.style.borderBottomColor = 'var(--border)'
+        e.currentTarget.style.background = 'var(--bg-card)'
+      }}
+      onClick={() => onOpen(article)}
+    >
+      {/* Main content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+          <span style={{
+            fontSize: 10, fontWeight: 700,
+            background: 'var(--bg-surface)', color: 'var(--text-2)',
+            padding: '1px 6px', borderRadius: 3,
+          }}>{article.source}</span>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{article.category}</span>
+          <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-muted)' }}>
+            {article.publishedAt}
+          </span>
+        </div>
+        <div style={{
+          fontSize: 13, fontWeight: 500, color: 'var(--text)',
+          lineHeight: 1.4, marginBottom: 5,
+          overflow: 'hidden', display: '-webkit-box',
+          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+        }}>
+          {article.headline}
+        </div>
+        {article.body && (
+          <div style={{
+            fontSize: 12, color: 'var(--text-3)',
+            lineHeight: 1.5, marginBottom: 6,
+            overflow: 'hidden', display: '-webkit-box',
+            WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          }}>
+            {article.body}
+          </div>
+        )}
+        {article.tickers.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {article.tickers.slice(0, 4).map(t => (
+              <TickerChip key={t.symbol} symbol={t.symbol} changePct={t.change} quotes={quotes} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnail */}
+      {article.image ? (
+        <img
+          src={article.image}
+          alt=""
+          loading="lazy"
+          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+          style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}
+        />
+      ) : (
+        <div style={{
+          width: 64, height: 64, borderRadius: 6, flexShrink: 0,
+          background: THUMB_GRADIENT[sentiment],
+        }} />
+      )}
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function NewsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all')
   const isMobile = useMobile()
   const navigate = useNavigate()
-  const { theme } = useTheme()
-  const isLight = theme === 'light'
   const { items: finnhubItems, loading } = useNewsArticles()
   const avItems = useAlphaVantageNews()
 
-  // Merge + deduplicate by ID, sort latest first
   const rawItems = useMemo(() => {
     const seen = new Set<number>()
     const merged: FinnhubNewsItem[] = []
@@ -238,6 +531,7 @@ export default function NewsPage() {
     merged.sort((a, b) => b.datetime - a.datetime)
     return merged
   }, [finnhubItems, avItems])
+
   const { quotes: stockQuotes } = useMarketData()
   const cryptoQuotes = useCryptoQuotes()
   const quotes = useMemo(
@@ -245,11 +539,9 @@ export default function NewsPage() {
     [stockQuotes, cryptoQuotes]
   )
 
-  // Extra images fetched via og:image when Finnhub provides none
   const [extraImages, setExtraImages] = useState<Record<string, string>>({})
   const fetchingIds = useRef(new Set<string>())
 
-  // Build a map of article ID → URL for og:image lookups
   const urlById = useMemo(() => {
     const m: Record<string, string> = {}
     for (const item of rawItems) if (item.url) m[String(item.id)] = item.url
@@ -282,12 +574,11 @@ export default function NewsPage() {
     ? articles
     : articles.filter(a => a.categoryType === activeFilter)
 
-  const hero = filtered[0] ?? null
+  const hero       = filtered[0] ?? null
   const compact2col = filtered.slice(1, 3)
   const moreStories = filtered.slice(3)
-  const storyCount = rawItems.length > 0 ? rawItems.length : 218
+  const storyCount  = rawItems.length > 0 ? rawItems.length : 218
 
-  // Lazily fetch og:image for featured cards that Finnhub didn't give an image for
   useEffect(() => {
     const candidates = [hero, ...compact2col].filter(
       (a): a is NewsArticle => !!a && !a.image && !!urlById[a.id] && !fetchingIds.current.has(a.id)
@@ -301,279 +592,161 @@ export default function NewsPage() {
     }
   }, [hero?.id, compact2col[0]?.id, compact2col[1]?.id, urlById])
 
-  // Merge extraImages into articles for rendering
   function img(article: NewsArticle): string | undefined {
     return article.image || extraImages[article.id]
   }
 
-  return (
-    <div style={{ padding: isMobile ? '16px 16px 100px' : 0 }}>
-      <div>
+  // ── Render ────────────────────────────────────────────────────────────────
 
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.3px' }}>News</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'var(--green-bg)', border: '1px solid var(--green-border)', borderRadius: 20, padding: '3px 10px' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }} />
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--green)' }}>
-              Live · {loading ? '…' : `${storyCount} stories today`}
-            </span>
+  return (
+    <div style={{ background: 'var(--bg-page)', minHeight: '100%' }}>
+
+      {/* ── PAGE HEADER ── */}
+      <div style={{
+        background: 'var(--bg-card)',
+        borderBottom: '0.5px solid var(--border)',
+        padding: '14px 20px 0',
+      }}>
+        {/* Top row: title + controls */}
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', marginBottom: 12,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>News</span>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              background: 'var(--green-bg)',
+              border: '0.5px solid var(--green-border)',
+              borderRadius: 20, padding: '3px 9px',
+            }}>
+              <span className="live-pulse" style={{
+                width: 5, height: 5, borderRadius: '50%',
+                background: 'var(--green)', display: 'inline-block', flexShrink: 0,
+              }} />
+              <span style={{ fontSize: 11, color: 'var(--green)' }}>
+                Live · {loading ? '…' : `${storyCount} stories today`}
+              </span>
+            </div>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            <select style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
+
+          <div style={{ display: 'flex', gap: 6 }}>
+            <select style={{
+              background: 'var(--bg-surface)', border: '0.5px solid var(--border)',
+              borderRadius: 6, padding: '5px 10px', fontSize: 12,
+              color: 'var(--text-2)', cursor: 'pointer', outline: 'none',
+            }}>
               <option>My wall</option>
               <option>All sources</option>
             </select>
-            <select style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
+            <select style={{
+              background: 'var(--bg-surface)', border: '0.5px solid var(--border)',
+              borderRadius: 6, padding: '5px 10px', fontSize: 12,
+              color: 'var(--text-2)', cursor: 'pointer', outline: 'none',
+            }}>
               <option>Sort: Latest</option>
               <option>Sort: Relevance</option>
             </select>
           </div>
         </div>
 
-        {/* Filter tabs */}
-        <div className="scrollbar-hide" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
-          {FILTER_TABS.map(({ id, label }) => {
+        {/* Filter chips */}
+        <div className="scrollbar-hide" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', paddingBottom: 12 }}>
+          {FILTER_TABS.map(({ id, label, sentiment }) => {
             const active = activeFilter === id
+            let chipStyle: React.CSSProperties
+
+            if (sentiment === 'bullish') {
+              chipStyle = {
+                padding: '5px 12px', borderRadius: 5, fontSize: 12,
+                cursor: 'pointer', transition: 'all 0.15s',
+                fontFamily: 'Inter, sans-serif', fontWeight: active ? 500 : 400,
+                background: active ? 'var(--green-bg)' : 'transparent',
+                border: '0.5px solid var(--green-border)',
+                color: 'var(--green)',
+              }
+            } else if (sentiment === 'bearish') {
+              chipStyle = {
+                padding: '5px 12px', borderRadius: 5, fontSize: 12,
+                cursor: 'pointer', transition: 'all 0.15s',
+                fontFamily: 'Inter, sans-serif', fontWeight: active ? 500 : 400,
+                background: active ? 'var(--red-bg)' : 'transparent',
+                border: '0.5px solid var(--red-border)',
+                color: 'var(--red)',
+              }
+            } else {
+              chipStyle = {
+                padding: '5px 12px', borderRadius: 5, fontSize: 12,
+                cursor: 'pointer', transition: 'all 0.15s',
+                fontFamily: 'Inter, sans-serif', fontWeight: active ? 500 : 400,
+                background: active ? 'var(--bg-surface)' : 'transparent',
+                border: `0.5px solid ${active ? 'var(--border-hard)' : 'var(--border)'}`,
+                color: active ? 'var(--text)' : 'var(--text-3)',
+              }
+            }
+
             return (
               <button
                 key={id}
                 onClick={() => setActiveFilter(id)}
-                style={{
-                  padding: '5px 13px', borderRadius: 4, border: '1px solid',
-                  fontSize: 12, cursor: 'pointer', transition: 'all 0.15s',
-                  fontFamily: 'Inter, sans-serif',
-                  background: active ? (isLight ? '#f0fdf4' : '#161616') : 'transparent',
-                  color:      active ? (isLight ? '#16a34a' : '#e8e8e8') : (isLight ? '#666666' : '#555555'),
-                  borderColor: active ? (isLight ? '#bbf7d0' : '#2a2a2a') : (isLight ? '#e2e2e2' : '#1e1e1e'),
-                  fontWeight: active ? 500 : 400,
-                }}
+                className={sentiment ? undefined : 'news-chip-default'}
+                style={chipStyle}
               >
                 {label}
               </button>
             )
           })}
         </div>
+      </div>
 
+      {/* ── PAGE BODY ── */}
+      <div style={{ padding: isMobile ? '16px 16px 100px' : '16px 20px' }}>
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text4)', fontSize: 14 }}>No stories match this filter.</div>
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-4)', fontSize: 14 }}>
+            No stories match this filter.
+          </div>
         ) : (
           <>
-            {/* Hero card */}
+            {/* Featured article */}
             {hero && (
-              <div
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden', marginBottom: 14, cursor: 'pointer', transition: 'border-color 0.15s' }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--blue-border)')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
-                onClick={() => openArticle(hero)}
-              >
-                {/* Hero thumbnail */}
-                {img(hero) && (
-                  <img
-                    src={img(hero)}
-                    alt=""
-                    loading="lazy"
-                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
-                    style={{ width: '100%', height: isMobile ? 300 : 480, objectFit: 'cover', objectPosition: 'top', display: 'block' }}
-                  />
-                )}
-                <div style={{ padding: '18px 20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                    <span style={{ background: hero.sourceColor, color: '#fff', fontSize: 9, fontWeight: 800, letterSpacing: 1, padding: '2px 7px', borderRadius: 4 }}>{hero.source}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text4)' }}>{hero.category}</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text4)', fontFamily: 'JetBrains Mono, monospace' }}>{hero.publishedAt}</span>
-                  </div>
-                  <h2 style={{ fontSize: isMobile ? 17 : 20, fontWeight: 800, color: 'var(--text)', lineHeight: 1.3, margin: '0 0 12px', letterSpacing: '-0.3px' }}>
-                    {hero.headline}
-                  </h2>
-                  {hero.body && (
-                    <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.7, margin: '0 0 16px',
-                      display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {hero.body}
-                    </p>
-                  )}
-                  {hero.tickers.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
-                      {hero.tickers.map(t => (
-                        <TickerChip key={t.symbol} symbol={t.symbol} changePct={t.change} quotes={quotes} />
-                      ))}
-                    </div>
-                  )}
-                  <button style={{ background: 'transparent', border: '1px solid #1e1e1e', borderRadius: 4, padding: '8px 16px', fontSize: 12, fontWeight: 600, color: '#555555', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-                    Read full story →
-                  </button>
-                </div>
-              </div>
+              <FeaturedCard
+                article={hero}
+                imageUrl={img(hero)}
+                quotes={quotes}
+                onOpen={openArticle}
+              />
             )}
 
-            {/* 2-column compact cards */}
+            {/* 2-column grid */}
             {compact2col.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: 8, marginBottom: 8,
+              }}>
                 {compact2col.map(article => (
-                  <ArticleCard key={article.id} article={article} quotes={quotes} onOpen={openArticle} extraImage={extraImages[article.id]} />
+                  <GridCard
+                    key={article.id}
+                    article={article}
+                    quotes={quotes}
+                    onOpen={openArticle}
+                  />
                 ))}
               </div>
             )}
 
-            {/* More stories */}
-            {moreStories.length > 0 && (
-              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border2)' }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>More stories today</span>
-                  <button style={{ fontSize: 11, fontWeight: 600, color: 'var(--blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                    See all {storyCount}
-                  </button>
-                </div>
-                {moreStories.map((article, i) => (
-                  <CompactRow key={article.id} article={article} isLast={i === moreStories.length - 1} quotes={quotes} onOpen={openArticle} />
-                ))}
-              </div>
-            )}
+            {/* Article rows */}
+            {moreStories.map(article => (
+              <ArticleRow
+                key={article.id}
+                article={article}
+                quotes={quotes}
+                onOpen={openArticle}
+              />
+            ))}
           </>
         )}
       </div>
-    </div>
-  )
-}
-
-// ─── TickerChip ────────────────────────────────────────────────────────────────
-
-function TickerChip({ symbol, changePct, quotes }: { symbol: string; changePct: number; quotes: Record<string, Quote> }) {
-  const quote = quotes[symbol]
-  const pct = quote ? quote.changePct : changePct
-  const up = pct >= 0
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 5,
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700,
-      padding: '4px 10px', borderRadius: 6,
-      background: up ? 'var(--green-bg)' : 'var(--red-bg)',
-      color: up ? 'var(--green)' : 'var(--red)',
-      border: `1px solid ${up ? 'var(--green-border)' : 'var(--red-border)'}`,
-    }}>
-      {symbol}
-      {quote ? (
-        <span style={{ fontWeight: 500 }}>{up ? '+' : ''}{pct.toFixed(2)}%</span>
-      ) : pct !== 0 ? (
-        <span style={{ fontWeight: 500 }}>{up ? '+' : ''}{pct.toFixed(2)}%</span>
-      ) : null}
-    </span>
-  )
-}
-
-// ─── ArticleCard ───────────────────────────────────────────────────────────────
-
-function ArticleCard({ article, quotes, onOpen, extraImage }: { article: NewsArticle; quotes: Record<string, Quote>; onOpen: (a: NewsArticle) => void; extraImage?: string }) {
-  const thumb = article.image || extraImage
-  return (
-    <div
-      style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', transition: 'border-color 0.15s' }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--blue-border)')}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
-      onClick={() => onOpen(article)}
-    >
-      {thumb && (
-        <img
-          src={thumb}
-          alt=""
-          loading="lazy"
-          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
-          style={{ width: '100%', height: 200, objectFit: 'cover', objectPosition: 'top', display: 'block' }}
-        />
-      )}
-      <div style={{ padding: '14px 14px 14px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <span style={{ background: article.sourceColor, color: '#fff', fontSize: 9, fontWeight: 800, letterSpacing: 0.8, padding: '2px 6px', borderRadius: 4 }}>{article.source}</span>
-        <span style={{ fontSize: 10, color: 'var(--text4)' }}>{article.category}</span>
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text4)', fontFamily: 'JetBrains Mono, monospace' }}>{article.publishedAt}</span>
-      </div>
-      <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', lineHeight: 1.4, margin: '0 0 8px' }}>{article.headline}</h3>
-      {article.body && (
-        <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6, margin: '0 0 12px',
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-          {article.body}
-        </p>
-      )}
-      {article.tickers.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {article.tickers.map(t => (
-            <TickerChip key={t.symbol} symbol={t.symbol} changePct={t.change} quotes={quotes} />
-          ))}
-        </div>
-      )}
-      </div>
-    </div>
-  )
-}
-
-// ─── CompactRow ────────────────────────────────────────────────────────────────
-
-function CompactRow({ article, isLast, quotes, onOpen }: { article: NewsArticle; isLast: boolean; quotes: Record<string, Quote>; onOpen: (a: NewsArticle) => void }) {
-  const mainTicker = article.tickers[0]
-  const quote = mainTicker ? quotes[mainTicker.symbol] : null
-  const price = quote?.price ?? 0
-  const pct = quote?.changePct ?? mainTicker?.change ?? 0
-  const up = pct >= 0
-
-  return (
-    <div
-      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: isLast ? 'none' : '1px solid var(--border2)', cursor: 'pointer', transition: 'background 0.12s' }}
-      onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
-      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-      onClick={() => onOpen(article)}
-    >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-          <span style={{ background: article.sourceColor, color: '#fff', fontSize: 9, fontWeight: 800, letterSpacing: 0.8, padding: '1px 6px', borderRadius: 3 }}>{article.source}</span>
-          <span style={{ fontSize: 10, color: 'var(--text4)', fontFamily: 'JetBrains Mono, monospace' }}>{article.publishedAt}</span>
-        </div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-          {article.headline}
-        </div>
-        {article.tickers.length > 0 && (
-          <div style={{ display: 'flex', gap: 5, marginTop: 6, flexWrap: 'wrap' }}>
-            {article.tickers.slice(0, 4).map(t => {
-              const q = quotes[t.symbol]
-              const p = q?.changePct ?? t.change
-              const up = p >= 0
-              return (
-                <span key={t.symbol} style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700,
-                  padding: '2px 7px', borderRadius: 5,
-                  background: up ? 'var(--green-bg)' : 'var(--red-bg)',
-                  color: up ? 'var(--green)' : 'var(--red)',
-                  border: `1px solid ${up ? 'var(--green-border)' : 'var(--red-border)'}`,
-                }}>
-                  {t.symbol} {p !== 0 && <span style={{ fontWeight: 500 }}>{up ? '+' : ''}{p.toFixed(2)}%</span>}
-                </span>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Right side: thumbnail if available, otherwise price info */}
-      {article.image ? (
-        <img
-          src={article.image}
-          alt=""
-          loading="lazy"
-          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
-          style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
-        />
-      ) : mainTicker && (
-        <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 72 }}>
-          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, color: 'var(--text4)', marginBottom: 2 }}>{mainTicker.symbol}</div>
-          {price > 0 && (
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
-              ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-          )}
-          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, color: up ? 'var(--green)' : 'var(--red)' }}>
-            {up ? '+' : ''}{pct.toFixed(2)}%
-          </div>
-        </div>
-      )}
     </div>
   )
 }

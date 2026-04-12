@@ -4,12 +4,12 @@ import { firmBadge, phaseBadge, Avatar, PostActions, LessonBlock } from './Miles
 
 function barColor(used: number, limit: number): string {
   const pct = limit > 0 ? used / limit : 0;
-  if (pct >= 0.8) return '#ef4444';
-  if (pct >= 0.6) return '#f59e0b';
-  return '#22c55e';
+  if (pct >= 0.8) return 'var(--red)';
+  if (pct >= 0.6) return 'var(--amber)';
+  return 'var(--green)';
 }
 
-function RuleBar({ rule }: { rule: Rule }) {
+function RuleBar({ rule, isLast }: { rule: Rule; isLast: boolean }) {
   const pct = rule.limit > 0 ? Math.min(rule.used / rule.limit, 1) : 0;
   const color = barColor(rule.used, rule.limit);
 
@@ -20,18 +20,20 @@ function RuleBar({ rule }: { rule: Rule }) {
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '0.5px solid var(--border)' }}>
-      <div style={{ width: 100, fontSize: 12, color: 'var(--text-3)', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {rule.name}
+    <div style={{
+      padding: '6px 10px',
+      borderBottom: isLast ? 'none' : '0.5px solid var(--border-soft)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {rule.name}
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums', flexShrink: 0, marginLeft: 8 }}>
+          {formatVal(rule.used, rule.type)} / {formatVal(rule.limit, rule.type)}
+        </span>
       </div>
-      <div style={{ flex: 1, height: 3, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${pct * 100}%`, background: color, borderRadius: 2 }} />
-      </div>
-      <div style={{ fontSize: 11, color: 'var(--text-3)', fontVariantNumeric: 'tabular-nums', flexShrink: 0, textAlign: 'right', minWidth: 40 }}>
-        {formatVal(rule.used, rule.type)}
-      </div>
-      <div style={{ fontSize: 11, color: 'var(--border-emphasis)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
-        / {formatVal(rule.limit, rule.type)}
+      <div style={{ height: 4, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct * 100}%`, background: color, borderRadius: 4 }} />
       </div>
     </div>
   );
@@ -54,88 +56,93 @@ export default function ProgressPost({ post, isLiked, onLike, isFollowing, onFol
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: 'flex', gap: 12,
-        paddingTop: '14px', paddingBottom: '14px', paddingRight: '16px', paddingLeft: '12px',
-        borderLeft: '2px solid #8b5cf6',
-        borderBottom: '0.5px solid #1e1e1e',
-        background: hovered ? 'var(--surface)' : 'transparent',
-        transition: 'background 0.1s',
+        background: 'var(--bg-card)',
+        border: `0.5px solid ${hovered ? 'var(--border-soft)' : 'var(--border)'}`,
+        borderLeft: '2px solid var(--blue)',
+        borderRadius: 8,
+        padding: 14,
+        marginBottom: 10,
+        transition: 'border-color 0.1s',
       }}
     >
-      {/* Avatar */}
-      <Avatar initials={user.avatar} color="var(--border)" size={40} />
+      <div style={{ display: 'flex', gap: 12 }}>
+        {/* Avatar */}
+        <Avatar initials={user.avatar} color="" size={36} />
 
-      {/* Right column */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{user.name}</span>
-          {isVerified && (
+        {/* Right column */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{user.name}</span>
+            {isVerified && (
+              <span style={{
+                width: 15, height: 15, borderRadius: '50%', background: '#1d9bf0',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                marginLeft: 2, flexShrink: 0,
+              }}>
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+            )}
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>@{user.handle}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-hint)' }}>·</span>
+            <span style={{ fontSize: 12, color: 'var(--text-hint)' }}>{createdAt}</span>
+            {firmBadge(firm)}
+            {phaseBadge(phase)}
             <span style={{
-              width: 16, height: 16, borderRadius: '50%', background: '#1d9bf0',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginLeft: 2, flexShrink: 0,
+              fontSize: 10, fontWeight: 500, color: 'var(--text-muted)',
+              padding: '2px 7px', borderRadius: 3,
+              background: 'var(--bg-surface)', border: '0.5px solid var(--border)',
             }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Day {dayNumber}
             </span>
-          )}
-          <span style={{ fontSize: 13, color: 'var(--text-3)' }}>@{user.handle}</span>
-          <span style={{ fontSize: 13, color: 'var(--text-3)' }}>·</span>
-          <span style={{ fontSize: 13, color: 'var(--text-3)' }}>{createdAt}</span>
-          {firmBadge(firm)}
-          {phaseBadge(phase)}
-          <span style={{
-            fontSize: 11, fontWeight: 500, color: 'var(--text-3)',
-            padding: '1px 6px', borderRadius: 3,
-            background: 'var(--surface)', border: '0.5px solid var(--border)',
-          }}>
-            Day {dayNumber}
-          </span>
-        </div>
-
-        {/* Narrative */}
-        {narrative && (
-          <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.6, margin: '0 0 12px 0' }}>
-            {narrative}
-          </p>
-        )}
-
-        {/* Rule bars embedded card */}
-        {rules && rules.length > 0 && (
-          <div style={{
-            borderRadius: 8, border: '0.5px solid var(--border)',
-            background: 'var(--surface)', marginBottom: 12, overflow: 'hidden',
-          }}>
-            {rules.map((r, i) => (
-              <div key={r.type} style={{ borderBottom: i < rules.length - 1 ? 'none' : undefined }}>
-                <RuleBar rule={r} />
-              </div>
-            ))}
           </div>
-        )}
 
-        {lesson && <LessonBlock text={lesson} />}
+          {/* Narrative */}
+          {narrative && (
+            <p style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.6, margin: '0 0 10px 0' }}>
+              {narrative}
+            </p>
+          )}
 
-        <PostActions
-          likes={post.likes}
-          comments={post.comments}
-          postId={post.id}
-          isLiked={isLiked}
-          onLike={onLike}
-          extra={
-            <button
-              onClick={() => onFollow(post.id)}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px',
-                fontSize: 12, color: isFollowing ? '#22c55e' : 'var(--text-3)', fontFamily: 'inherit', borderRadius: 4,
-              }}
-              onMouseEnter={e => { if (!isFollowing) (e.currentTarget as HTMLButtonElement).style.color = '#1d9bf0'; }}
-              onMouseLeave={e => { if (!isFollowing) (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-3)'; }}
-            >
-              {isFollowing ? 'Following ✓' : 'Follow challenge ↗'}
-            </button>
-          }
-        />
+          {/* Rule bars card */}
+          {rules && rules.length > 0 && (
+            <div style={{
+              background: 'var(--bg-surface)',
+              border: '0.5px solid var(--border)',
+              borderRadius: 6,
+              marginBottom: 10,
+              overflow: 'hidden',
+            }}>
+              {rules.map((r, i) => (
+                <RuleBar key={r.type} rule={r} isLast={i === rules.length - 1} />
+              ))}
+            </div>
+          )}
+
+          {lesson && <LessonBlock text={lesson} />}
+
+          <PostActions
+            likes={post.likes}
+            comments={post.comments}
+            postId={post.id}
+            isLiked={isLiked}
+            onLike={onLike}
+            extra={
+              <button
+                onClick={() => onFollow(post.id)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px',
+                  fontSize: 11, color: isFollowing ? 'var(--green)' : 'var(--text-hint)',
+                  fontFamily: 'inherit', borderRadius: 4,
+                }}
+                onMouseEnter={e => { if (!isFollowing) (e.currentTarget as HTMLButtonElement).style.color = 'var(--blue)'; }}
+                onMouseLeave={e => { if (!isFollowing) (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-hint)'; }}
+              >
+                {isFollowing ? 'Following ✓' : 'Follow challenge ↗'}
+              </button>
+            }
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { currentUser, APP_NAME, DEMO_USERS, DEMO_POSTS } from '../../data/demo';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMarketData } from '../../context/MarketDataContext';
 import { fetchSearch, type SearchResult } from '../feed/TickerChart';
 import type { User, Post } from '../../types/index';
 import { useTheme } from '../../context/ThemeContext';
+import { useNotifications } from '../../hooks/useNotifications';
 
 function useDebounce<T>(value: T, delay: number): T {
   const [d, setD] = useState(value);
@@ -28,8 +29,11 @@ function CandlIcon() {
 export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () => void; notifOpen: boolean }) {
   const { quotes } = useMarketData();
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, toggle } = useTheme();
   const isLight = theme === 'light';
+  const { unreadCount } = useNotifications();
+  const isNotifPage = location.pathname === '/notifications';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -202,7 +206,7 @@ export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () =
                 <>
                   {matchedUsers.length > 0 && (
                     <>
-                      <div style={{ padding: '6px 12px 3px', fontSize: 10, fontWeight: 500, color: 'var(--text-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>People</div>
+                      <div style={{ padding: '6px 12px 3px', fontSize: 10, fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>People</div>
                       {matchedUsers.map(u => (
                         <div
                           key={u.id}
@@ -228,7 +232,7 @@ export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () =
 
                   {tickerResults.length > 0 && (
                     <>
-                      <div style={{ padding: '6px 12px 3px', fontSize: 10, fontWeight: 500, color: 'var(--text-4)', textTransform: 'uppercase', letterSpacing: '0.06em', borderTop: matchedUsers.length > 0 ? '0.5px solid var(--border)' : 'none' }}>Tickers</div>
+                      <div style={{ padding: '6px 12px 3px', fontSize: 10, fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', borderTop: matchedUsers.length > 0 ? '0.5px solid var(--border)' : 'none' }}>Tickers</div>
                       {tickerResults.map(r => (
                         <div
                           key={r.symbol + r.exchange}
@@ -256,7 +260,7 @@ export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () =
 
                   {matchedPosts.length > 0 && (
                     <>
-                      <div style={{ padding: '6px 12px 3px', fontSize: 10, fontWeight: 500, color: 'var(--text-4)', textTransform: 'uppercase', letterSpacing: '0.06em', borderTop: (matchedUsers.length > 0 || tickerResults.length > 0) ? '0.5px solid var(--border)' : 'none' }}>Posts</div>
+                      <div style={{ padding: '6px 12px 3px', fontSize: 10, fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', borderTop: (matchedUsers.length > 0 || tickerResults.length > 0) ? '0.5px solid var(--border)' : 'none' }}>Posts</div>
                       {matchedPosts.map(p => (
                         <div
                           key={p.id}
@@ -303,19 +307,26 @@ export default function Topbar({ onNotifClick, notifOpen }: { onNotifClick: () =
 
         {/* Notif bell */}
         <button
-          className={`icon-btn ${notifOpen ? 'icon-btn-active' : ''}`}
           onClick={() => navigate('/notifications')}
-          style={{ position: 'relative' }}
+          style={{
+            position: 'relative', width: 28, height: 28, borderRadius: '50%',
+            background: unreadCount > 0 ? 'var(--green-bg)' : 'var(--surface)',
+            border: `0.5px solid ${unreadCount > 0 ? 'var(--green-border)' : 'var(--border)'}`,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: isNotifPage ? 'var(--green)' : 'var(--text-3)',
+          }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
-          <span style={{
-            position: 'absolute', top: '4px', right: '4px',
-            width: '6px', height: '6px', borderRadius: '50%',
-            background: '#ef4444', border: '1px solid var(--bg)',
-          }} />
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute', top: 2, right: 2,
+              width: 7, height: 7, borderRadius: '50%',
+              background: 'var(--red)', border: '1.5px solid var(--surface)',
+            }} />
+          )}
         </button>
 
         {/* User pill */}

@@ -92,7 +92,7 @@ function SearchModal({ onClose, onAdd }: {
           )}
           {results.length === 0 && !query.trim() && (
             <div style={{ padding: '20px 16px' }}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 10 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 10 }}>
                 Popular
               </div>
               {['NVDA','TSLA','AAPL','MSFT','GOOGL','AMZN','META','SPY','QQQ','AMD'].map(sym => (
@@ -255,7 +255,7 @@ export default function WatchlistPage() {
         {!isMobile && (
           <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr 0.9fr 90px 0.8fr 60px 50px', padding: '8px 18px', borderBottom: '1px solid var(--border)' }}>
             {['SYMBOL', 'PRICE', 'CHANGE', 'INTRADAY', 'VOLUME', 'ALERT', ''].map(col => (
-              <div key={col} style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--text-3)', textTransform: 'uppercase' }}>{col}</div>
+              <div key={col} style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{col}</div>
             ))}
           </div>
         )}

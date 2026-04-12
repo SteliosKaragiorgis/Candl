@@ -1,247 +1,183 @@
+import { useState } from 'react';
 import type { PendingTrade } from '../../hooks/usePendingTrade';
-import { currentUser } from '../../data/demo';
 import TradeChart from './TradeChart';
-
-const DEMO_BARS = [30, 34, 31, 37, 40, 38, 43, 47, 44, 50, 56, 63, 70, 76, 82];
-
-function MiniBarChart() {
-  const max = Math.max(...DEMO_BARS);
-  const min = Math.min(...DEMO_BARS);
-  const range = max - min;
-  const chartH = 36;
-  const barW = 4;
-  const gap = 2;
-  const totalW = DEMO_BARS.length * (barW + gap) - gap;
-
-  return (
-    <svg width={totalW} height={chartH} style={{ display: 'block', flexShrink: 0 }}>
-      {DEMO_BARS.map((v, i) => {
-        const barH = ((v - min) / range) * (chartH - 6) + 6;
-        const isRecent = i >= DEMO_BARS.length - 4;
-        return (
-          <rect
-            key={i}
-            x={i * (barW + gap)}
-            y={chartH - barH}
-            width={barW}
-            height={barH}
-            rx={1.5}
-            fill={isRecent ? '#22c55e' : '#2a2a2a'}
-          />
-        );
-      })}
-    </svg>
-  );
-}
+import { useMT5Accounts } from '../../hooks/useMT5Accounts';
+import { useTradeCandles, chartBounds } from '../../hooks/useTradeCandles';
 
 interface Props {
   trade: PendingTrade;
-  onSkip: () => void;
   onPublish: () => void;
-  onRemind: () => void;
+  onSkip: () => void;
+  onRemindLater: () => void;
 }
 
-export default function PendingTradeCard({ trade, onSkip, onPublish, onRemind }: Props) {
-  const pnlStr = trade.net_profit >= 0 ? `+$${trade.net_profit.toFixed(2)}` : `-$${Math.abs(trade.net_profit).toFixed(2)}`;
-  const closedMs = Date.now() - new Date(trade.close_time).getTime();
-  const detectedMinsAgo = Math.round(closedMs / 60000);
-  const timeLabel = detectedMinsAgo < 1 ? 'just now' : `${detectedMinsAgo}m ago`;
+export default function PendingTradeCard({ trade, onPublish, onSkip, onRemindLater }: Props) {
+  const [showChart, setShowChart] = useState(false);
+
+  // Fetch real candles from the first connected MT5 account.
+  // enabled=false until the user opens the chart to avoid upfront network requests.
+  const { accounts } = useMT5Accounts();
+  const connected = accounts.find(
+    a => a.status === 'connected' && a.metaApiAccountId && a.metaApiRegion,
+  );
+  const { candles, timeframe: candleTF } = useTradeCandles({
+    symbol:    trade.symbol,
+    openTime:  trade.open_time,
+    closeTime: trade.close_time,
+    accountId: connected?.metaApiAccountId ?? '',
+    region:    connected?.metaApiRegion    ?? '',
+    enabled:   showChart && !!(connected?.metaApiAccountId && connected?.metaApiRegion),
+  });
+
+  const { sl: chartSL, tp: chartTP } = chartBounds(
+    trade.direction, trade.entry_price, trade.exit_price, trade.sl, trade.tp,
+  );
+
+  const pnl = trade.net_profit;
+  const pnlStr = pnl >= 0 ? `+$${pnl.toFixed(2)}` : `-$${Math.abs(pnl).toFixed(2)}`;
+  const isLong = trade.direction.toUpperCase() === 'LONG';
+  const rDisplay = trade.r_multiple >= 0 ? `+${trade.r_multiple}R` : `${trade.r_multiple}R`;
 
   return (
     <div style={{
-      background: 'var(--surface)',
-      border: '0.5px solid var(--border)',
-      borderTop: '1px solid #22c55e',
+      background: 'var(--bg-card)',
+      border: '0.5px solid var(--green-border)',
+      borderTop: '2px solid var(--green)',
       borderRadius: 8,
-      marginBottom: 16,
+      padding: '14px 16px',
+      margin: '10px 16px',
     }}>
-      {/* "Awaiting story" label */}
-      <div style={{
-        padding: '8px 16px 0',
-        fontSize: 10, fontWeight: 500, color: '#666666',
-        textTransform: 'uppercase', letterSpacing: '0.07em',
-      }}>
-        Awaiting story
+
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="live-pulse" style={{
+            width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', flexShrink: 0,
+          }} />
+          <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--green)' }}>Trade detected</span>
+          <span style={{ fontSize: 11, color: 'var(--text-4)', marginLeft: 4 }}>via MT5 · just now</span>
+        </div>
+        <button
+          onClick={onSkip}
+          style={{ fontSize: 18, color: 'var(--text-4)', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: 0 }}
+        >
+          ×
+        </button>
       </div>
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px 10px' }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-          background: 'var(--surface2)', border: '0.5px solid var(--border-emphasis)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'var(--text-2)', fontSize: 12, fontWeight: 500,
+      {/* Trade row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{trade.symbol}</span>
+        <span style={{
+          fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 3,
+          background: isLong ? 'var(--green-bg)' : 'var(--red-bg)',
+          color: isLong ? 'var(--green)' : 'var(--red)',
+          border: `0.5px solid ${isLong ? 'var(--green-border)' : 'var(--red-border)'}`,
         }}>
-          {currentUser.initials}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{currentUser.name}</span>
-            <span style={{
-              fontSize: 9, fontWeight: 500, letterSpacing: '0.5px',
-              padding: '1px 6px', borderRadius: 3,
-              background: '#0d1627', color: '#1d9bf0',
-              border: '0.5px solid #1a3a5c',
-            }}>MT5 VERIFIED</span>
-            <span style={{
-              fontSize: 9, fontWeight: 500, letterSpacing: '0.5px',
-              padding: '1px 6px', borderRadius: 3,
-              background: 'var(--surface2)', color: 'var(--text-3)',
-              border: '0.5px solid var(--border)',
-            }}>STORY PENDING</span>
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
-            @{currentUser.username} · {timeLabel}
-          </div>
-        </div>
+          {isLong ? 'LONG' : 'SHORT'}
+        </span>
+        <span style={{
+          fontSize: 15, fontWeight: 700, marginLeft: 'auto',
+          color: pnl >= 0 ? 'var(--green)' : 'var(--red)',
+          fontVariantNumeric: 'tabular-nums',
+        }}>
+          {pnlStr}
+        </span>
       </div>
 
-      {/* Trade block */}
+      {/* Stats grid */}
       <div style={{
-        margin: '0 16px 10px',
-        background: 'var(--bg)',
-        border: '0.5px solid var(--border)',
-        borderRadius: 6,
-        padding: '10px 12px',
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 1, background: 'var(--border-soft)',
+        borderRadius: 5, overflow: 'hidden', marginBottom: 10,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-              {trade.symbol}
-            </span>
-            <span style={{
-              fontSize: 10, fontWeight: 600, letterSpacing: '0.5px',
-              padding: '2px 7px', borderRadius: 4,
-              background: '#0d1f12', color: '#22c55e', border: '0.5px solid #1a3a22',
-            }}>
-              {trade.direction.toUpperCase()}
-            </span>
-            <span style={{
-              fontSize: 15, fontWeight: 600,
-              color: trade.net_profit >= 0 ? '#22c55e' : '#ef4444',
-              fontVariantNumeric: 'tabular-nums',
-            }}>
-              {pnlStr}
-            </span>
+        {[
+          { label: 'ENTRY',      value: trade.entry_price.toFixed(4) },
+          { label: 'EXIT',       value: trade.exit_price.toFixed(4)  },
+          { label: 'R MULTIPLE', value: rDisplay                      },
+        ].map(({ label, value }) => (
+          <div key={label} style={{ background: 'var(--bg-surface)', padding: '7px 10px' }}>
+            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+            <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-4)', marginTop: 1 }}>{label}</div>
           </div>
-          <MiniBarChart />
+        ))}
+      </div>
+
+      {/* Chart toggle */}
+      <button
+        onClick={() => setShowChart(o => !o)}
+        style={{
+          fontSize: 12,
+          color: 'var(--green)',
+          textAlign: 'center',
+          padding: '6px 0',
+          borderTop: '0.5px solid var(--green-border)',
+          cursor: 'pointer',
+          background: 'none',
+          borderLeft: 'none',
+          borderRight: 'none',
+          borderBottom: 'none',
+          width: '100%',
+          marginBottom: 10,
+          fontFamily: 'inherit',
+        }}
+      >
+        {showChart ? 'Hide chart ↑' : 'View chart ↓'}
+      </button>
+      {showChart && (
+        <div style={{ marginBottom: 10 }}>
+          <TradeChart
+            symbol={trade.symbol}
+            direction={trade.direction}
+            entryPrice={trade.entry_price}
+            exitPrice={trade.exit_price}
+            stopLoss={chartSL}
+            takeProfit={chartTP}
+            entryTime={trade.open_time}
+            exitTime={trade.close_time}
+            rMultiple={trade.r_multiple}
+            priceData={candles ?? undefined}
+            timeframe={candles ? candleTF : undefined}
+            height={260}
+          />
         </div>
+      )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
-          {[
-            { label: 'ENTRY',    value: trade.entry_price.toFixed(4) },
-            { label: 'EXIT',     value: trade.exit_price.toFixed(4) },
-            { label: 'R MULT',   value: `${trade.r_multiple}R` },
-            { label: 'DURATION', value: trade.duration_formatted },
-          ].map(({ label, value }) => (
-            <div key={label} style={{
-              background: 'var(--surface)',
-              border: '0.5px solid var(--border)',
-              borderRadius: 4,
-              padding: '6px 8px',
-            }}>
-              <div style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.6px', color: '#555555', textTransform: 'uppercase', marginBottom: 2 }}>
-                {label}
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: '#d4d4d4', fontVariantNumeric: 'tabular-nums' }}>
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Trade chart — always expanded */}
-      <div style={{ margin: '0 16px 10px' }}>
-        <TradeChart
-          symbol={trade.symbol}
-          direction={trade.direction}
-          entryPrice={trade.entry_price}
-          exitPrice={trade.exit_price}
-          stopLoss={trade.sl}
-          takeProfit={trade.tp}
-          entryTime={trade.open_time}
-          exitTime={trade.close_time}
-          pnl={trade.net_profit}
-          rMultiple={trade.r_multiple}
-          timeframe="H1"
-        />
-      </div>
-
-      {/* Source badges */}
-      <div style={{ display: 'flex', gap: 6, padding: '0 16px 10px', flexWrap: 'wrap' }}>
-        <span style={{
-          fontSize: 10, fontWeight: 500,
-          padding: '2px 8px', borderRadius: 3,
-          background: '#0d1f12', color: '#22c55e',
-          border: '0.5px solid #1a3a22',
-        }}>✓ MT5 verified</span>
-        <span style={{
-          fontSize: 10, fontWeight: 500,
-          padding: '2px 8px', borderRadius: 3,
-          background: '#0d1f12', color: '#22c55e',
-          border: '0.5px solid #1a3a22',
-        }}>✓ Tradezella linked</span>
-      </div>
-
-      {/* Subtext */}
-      <p style={{ margin: '0 16px 12px', fontSize: 12, color: 'var(--text-3)', lineHeight: 1.55 }}>
-        Add your narrative, emotion tag and lesson — takes 30 seconds. Only you see this until you publish.
-      </p>
-
-      {/* Buttons */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '0 16px 14px' }}>
+      {/* Actions row */}
+      <div style={{ display: 'flex', gap: 6 }}>
         <button
           onClick={onPublish}
           style={{
-            width: '100%',
-            background: '#0d1f12',
-            color: '#22c55e',
-            border: '0.5px solid #1a3a22',
-            borderRadius: 4,
-            padding: '10px 0',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
+            flex: 1, background: 'var(--green)', color: '#000000',
+            fontSize: 12, fontWeight: 500, padding: 9,
+            borderRadius: 6, border: 'none', cursor: 'pointer', textAlign: 'center',
+            fontFamily: 'inherit',
           }}
         >
           Add story and publish
         </button>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button
-            onClick={onSkip}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              color: 'var(--text-3)',
-              border: '0.5px solid var(--border)',
-              borderRadius: 4,
-              padding: '8px 0',
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            Skip
-          </button>
-          <button
-            onClick={onRemind}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              color: 'var(--text-3)',
-              border: '0.5px solid var(--border)',
-              borderRadius: 4,
-              padding: '8px 0',
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            Remind me later
-          </button>
-        </div>
+        <button
+          onClick={onSkip}
+          style={{
+            fontSize: 12, color: 'var(--text-3)', padding: '9px 14px',
+            borderRadius: 6, border: '0.5px solid var(--border-hard)',
+            background: 'transparent', cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >
+          Skip
+        </button>
+        <button
+          onClick={onRemindLater}
+          style={{
+            fontSize: 12, color: 'var(--text-3)', padding: '9px 14px',
+            borderRadius: 6, border: '0.5px solid var(--border-hard)',
+            background: 'transparent', cursor: 'pointer', fontFamily: 'inherit',
+          }}
+        >
+          Remind me later
+        </button>
       </div>
+
     </div>
   );
 }

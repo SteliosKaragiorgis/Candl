@@ -25,7 +25,15 @@ export default function ShareTradeModal({ trade, onClose, onPublish }: Props) {
   const pnlStr = trade.net_profit >= 0 ? `+$${trade.net_profit.toFixed(2)}` : `-$${Math.abs(trade.net_profit).toFixed(2)}`;
   const closedMs = Date.now() - new Date(trade.close_time).getTime();
   const detectedMinsAgo = Math.round(closedMs / 60000);
-  const timeLabel = detectedMinsAgo < 1 ? 'just now' : `${detectedMinsAgo} min ago`;
+  const timeLabel = detectedMinsAgo < 1
+    ? 'just now'
+    : detectedMinsAgo < 60
+      ? `${detectedMinsAgo} min ago`
+      : (() => {
+          const h = Math.floor(detectedMinsAgo / 60);
+          const m = detectedMinsAgo % 60;
+          return m > 0 ? `${h}h ${m}m ago` : `${h}h ago`;
+        })();
 
   function toggleEmotion(e: string) {
     setSelectedEmotions(prev =>
@@ -132,10 +140,6 @@ export default function ShareTradeModal({ trade, onClose, onPublish }: Props) {
               fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
               background: 'var(--green-bg)', color: 'var(--green)', border: '1px solid var(--green-border)',
             }}>✓ MT5 verified</span>
-            <span style={{
-              fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
-              background: 'var(--green-bg)', color: 'var(--green)', border: '1px solid var(--green-border)',
-            }}>✓ Tradezella linked</span>
           </div>
 
           {/* Narrative */}

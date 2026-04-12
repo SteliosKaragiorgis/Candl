@@ -5,11 +5,14 @@ import { useWatchlist } from '../../context/WatchlistContext';
 import ComposerModal from '../feed/ComposerModal';
 import { useChallenges } from '../../hooks/useChallenge';
 import { useTheme } from '../../context/ThemeContext';
+import { useNotifications } from '../../hooks/useNotifications';
 
 const navItems = [
   { label: 'Feed', path: '/', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
   { label: 'News', path: '/news', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2V9"/><line x1="18" y1="14" x2="10" y2="14"/><line x1="18" y1="10" x2="10" y2="10"/><line x1="14" y1="18" x2="10" y2="18"/></svg> },
   { label: 'Watchlist', path: '/watchlist', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> },
+  { label: 'My trades', path: '/trades', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
+  { label: 'Notifications', path: '/notifications', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> },
   { label: 'Prop Firm', path: '/prop-firm', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
   { label: 'Connections', path: '/connections', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> },
   { label: 'Settings', path: '/settings', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
@@ -39,6 +42,7 @@ export default function Sidebar() {
   const challenges = useChallenges();
   const { theme, toggle } = useTheme();
   const isLight = theme === 'light';
+  const { unreadCount: notifUnread } = useNotifications();
   const activeChallengesCount = challenges.filter(
     c => c.status === 'active' || c.status === 'near_limit',
   ).length;
@@ -59,7 +63,10 @@ export default function Sidebar() {
           const active = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
           const badge = label === 'Prop Firm' && activeChallengesCount > 0
             ? activeChallengesCount
+            : label === 'Notifications' && notifUnread > 0
+            ? notifUnread
             : null;
+          const isNotifBadge = label === 'Notifications' && badge !== null;
           const activeColor  = isLight ? '#16a34a' : '#f0f0f0';
           const inactiveColor = isLight ? '#374151' : '#c8c8c8';
           const activeBg     = isLight ? '#f0fdf4' : 'transparent';
@@ -97,10 +104,14 @@ export default function Sidebar() {
               </span>
               {badge !== null && (
                 <span style={{
-                  background: 'var(--green-bg)', color: '#22c55e',
-                  border: '0.5px solid var(--green-border)',
-                  borderRadius: 4, fontSize: 11, fontWeight: 500,
-                  padding: '1px 8px', fontVariantNumeric: 'tabular-nums',
+                  background: isNotifBadge ? 'var(--red)' : 'var(--green-bg)',
+                  color: isNotifBadge ? '#fff' : '#22c55e',
+                  border: isNotifBadge ? 'none' : '0.5px solid var(--green-border)',
+                  borderRadius: isNotifBadge ? 10 : 4,
+                  fontSize: isNotifBadge ? 9 : 11, fontWeight: 500,
+                  padding: isNotifBadge ? '1px 5px' : '1px 8px',
+                  fontVariantNumeric: 'tabular-nums',
+                  marginLeft: isNotifBadge ? 'auto' : undefined,
                 }}>
                   {badge}
                 </span>
@@ -134,7 +145,7 @@ export default function Sidebar() {
       <div style={{ marginBottom: 6 }}>
         <div style={{
           fontSize: 10, fontWeight: 500, letterSpacing: '0.07em',
-          color: '#555555', textTransform: 'uppercase',
+          color: 'var(--text-muted)', textTransform: 'uppercase',
           padding: '0 4px', marginBottom: 6,
         }}>
           Watchlist
@@ -152,10 +163,10 @@ export default function Sidebar() {
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: '#c8c8c8', fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
                 {item.symbol}
               </div>
-              <div style={{ fontSize: 11, color: '#a8a8a8', fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
                 {item.price > 0 ? `$${item.price.toFixed(2)}` : '—'}
               </div>
             </div>
@@ -173,7 +184,7 @@ export default function Sidebar() {
 
       {/* Suggested users */}
       <div style={{ marginTop: 8, borderTop: '0.5px solid var(--border)', paddingTop: 12 }}>
-        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.07em', color: '#555555', textTransform: 'uppercase', padding: '0 4px', marginBottom: 8 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.07em', color: 'var(--text-muted)', textTransform: 'uppercase', padding: '0 4px', marginBottom: 8 }}>
           Suggested
         </div>
         {[privateUser, ryanC].map(u => (
@@ -215,7 +226,7 @@ export default function Sidebar() {
                   </span>
                 )}
               </div>
-              <div style={{ fontSize: 11, color: '#555555' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-primary)' }}>
                 {u.hasSentFollowRequest ? '· Wants to follow' : `@${u.username}`}
               </div>
             </div>

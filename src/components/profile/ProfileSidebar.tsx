@@ -71,7 +71,7 @@ export default function ProfileSidebar({ user }: { user: User }) {
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>
               {s.count}
             </span>
-            <span style={{ fontSize: '10px', color: 'var(--text-3)' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
               {Math.round((s.count / total) * 100)}%
             </span>
           </div>
@@ -89,7 +89,7 @@ export default function ProfileSidebar({ user }: { user: User }) {
         {SECTORS.map(s => (
           <div key={s.name} style={{ marginBottom: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-              <span style={{ fontSize: '10px', color: 'var(--text-2)' }}>{s.name}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-primary)' }}>{s.name}</span>
               <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>
                 {s.pct}%
               </span>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Green figure (top) -->
+  <g transform="translate(100,52) rotate(0)">
+    <circle cx="0" cy="-28" r="16" fill="#4caf50"/>
+    <path d="M-18,0 Q-18,-20 0,-22 Q18,-20 18,0 Q18,18 0,20 Q-18,18 -18,0Z" fill="#4caf50"/>
+    <path d="M-18,8 Q-28,18 -24,34 L24,34 Q28,18 18,8Z" fill="#4caf50"/>
+  </g>
+  <!-- Blue figure (bottom-left) -->
+  <g transform="translate(57,138) rotate(0)">
+    <circle cx="0" cy="-28" r="16" fill="#2196f3"/>
+    <path d="M-18,0 Q-18,-20 0,-22 Q18,-20 18,0 Q18,18 0,20 Q-18,18 -18,0Z" fill="#2196f3"/>
+    <path d="M-18,8 Q-28,18 -24,34 L24,34 Q28,18 18,8Z" fill="#2196f3"/>
+  </g>
+  <!-- Yellow figure (bottom-right) -->
+  <g transform="translate(143,138) rotate(0)">
+    <circle cx="0" cy="-28" r="16" fill="#ffc107"/>
+    <path d="M-18,0 Q-18,-20 0,-22 Q18,-20 18,0 Q18,18 0,20 Q-18,18 -18,0Z" fill="#ffc107"/>
+    <path d="M-18,8 Q-28,18 -24,34 L24,34 Q28,18 18,8Z" fill="#ffc107"/>
+  </g>
+  <!-- Center white circle -->
+  <circle cx="100" cy="100" r="30" fill="white"/>
+  <!-- Center "5" -->
+  <text x="100" y="114" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#f9a825">5</text>
+</svg>

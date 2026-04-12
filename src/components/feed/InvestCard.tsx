@@ -30,7 +30,22 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
   const [commentHov, setCommentHov] = useState(false);
   const [shareHov, setShareHov] = useState(false);
   const [bookmarkHov, setBookmarkHov] = useState(false);
+  const [shareCardHov, setShareCardHov] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const shareButtonRef = useRef<HTMLButtonElement>(null);
+
+  async function handleShareCard(e: React.MouseEvent) {
+    e.stopPropagation();
+    const text = `${post.user.name} added ${post.ticker} — ${post.conviction} conviction · ${post.horizon} horizon`;
+    const url  = `${window.location.origin}/post/${post.id}`;
+    if (navigator.share) {
+      await navigator.share({ title: text, url }).catch(() => null);
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }
 
   function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
@@ -58,11 +73,12 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', gap: 12,
-        paddingTop: '14px', paddingBottom: '14px', paddingRight: '16px', paddingLeft: '12px',
+        padding: '14px 16px 14px 12px',
+        border: `0.5px solid ${hovered ? 'var(--border-soft)' : 'var(--border)'}`,
         borderLeft: '2px solid #f59e0b',
-        borderBottom: '0.5px solid #1e1e1e',
-        background: hovered ? 'var(--surface)' : 'transparent',
-        cursor: 'pointer', transition: 'background 0.1s',
+        borderRadius: 8,
+        background: 'var(--bg-card)',
+        cursor: 'pointer', transition: 'border-color 0.1s',
       }}
     >
       {/* Avatar */}
@@ -84,7 +100,7 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
           <span
             onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
-            style={{ fontSize: 14, fontWeight: 600, color: '#e0e0e0', cursor: 'pointer' }}
+            style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}
             onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
             onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
           >
@@ -114,7 +130,7 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
 
         {/* Body */}
         {post.body && (
-          <p style={{ fontSize: 14, color: '#c0c0c0', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+          <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6, margin: '0 0 12px 0' }}>
             {renderBody(post.body)}
           </p>
         )}
@@ -138,7 +154,7 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
           </div>
           {/* Row 2: Conviction */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg)' }}>
-            <span style={{ fontSize: 9, color: '#444', textTransform: 'uppercase', letterSpacing: '0.04em', width: 80, flexShrink: 0 }}>Conviction</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', width: 80, flexShrink: 0 }}>Conviction</span>
             <span style={{ fontSize: 13, fontWeight: 500, color: convictionColor }}>{post.conviction}</span>
           </div>
         </div>
@@ -163,8 +179,8 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
               <div key={label} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderBottom: i < arr.length - 1 ? '0.5px solid var(--border)' : 'none' }}>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, marginTop: 5, background: dot }} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.04em', color: '#444', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
-                  <div style={{ fontSize: 13, color: '#888', lineHeight: 1.5 }}>{value}</div>
+                  <div style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.04em', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5 }}>{value}</div>
                 </div>
               </div>
             ))}
@@ -239,6 +255,22 @@ export default function InvestCard({ post }: { post: InvestmentPost }) {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
             </svg>
+          </button>
+
+          <button
+            onClick={handleShareCard}
+            onMouseEnter={() => setShareCardHov(true)}
+            onMouseLeave={() => setShareCardHov(false)}
+            style={{
+              fontSize: 11, fontWeight: 500,
+              padding: '3px 9px', borderRadius: 4,
+              border: '0.5px solid var(--border-hard)',
+              background: 'transparent',
+              color: shareCopied ? 'var(--green)' : shareCardHov ? 'var(--text-2)' : 'var(--text-3)',
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            {shareCopied ? 'Copied ✓' : 'Share ↗'}
           </button>
         </div>
       </div>

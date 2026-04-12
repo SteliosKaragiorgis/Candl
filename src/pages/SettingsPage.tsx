@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { currentUser } from '../data/demo';
 import { useMobile } from '../hooks/useMobile';
-import { useMT5Accounts, connectMT5Account } from '../hooks/useMT5Accounts';
+import { useMT5Accounts, connectMT5Account, syncMT5Account } from '../hooks/useMT5Accounts';
 import type { MT5Account } from '../types/mt5account';
 
 type Tab = 'profile' | 'notifications' | 'security' | 'billing' | 'connections';
@@ -50,7 +50,7 @@ function FieldRow({ label, hint, children }: {
     }}>
       <div>
         <div style={{ fontSize: 13, color: 'var(--text)' }}>{label}</div>
-        {hint && <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 2 }}>{hint}</div>}
+        {hint && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{hint}</div>}
       </div>
       {children}
     </div>
@@ -79,7 +79,7 @@ function CardTitle({ children, danger }: { children: React.ReactNode; danger?: b
 
 function CardDesc({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 12, color: 'var(--text-4)', marginBottom: 16, lineHeight: 1.5 }}>
+    <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 16, lineHeight: 1.5 }}>
       {children}
     </div>
   );
@@ -104,14 +104,27 @@ function Btn({ children, onClick, variant = 'default' }: {
 
 // ── Tab: Connections ─────────────────────────────────────────────────────────
 
-// Known servers grouped by firm for the dropdown
+// Known servers grouped by broker/firm for the dropdown
 const KNOWN_SERVERS = [
-  { group: 'FTMO',       servers: ['FTMO-Demo', 'FTMO-Demo2', 'FTMO-Server', 'FTMO-Server2'] },
-  { group: 'TFT',        servers: ['TheFundedTrader-Live', 'TheFundedTrader-Demo'] },
-  { group: 'Apex',       servers: ['ApexFuturesUSA', 'Apex-Live'] },
-  { group: 'E8',         servers: ['E8FundingFX-Live', 'E8FundingFX-Demo'] },
-  { group: 'FundedNext', servers: ['FundedNext-Live', 'FundedNext-Demo'] },
-  { group: 'Other',      servers: ['Other (type below)'] },
+  // ── Prop Firms ──
+  { group: 'FTMO',           servers: ['FTMO-Demo', 'FTMO-Demo2', 'FTMO-Server', 'FTMO-Server2'] },
+  { group: 'The Funded Trader', servers: ['TheFundedTrader-Live', 'TheFundedTrader-Demo'] },
+  { group: 'Apex',           servers: ['ApexFuturesUSA', 'Apex-Live'] },
+  { group: 'E8 Funding',     servers: ['E8FundingFX-Live', 'E8FundingFX-Demo'] },
+  { group: 'FundedNext',     servers: ['FundedNext-Live', 'FundedNext-Demo'] },
+  { group: 'MyFundedFX',     servers: ['MyFundedFX-Demo', 'MyFundedFX-Live'] },
+  { group: 'True Forex Funds', servers: ['TrueForexFunds-Live', 'TrueForexFunds-Demo'] },
+  // ── Retail Brokers ──
+  { group: 'IC Markets',     servers: ['ICMarketsSC-Demo', 'ICMarketsSC-Live', 'ICMarketsSC-Live2', 'ICMarketsSC-Live3'] },
+  { group: 'Pepperstone',    servers: ['Pepperstone-Demo', 'Pepperstone-Live', 'Pepperstone-Live01'] },
+  { group: 'XM',             servers: ['XMGlobal-Demo 3', 'XMGlobal-Real 3', 'XMGlobal-Real 15'] },
+  { group: 'Exness',         servers: ['Exness-Trial', 'Exness-Real'] },
+  { group: 'FxPro',          servers: ['FxPro-MT5', 'FxPro-MT5 Demo'] },
+  { group: 'Tickmill',       servers: ['Tickmill-Demo', 'Tickmill-Live'] },
+  { group: 'Vantage',        servers: ['Vantage-Demo', 'Vantage-Live'] },
+  { group: 'OANDA',          servers: ['OANDA-v20 Practice', 'OANDA-v20 Live'] },
+  { group: 'MetaQuotes',     servers: ['MetaQuotes-Demo'] },
+  { group: 'Other',          servers: ['Other (type below)'] },
 ];
 
 const STATUS_CFG = {
@@ -177,8 +190,8 @@ function ConnectModal({ onClose, onConnected }: {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)' }}>Connect MT5 account</div>
-            <div style={{ fontSize: 12, color: 'var(--text-4)', marginTop: 3 }}>
-              Same credentials you use to log into MetaTrader 5
+            <div style={{ fontSize: 13, color: 'var(--text-primary)', marginTop: 3 }}>
+              Any MT5 account — prop firm or retail broker
             </div>
           </div>
           <button
@@ -234,7 +247,7 @@ function ConnectModal({ onClose, onConnected }: {
                 )}
               </button>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 5 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>
               Your password is sent directly to the MT5 server for validation and is never stored.
             </div>
           </div>
@@ -249,7 +262,7 @@ function ConnectModal({ onClose, onConnected }: {
               onChange={e => setServer(e.target.value)}
               style={{ ...fieldStyle, cursor: 'pointer', appearance: 'none' as const }}
             >
-              <option value="" disabled>Select your prop firm server…</option>
+              <option value="" disabled>Select your broker server…</option>
               {KNOWN_SERVERS.map(({ group, servers }) => (
                 <optgroup key={group} label={group}>
                   {servers.map(s => <option key={s} value={s}>{s}</option>)}
@@ -307,9 +320,23 @@ function ConnectModal({ onClose, onConnected }: {
   );
 }
 
-function AccountCard({ account, onRemove }: { account: MT5Account; onRemove: (id: string) => void }) {
+function AccountCard({
+  account,
+  onRemove,
+  onSync,
+}: {
+  account: MT5Account;
+  onRemove: (id: string) => void;
+  onSync: (account: MT5Account) => Promise<void>;
+}) {
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const cfg = STATUS_CFG[account.status];
+
+  async function handleSync() {
+    setSyncing(true);
+    try { await onSync(account); } finally { setSyncing(false); }
+  }
 
   const formatSync = (iso: string | null) => {
     if (!iso) return 'Never';
@@ -361,7 +388,7 @@ function AccountCard({ account, onRemove }: { account: MT5Account; onRemove: (id
             </span>
           )}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 4, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
           <span>{account.server}</span>
           <span style={{ fontVariantNumeric: 'tabular-nums' }}>
             Balance: <span style={{ color: 'var(--text-3)' }}>${account.balance.toLocaleString()}</span>
@@ -378,6 +405,30 @@ function AccountCard({ account, onRemove }: { account: MT5Account; onRemove: (id
 
       {/* Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+        {account.metaApiAccountId && !confirmRemove && (
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            title="Sync balance & equity"
+            style={{
+              background: 'none', border: '0.5px solid var(--border)',
+              borderRadius: 7, padding: '5px 10px', fontSize: 12,
+              color: 'var(--text-4)', cursor: syncing ? 'wait' : 'pointer',
+              fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5,
+            }}
+          >
+            <svg
+              width="11" height="11" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+              style={{ animation: syncing ? 'spin 0.8s linear infinite' : 'none' }}
+            >
+              <polyline points="23 4 23 10 17 10"/>
+              <polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            {syncing ? 'Syncing…' : 'Sync'}
+          </button>
+        )}
         {!confirmRemove ? (
           <button
             onClick={() => setConfirmRemove(true)}
@@ -422,8 +473,18 @@ function AccountCard({ account, onRemove }: { account: MT5Account; onRemove: (id
 }
 
 function ConnectionsTab() {
-  const { accounts, addAccount, removeAccount } = useMT5Accounts();
+  const { accounts, addAccount, removeAccount, updateAccount } = useMT5Accounts();
   const [modalOpen, setModalOpen] = useState(false);
+
+  async function handleSync(account: MT5Account) {
+    updateAccount(account.id, { status: 'syncing' });
+    try {
+      const patch = await syncMT5Account(account);
+      updateAccount(account.id, { ...patch, status: 'connected' });
+    } catch {
+      updateAccount(account.id, { status: 'error', errorMessage: 'Sync failed. Check your connection.' });
+    }
+  }
 
   return (
     <>
@@ -433,7 +494,7 @@ function ConnectionsTab() {
           <div>
             <CardTitle>MetaTrader 5 accounts</CardTitle>
             <CardDesc>
-              Connect your prop firm accounts directly. Trades sync automatically — no EA required.
+              Connect any MT5 account — prop firm or retail broker. Trades sync automatically, no EA required.
             </CardDesc>
           </div>
           <button
@@ -463,14 +524,14 @@ function ConnectionsTab() {
               </svg>
             </div>
             <div style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 4 }}>No accounts connected</div>
-            <div style={{ fontSize: 12, color: 'var(--text-4)' }}>
+            <div style={{ fontSize: 13, color: 'var(--text-primary)' }}>
               Add your MT5 login to start syncing trades and tracking challenge progress
             </div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
             {accounts.map(a => (
-              <AccountCard key={a.id} account={a} onRemove={removeAccount} />
+              <AccountCard key={a.id} account={a} onRemove={removeAccount} onSync={handleSync} />
             ))}
           </div>
         )}
@@ -541,7 +602,7 @@ function ProfileTab() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <Btn>Change photo</Btn>
-            <span style={{ fontSize: 11, color: 'var(--text-4)' }}>JPG, PNG · max 2MB</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>JPG, PNG · max 2MB</span>
           </div>
         </div>
 
@@ -586,7 +647,7 @@ function ProfileTab() {
               borderRadius: 10, padding: '12px 14px', textAlign: 'center',
             }}>
               <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 700, color: positive ? 'var(--green)' : 'var(--text)', lineHeight: 1 }}>{val}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-4)', marginTop: 4, letterSpacing: '0.5px' }}>{lbl}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, letterSpacing: '0.5px' }}>{lbl}</div>
             </div>
           ))}
         </div>
@@ -803,7 +864,7 @@ function BillingTab() {
           >
             <div>
               <div style={{ fontSize: 13, color: 'var(--text)' }}>{date}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 2 }}>{desc}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{desc}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
@@ -905,8 +966,8 @@ export default function SettingsPage() {
           padding: '20px 0',
         }}>
           <div style={{
-            fontSize: 9, fontWeight: 700, letterSpacing: '1.5px',
-            color: 'var(--text-4)', textTransform: 'uppercase',
+            fontSize: 10, fontWeight: 700, letterSpacing: '1.5px',
+            color: 'var(--text-muted)', textTransform: 'uppercase',
             padding: '4px 20px 10px',
           }}>
             Settings
@@ -941,8 +1002,8 @@ export default function SettingsPage() {
       }}>
         {/* Section title */}
         <div style={{
-          fontSize: 9, fontWeight: 700, letterSpacing: 2,
-          color: 'var(--text-4)', textTransform: 'uppercase',
+          fontSize: 10, fontWeight: 700, letterSpacing: 2,
+          color: 'var(--text-muted)', textTransform: 'uppercase',
           marginBottom: 24, paddingBottom: 10,
           borderBottom: '0.5px solid var(--border)',
         }}>

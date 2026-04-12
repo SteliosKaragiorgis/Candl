@@ -96,7 +96,7 @@ export default function NewsCountdown() {
           {event.shortName === 'FOMC' ? 'FOMC Decision' : event.name}
         </div>
         <span style={{
-          fontSize: 8, fontWeight: 700, letterSpacing: 1,
+          fontSize: 10, fontWeight: 700, letterSpacing: 1,
           padding: '2px 6px', borderRadius: 20, textTransform: 'uppercase',
           background: urgencyColor, color: 'white',
         }}>
@@ -122,7 +122,7 @@ export default function NewsCountdown() {
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: urgencyColor, lineHeight: 1 }}>
               {pad(timeLeft.days)}
             </span>
-            <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginTop: 2 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginTop: 2 }}>
               days
             </span>
           </div>
@@ -137,7 +137,7 @@ export default function NewsCountdown() {
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: urgencyColor, lineHeight: 1 }}>
               {pad(u.val)}
             </span>
-            <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginTop: 2 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginTop: 2 }}>
               {u.lbl}
             </span>
           </div>
@@ -146,7 +146,7 @@ export default function NewsCountdown() {
         {timeLeft.days === 0 && (
           <div style={{ ...unitStyle, background: 'var(--surface2)' }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text3)', lineHeight: 1 }}>live</span>
-            <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginTop: 2 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginTop: 2 }}>
               feed
             </span>
           </div>
@@ -157,7 +157,7 @@ export default function NewsCountdown() {
       {upcomingEvents.length > 0 && (
         <div>
           <div style={{
-            fontSize: 8, fontWeight: 700, letterSpacing: 1.5,
+            fontSize: 10, fontWeight: 700, letterSpacing: 1.5,
             color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 6,
           }}>
             Up next
