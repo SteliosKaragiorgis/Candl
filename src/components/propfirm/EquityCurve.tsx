@@ -87,7 +87,7 @@ export default function EquityCurve({ challenge, height = 180 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const tooltipRef   = useRef<HTMLDivElement>(null);
   const chartRef     = useRef<IChartApi | null>(null);
-  const seriesRef    = useRef<ISeriesApi<'Area', AreaStyleOptions & SeriesOptionsCommon> | null>(null);
+  const seriesRef    = useRef<any>(null);
   const pointsRef    = useRef<EquityPoint[]>([]);
 
   const buildAndRender = useCallback(() => {
@@ -135,8 +135,7 @@ export default function EquityCurve({ challenge, height = 180 }: Props) {
       crosshair: { mode: 1 },
       handleScale: false,
       handleScroll: false,
-      watermark: { visible: false },
-    });
+    } as any);
 
     chartRef.current = chart;
 

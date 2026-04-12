@@ -161,16 +161,14 @@ export default function TradeChart({ trade, height = 260, chartOptions }: Props)
       },
       rightPriceScale: {
         borderColor:  '#0d0d0d',
-        textColor:    '#1a1a1a',
         scaleMargins: { top: 0.08, bottom: 0.08 },
-      },
+      } as any,
       timeScale: {
         borderColor:    '#0d0d0d',
-        textColor:      '#1a1a1a',
         timeVisible:    true,
         secondsVisible: false,
       },
-      watermark:    { visible: false },
+      watermark:    { visible: false } as any,
       handleScroll: {
         mouseWheel:       true,
         pressedMouseMove: true,
@@ -182,7 +180,7 @@ export default function TradeChart({ trade, height = 260, chartOptions }: Props)
         mouseWheel:           true,
         pinch:                true,
       },
-    })
+    } as any)
 
     if (chartOptions) chart.applyOptions(chartOptions)
 

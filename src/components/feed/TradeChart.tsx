@@ -147,8 +147,7 @@ export default function TradeChart({
       crosshair: { mode: 1 },
       handleScale: true,
       handleScroll: true,
-      watermark: { visible: false },
-    });
+    } as any);
 
     const { precision, minMove } = getPriceFormat(symbol, entryPrice);
     const fmtP = (p: number) => p.toFixed(precision);

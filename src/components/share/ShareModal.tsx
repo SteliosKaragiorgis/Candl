@@ -79,7 +79,7 @@ function DownloadIcon() {
 // ── Modal ─────────────────────────────────────────────────────────────────────
 
 export default function ShareModal({ trade, user, onClose }: Props) {
-  const cardRef  = useRef<HTMLDivElement>(null);
+  const cardRef  = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
   const [cardStyle, setCardStyle] = useState<CardStyle>('A');
   const [caption, setCaption] = useState('');
   const [busy, setBusy] = useState<'share' | 'copy' | 'download' | null>(null);

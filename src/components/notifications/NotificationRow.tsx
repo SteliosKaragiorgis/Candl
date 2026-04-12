@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Notification, NotificationType } from '../../types/notification'
 
@@ -38,7 +38,7 @@ function XIcon() {
   return <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
 }
 
-const TYPE_BADGE: Record<NotificationType, { bg: string; icon: JSX.Element }> = {
+const TYPE_BADGE: Record<NotificationType, { bg: string; icon: React.ReactNode }> = {
   TRADE_DETECTED:  { bg: '#22c55e', icon: <TrendingUpIcon /> },
   TRADE_LIKED:     { bg: '#ef4444', icon: <HeartFilledIcon /> },
   TRADE_COMMENTED: { bg: '#666',    icon: <MessageFilledIcon /> },
@@ -243,7 +243,7 @@ export default function NotificationRow({ notification: n, onAction }: Props) {
   /* ── Meta row ── */
   function renderMeta() {
     const time = relativeTime(n.createdAt)
-    let badge: JSX.Element | null = null
+    let badge: React.ReactNode = null
 
     if (n.type === 'TRADE_DETECTED') {
       badge = (

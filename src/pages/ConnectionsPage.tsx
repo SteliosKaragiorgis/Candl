@@ -61,7 +61,7 @@ function ConnectModal({ onClose, onConnected }: {
     setLoading(true);
     setError('');
     try {
-      const account = await connectMT5Account(login, password, effectiveServer, balance ? parseFloat(balance) : undefined);
+      const account = await connectMT5Account(login, password, effectiveServer);
       onConnected(account);
       onClose();
     } catch (err) {
