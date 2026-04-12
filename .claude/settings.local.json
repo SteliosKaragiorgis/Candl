@@ -33,7 +33,20 @@
       "Bash(ls \"c:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow\\\\node_modules\\\\lightweight-charts\\\\dist 2>&1 && grep CandlestickSeries\")",
       "Bash(LineStyle)",
       "Bash('addCandlestick c:UserssteliDocumentsTradeFlownode_moduleslightweight-chartsdisttypings.d.ts')",
-      "Bash(grep -r \"search\\\\|Search\" /c/Users/steli/Documents/TradeFlow/src --include=*.ts --include=*.tsx)"
+      "Bash(grep -r \"search\\\\|Search\" /c/Users/steli/Documents/TradeFlow/src --include=*.ts --include=*.tsx)",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow && node_modules\\\\.bin\\\\vite build 2>&1 & echo EXIT:%errorlevel%\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow && node_modules\\\\.bin\\\\tsc --noEmit 2>&1 | findstr /v /c:\\\\\"Microsoft\\\\\" /c:\\\\\"\\(c\\) Microsoft\\\\\" /c:\\\\\"Windows\\\\\" & echo TS_DONE\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow && node_modules\\\\.bin\\\\tsc --noEmit && echo TS_OK\")",
+      "Bash(cmd /c \"echo hello world\")",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow && npx vite build\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow && node -e \\\\\"const { execSync } = require\\('child_process'\\); try { const r = execSync\\('npx tsc --noEmit', {cwd: process.cwd\\(\\), encoding: 'utf8', stdio: 'pipe'}\\); console.log\\('OK:', r || 'no errors'\\); } catch\\(e\\) { console.log\\('ERRORS:', e.stdout, e.stderr\\); }\\\\\"\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow && npx tsc --noEmit 2>&1\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow && npx vite build 2>&1\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\steli\\\\Documents\\\\TradeFlow && npx vite build 2>&1 && echo BUILD_OK || echo BUILD_FAILED\")",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(npx vite:*)",
+      "Bash(node_modules/.bin/tsc --noEmit)"
     ]
   }
 }

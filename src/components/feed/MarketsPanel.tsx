@@ -70,7 +70,7 @@ export default function MarketsPanel() {
         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--text)', textTransform: 'uppercase' }}>
           Markets
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: 'var(--text4)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-muted)' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: isMarketOpen ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: isMarketOpen ? 'var(--green)' : 'var(--red)', flexShrink: 0 }} />
             {isMarketOpen ? 'Market open' : 'Market closed'}
@@ -110,7 +110,7 @@ export default function MarketsPanel() {
                   {t.price > 0 ? `$${fmt(t.price)}` : '—'}
                 </div>
                 <span style={{
-                  display: 'inline-block', fontSize: 9, fontWeight: 700,
+                  display: 'inline-block', fontSize: 10, fontWeight: 700,
                   padding: '1px 5px', borderRadius: 4,
                   background: up ? 'var(--green-bg)' : 'var(--red-bg)',
                   color: up ? 'var(--green)' : 'var(--red)',
@@ -140,7 +140,7 @@ export default function MarketsPanel() {
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>
               {q.ticker}
             </span>
-            <span style={{ fontSize: 9, color: 'var(--text4)' }}>· {q.name}</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>· {q.name}</span>
           </div>
           <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 26, fontWeight: 700, color: 'var(--text)', lineHeight: 1, marginBottom: 5 }}>
             {hasData ? `$${fmt(q.price)}` : '—'}
@@ -149,10 +149,10 @@ export default function MarketsPanel() {
             {hasData ? `${q.change > 0 ? '+' : ''}${fmt(q.change)}` : ''}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 10, color: 'var(--text4)' }}>{hasData ? 'today' : ''}</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{hasData ? 'today' : ''}</span>
             {hasData && (
               <span style={{
-                fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 20,
+                fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 20,
                 background: isUp ? 'var(--green-bg)' : 'var(--red-bg)',
                 color: isUp ? 'var(--green)' : 'var(--red)',
                 border: `1px solid ${isUp ? 'var(--green-border)' : 'var(--red-border)'}`,
@@ -185,7 +185,7 @@ export default function MarketsPanel() {
             { label: 'LOW',  value: hasData && q.low  > 0 ? `$${fmt(q.low)}`  : '—', color: 'var(--red)'   },
           ].map(({ label, value, color }) => (
             <div key={label} style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 3 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 3 }}>
                 {label}
               </div>
               <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, color }}>

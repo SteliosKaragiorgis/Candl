@@ -17,7 +17,7 @@ export default function StatBar() {
       {stats.map(({ label, value }) => (
         <div key={label} className="stat-tile">
           <div style={{
-            fontSize: 10, color: 'var(--text-3)', fontWeight: 500,
+            fontSize: 10, color: 'var(--text-muted)', fontWeight: 500,
             marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.06em',
           }}>
             {label}

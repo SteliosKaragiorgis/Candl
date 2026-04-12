@@ -2,12 +2,13 @@ import React from 'react';
 import type { Tip } from '../../types/propfirm';
 import { firmBadge } from './MilestonePost';
 
+// Category colours via CSS vars so they adapt to light/dark mode
 const CATEGORY_CFG: Record<Tip['category'], { label: string; color: string }> = {
-  risk:        { label: 'Risk management', color: '#22c55e' },
-  psychology:  { label: 'Psychology',      color: '#8b5cf6' },
-  news:        { label: 'News events',     color: '#f59e0b' },
-  entry:       { label: 'Entry timing',    color: '#3b82f6' },
-  compliance:  { label: 'Rule compliance', color: '#ef4444' },
+  risk:        { label: 'Risk management', color: 'var(--green)'  },
+  psychology:  { label: 'Psychology',      color: 'var(--purple)' },
+  news:        { label: 'News events',     color: 'var(--amber)'  },
+  entry:       { label: 'Entry timing',    color: 'var(--blue)'   },
+  compliance:  { label: 'Rule compliance', color: 'var(--red)'    },
 };
 
 interface TipCardProps {
@@ -18,51 +19,87 @@ interface TipCardProps {
 export default function TipCard({ tip, compact = false }: TipCardProps) {
   const cfg = CATEGORY_CFG[tip.category];
 
+  if (compact) {
+    return (
+      <div style={{
+        background: 'var(--bg-surface)',
+        border: '0.5px solid var(--border)',
+        borderRadius: 5,
+        padding: 9,
+      }}>
+        <div style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+          color: cfg.color, marginBottom: 5,
+        }}>
+          {cfg.label}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--text-primary)', lineHeight: 1.6, marginBottom: 5 }}>
+          {tip.text}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          — {tip.author}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{
-      background: 'var(--surface)', border: '0.5px solid var(--border)',
-      borderRadius: 6, padding: compact ? '10px 12px' : 12,
-    }}>
+    <div
+      style={{
+        background: 'var(--bg-card)',
+        border: '0.5px solid var(--border)',
+        borderRadius: 8,
+        padding: 14,
+        transition: 'border-color 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-soft)')}
+      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+    >
       {/* Category */}
       <div style={{
-        fontSize: 10, letterSpacing: '0.05em', textTransform: 'uppercase',
-        color: cfg.color, marginBottom: 6,
+        fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+        color: cfg.color, marginBottom: 8,
       }}>
         {cfg.label}
       </div>
 
       {/* Tip text */}
-      <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6, marginBottom: compact ? 0 : 8 }}>
+      <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.65, marginBottom: 10 }}>
         {tip.text}
       </div>
 
-      {!compact && (
-        <>
-          {/* Author */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 10, color: 'var(--border-emphasis)' }}>— {tip.author}</span>
-            <span style={{ fontSize: 10, color: 'var(--border-emphasis)' }}>·</span>
-            {firmBadge(tip.authorFirm)}
-            <span style={{ fontSize: 10, color: 'var(--border-emphasis)' }}>{tip.authorResult}</span>
-            {tip.isVerified && (
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="#22c55e"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            )}
-          </div>
-
-          {/* Like */}
-          <button style={{
+      {/* Author row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap',
+        borderTop: '0.5px solid var(--border-soft)',
+        paddingTop: 8, marginBottom: 8,
+      }}>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>— {tip.author}</span>
+        <span style={{ fontSize: 10, color: 'var(--text-hint)' }}>·</span>
+        {firmBadge(tip.authorFirm)}
+        <span style={{ fontSize: 10, color: 'var(--text-hint)' }}>{tip.authorResult}</span>
+        {tip.isVerified && (
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--green)">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        )}
+        {/* Like count pushed to the right */}
+        <button
+          style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-            fontSize: 11, color: 'var(--border-emphasis)', fontFamily: 'inherit',
+            fontSize: 11, color: 'var(--text-hint)', fontFamily: 'inherit',
             display: 'flex', alignItems: 'center', gap: 4,
+            marginLeft: 'auto',
           }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-3)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--border-emphasis)'; }}
-          >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            {tip.likes}
-          </button>
-        </>
-      )}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-hint)'; }}
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          {tip.likes}
+        </button>
+      </div>
     </div>
   );
 }

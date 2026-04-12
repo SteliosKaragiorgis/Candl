@@ -7,19 +7,20 @@
    ────────────────────────────────────────────────────────── */
 :root {
   /* Surfaces */
-  --bg:        #111111;
-  --surface:   #161616;
-  --surface2:  #1a1a1a;
-  --surface-2: #1a1a1a;
-  --surface3:  #0d0d0d;
-  --surface-3: #0d0d0d;
+  --bg:        #0d0d0d;
+  --surface:   #1c1c1c;
+  --surface2:  #222222;
+  --surface-2: #222222;
+  --surface3:  #111111;
+  --surface-3: #111111;
 
   /* Borders */
-  --border:          #1e1e1e;
-  --border-subtle:   #1e1e1e;
-  --border-emphasis: #2a2a2a;
-  --border-2:  #1a1a1a;
-  --border2:   #1a1a1a;
+  --border:          #2e2e2e;
+  --border-subtle:   #2e2e2e;
+  --border-emphasis: #383838;
+  --border-hard:     #383838;
+  --border-2:  #282828;
+  --border2:   #282828;
   --bw: 0.5px;
 
   /* Text — 4-level hierarchy */
@@ -57,6 +58,32 @@
   --purple-bg:     #1a0d27;
   --purple-border: #2d1a5c;
 
+  /* Page background */
+  --bg-page:        #0d0d0d;
+
+  /* PropFirm tokens — dark */
+  --bg-card:        #1c1c1c;
+  --bg-surface:     #0d0d0d;
+  --border-soft:    #252525;
+  --text-primary:   #e8e8e8;
+  --text-secondary: #c8c8c8;
+  --text-muted:     #666666;
+  --text-hint:      #333333;
+
+  /* Firm colour tokens — dark */
+  --ftmo-bg:      #0d1627;
+  --ftmo-color:   #3b82f6;
+  --ftmo-border:  #1a3a5c;
+  --tft-bg:       #1a0d27;
+  --tft-color:    #8b5cf6;
+  --tft-border:   #2d1a5c;
+  --apex-bg:      #1f1400;
+  --apex-color:   #f59e0b;
+  --apex-border:  #3a2200;
+  --e8-bg:        #0d1f12;
+  --e8-color:     #22c55e;
+  --e8-border:    #1a3a22;
+
   /* Layout dimensions */
   --sidebar-w: 220px;
   --rail-w:    56px;
@@ -70,9 +97,9 @@
   --radius-xl: 10px;
 
   /* Legacy X tokens (kept for gradual migration) */
-  --x-bg:      #111111;
-  --x-surface: #161616;
-  --x-border:  #1e1e1e;
+  --x-bg:      #0d0d0d;
+  --x-surface: #1c1c1c;
+  --x-border:  #2a2a2a;
   --x-text:    #e2e2e2;
   --x-muted:   #444444;
   --x-blue:    #1d9bf0;
@@ -96,6 +123,7 @@
   --border:          #e5e7eb;
   --border-subtle:   #f3f4f6;
   --border-emphasis: #d1d5db;
+  --border-hard:     #c0c0c0;
   --border-2:  #e5e7eb;
   --border2:   #e5e7eb;
   --text:   #111111;
@@ -135,6 +163,32 @@
   --x-amber:   #d97706;
   --x-hover:   #f3f4f6;
   --x-like:    #ec4899;
+
+  /* Page background */
+  --bg-page:        #f8f8f6;
+
+  /* PropFirm tokens — light */
+  --bg-card:        #ffffff;
+  --bg-surface:     #f9f9f7;
+  --border-soft:    #f0f0ee;
+  --text-primary:   #111111;
+  --text-secondary: #555555;
+  --text-muted:     #888888;
+  --text-hint:      #aaaaaa;
+
+  /* Firm colour tokens — light */
+  --ftmo-bg:      #eff6ff;
+  --ftmo-color:   #2563eb;
+  --ftmo-border:  #bfdbfe;
+  --tft-bg:       #faf5ff;
+  --tft-color:    #7c3aed;
+  --tft-border:   #e9d5ff;
+  --apex-bg:      #fffbeb;
+  --apex-color:   #d97706;
+  --apex-border:  #fde68a;
+  --e8-bg:        #f0fdf4;
+  --e8-color:     #16a34a;
+  --e8-border:    #bbf7d0;
 }
 
 /* Light mode CSS class overrides */
@@ -320,6 +374,12 @@ a { text-decoration: none; color: inherit; }
 }
 .post-btn:hover { opacity: 0.85; }
 
+/* News page chip hover (neutral chips only) */
+.news-chip-default:hover {
+  border-color: var(--border-hard) !important;
+  color: var(--text-2) !important;
+}
+
 /* Mobile breakpoints */
 @media (max-width: 768px) {
   .desktop-only { display: none !important; }
@@ -331,4 +391,17 @@ a { text-decoration: none; color: inherit; }
 @media (min-width: 769px) {
   .desktop-only { display: flex; }
   .mobile-only  { display: none !important; }
+}
+
+/* Hide TradingView attribution logo from Lightweight Charts */
+.tv-lightweight-charts > table a { display: none !important; }
+
+/* Prop firm challenge card button hovers */
+.log-trade-btn:hover { color: var(--text-primary) !important; border-color: var(--border-emphasis) !important; }
+.share-progress-btn:hover { opacity: 0.75; }
+
+/* Pulse animation for syncing indicator */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }

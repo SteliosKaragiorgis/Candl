@@ -28,6 +28,19 @@ export type TradingDay = {
   pnl: number;
 };
 
+// ─── Trade store ──────────────────────────────────────────────────────────────
+
+export type TradeEntry = {
+  id: string;
+  symbol: string;
+  direction: 'LONG' | 'SHORT';
+  pnl: number;
+  date: string; // YYYY-MM-DD
+  lotSize?: number;
+  setupType?: string;
+  notes?: string;
+};
+
 // ─── Community types ─────────────────────────────────────────────────────────
 
 export type PostType = 'milestone' | 'progress' | 'failure';
@@ -117,6 +130,12 @@ export type Challenge = {
   total_pnl: number;
   rules: Rule[];
   trading_days: TradingDay[];
+  trade_ids: string[];  // Trade IDs applied to this challenge
   mt5_account?: string;
   created_at: string;
+  // Optional fields — new additions; kept optional for backward compat with
+  // existing localStorage data that predates these fields.
+  trades?: TradeEntry[];
+  peak_balance?: number;
+  auto_apply_trades?: boolean;
 };

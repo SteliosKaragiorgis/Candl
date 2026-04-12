@@ -225,7 +225,7 @@ export default function TickerPage() {
               <span style={{ fontSize: 16, fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: '#16a34a' }}>
                 {demo.sentimentBull}%
               </span>
-              <div style={{ fontSize: 9, color: 'var(--text-3)' }}>bullish</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>bullish</div>
             </div>
             <button
               onClick={() => setWatching(w => !w)}
@@ -311,7 +311,7 @@ export default function TickerPage() {
             { label: 'VOL',  value: candleVolume, color: 'var(--text)' },
           ].map(col => (
             <div key={col.label}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 3 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 3 }}>
                 {col.label}
               </div>
               <div style={{ fontSize: 13, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: col.color }}>
@@ -366,7 +366,7 @@ export default function TickerPage() {
                     <span style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'JetBrains Mono, monospace' }}>
                       {item.time.replace('Today, ', 'Today · ')}
                     </span>
-                    <span style={{ fontSize: 10, color: 'var(--text-4)' }}>· {item.category}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>· {item.category}</span>
                   </div>
                   <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', lineHeight: 1.55, margin: '0 0 12px' }}>
                     {item.headline}
@@ -392,7 +392,7 @@ export default function TickerPage() {
                   <div style={{ height: 40, marginBottom: 6 }}>
                     <MiniSparkline points={item.sparkline} up={item.up} />
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-4)', marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
                     {ticker} intraday · news marker at ↑
                   </div>
                 </div>
@@ -427,7 +427,7 @@ export default function TickerPage() {
                     {item.source}
                   </span>
                   <span style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'JetBrains Mono, monospace' }}>{item.time}</span>
-                  <span style={{ fontSize: 10, color: 'var(--text-4)' }}>· {item.category}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>· {item.category}</span>
                 </div>
                 <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', lineHeight: 1.55, margin: '0 0 12px' }}>{item.headline}</p>
                 <div style={{

@@ -6,7 +6,13 @@ export default function SkeletonCard() {
   );
 
   return (
-    <div className="trade-card">
+    <div style={{
+      border: '0.5px solid var(--border)',
+      borderLeft: '2px solid var(--border)',
+      borderRadius: 8,
+      background: 'var(--bg-card)',
+      padding: '14px 16px 14px 12px',
+    }}>
       <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
         <div className="shimmer" style={{ width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0 }} />
         <div style={{ flex: 1 }}>

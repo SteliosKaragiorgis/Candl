@@ -269,7 +269,7 @@ export default function SearchPage() {
           {/* Users */}
           {matchedUsers.length > 0 && (
             <section>
-              <div style={{ padding: '10px 16px 6px', fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <div style={{ padding: '10px 16px 6px', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 People
               </div>
               {matchedUsers.map(u => <UserCard key={u.id} user={u} />)}
@@ -279,7 +279,7 @@ export default function SearchPage() {
           {/* Tickers */}
           {(tickerResults.length > 0 || tickerLoading) && (
             <section>
-              <div style={{ padding: '10px 16px 6px', fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <div style={{ padding: '10px 16px 6px', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Tickers
               </div>
               {tickerLoading && tickerResults.length === 0 ? (
@@ -293,7 +293,7 @@ export default function SearchPage() {
           {/* Posts */}
           {matchedPosts.length > 0 && (
             <section>
-              <div style={{ padding: '10px 16px 6px', fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <div style={{ padding: '10px 16px 6px', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Posts
               </div>
               {matchedPosts.map(p => <PostCard key={p.id} post={p} />)}

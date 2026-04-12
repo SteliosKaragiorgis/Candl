@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useMobile } from '../hooks/useMobile';
 import { useTheme } from '../context/ThemeContext';
 import { createChart, ColorType, AreaSeries } from 'lightweight-charts';
+import { useChallenges } from '../hooks/useChallenge';
+import { firmBadge } from '../components/propfirm/MilestonePost';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -207,6 +209,138 @@ function Avatar({ initials, gradient, size = 24 }: { initials: string; gradient:
   );
 }
 
+// ── Prop Firm Challenges summary card ─────────────────────────────────────────
+
+function PropFirmSummaryCard({ cardStyle }: { cardStyle: React.CSSProperties }) {
+  const navigate   = useNavigate();
+  const challenges = useChallenges();
+
+  const active = challenges.filter(c => c.status === 'active' || c.status === 'near_limit');
+  const total  = challenges.length;
+  const passed = challenges.filter(c => c.status === 'passed').length;
+  const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+  const overallPnl = challenges.reduce((s, c) => s + c.total_pnl, 0);
+
+  if (challenges.length === 0) return null;
+
+  return (
+    <div style={cardStyle}>
+      {/* Header row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14,
+      }}>
+        <div style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: '1px',
+          color: 'var(--text-muted)', textTransform: 'uppercase',
+        }}>
+          Prop Firm Challenges
+        </div>
+        <button
+          onClick={() => navigate('/propfirm?tab=myChallenges')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 11, color: 'var(--text-muted)', fontFamily: 'inherit',
+            padding: 0,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--green)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+        >
+          View all →
+        </button>
+      </div>
+
+      {/* Summary stats */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14,
+      }}>
+        {[
+          { val: String(active.length), label: 'Active' },
+          { val: `${passRate}%`,        label: 'Pass rate' },
+          {
+            val: overallPnl >= 0
+              ? `+$${overallPnl.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+              : `-$${Math.abs(overallPnl).toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
+            label: 'Overall P&L',
+            color: overallPnl >= 0 ? '#1D9E75' : '#E24B4A',
+          },
+        ].map(s => (
+          <div key={s.label} style={{
+            background: 'var(--surface-2, var(--bg-surface))',
+            border: '1px solid var(--border)',
+            borderRadius: 8, padding: '10px 12px',
+          }}>
+            <div style={{
+              fontSize: 15, fontWeight: 600,
+              color: ('color' in s ? s.color : undefined) ?? 'var(--text)',
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              {s.val}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Active challenge mini-cards */}
+      {active.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {active.map(c => {
+            const profitRule = c.rules.find(r => r.type === 'profit_target');
+            const progress   = profitRule
+              ? Math.min(100, Math.round((profitRule.used / profitRule.limit) * 100))
+              : 0;
+            const pnlColor   = c.total_pnl >= 0 ? '#1D9E75' : '#E24B4A';
+
+            return (
+              <div
+                key={c.id}
+                style={{
+                  background: 'var(--surface-2, var(--bg-surface))',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8, padding: '10px 12px',
+                }}
+              >
+                {/* Top row */}
+                <div style={{
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'space-between', marginBottom: 6,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {firmBadge(c.firm)}
+                    <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                      ${(c.account_size / 1000).toFixed(0)}k · Phase {c.phase}
+                    </span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: pnlColor, fontVariantNumeric: 'tabular-nums' }}>
+                      {c.total_pnl >= 0 ? '+' : ''}${c.total_pnl.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    </span>
+                    <span style={{ fontSize: 10, color: 'var(--text-3)', marginLeft: 6 }}>
+                      {c.days_remaining}d left
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div style={{ height: 4, background: 'var(--bg-surface, var(--border))', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${progress}%`, height: '100%',
+                    background: 'var(--green)', borderRadius: 2,
+                    transition: 'width 0.3s',
+                  }} />
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 3 }}>
+                  {progress}% of profit target
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function PortfolioPage() {
@@ -319,7 +453,7 @@ export default function PortfolioPage() {
 
         {/* ── P&L by Group ──────────────────────────────────────────────── */}
         <div style={cardStyle}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1px', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 14 }}>
             P&L by Group
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
@@ -358,10 +492,13 @@ export default function PortfolioPage() {
           </div>
         </div>
 
+        {/* ── Prop Firm Challenges ───────────────────────────────────────── */}
+        <PropFirmSummaryCard cardStyle={cardStyle} />
+
         {/* ── Positions ─────────────────────────────────────────────────── */}
         <div style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1px', color: 'var(--text-3)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               All Positions
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -391,7 +528,7 @@ export default function PortfolioPage() {
               marginBottom: 2,
             }}>
               {['Ticker', 'Type', 'Entry', 'Now', 'P&L', 'Progress', 'Source'].map(h => (
-                <div key={h} style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{h}</div>
+                <div key={h} style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{h}</div>
               ))}
             </div>
           )}
@@ -494,7 +631,7 @@ export default function PortfolioPage() {
         {/* ── Watchlist ──────────────────────────────────────────────────── */}
         <div style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1px', color: 'var(--text-3)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Watchlist
             </div>
             <button

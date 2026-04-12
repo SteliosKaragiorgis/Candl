@@ -26,7 +26,22 @@ export default function SocialCard({ post }: { post: SocialPost }) {
   const [commentHov, setCommentHov] = useState(false);
   const [shareHov, setShareHov] = useState(false);
   const [bookmarkHov, setBookmarkHov] = useState(false);
+  const [shareCardHov, setShareCardHov] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const shareButtonRef = useRef<HTMLButtonElement>(null);
+
+  async function handleShareCard(e: React.MouseEvent) {
+    e.stopPropagation();
+    const text = `${post.user.name} on ${post.ticker ? '$' + post.ticker : 'markets'}`;
+    const url  = `${window.location.origin}/post/${post.id}`;
+    if (navigator.share) {
+      await navigator.share({ title: text, url }).catch(() => null);
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }
 
   function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
@@ -115,11 +130,12 @@ export default function SocialCard({ post }: { post: SocialPost }) {
         onMouseLeave={() => setHovered(false)}
         style={{
           display: 'flex', gap: 12,
-          paddingTop: '14px', paddingBottom: '14px', paddingRight: '16px', paddingLeft: '12px',
-          borderLeft: '2px solid #2a2a2a',
-          borderBottom: '0.5px solid #1e1e1e',
-          background: hovered ? 'var(--surface)' : 'transparent',
-          cursor: 'pointer', transition: 'background 0.1s',
+          padding: '14px 16px 14px 12px',
+          border: `0.5px solid ${hovered ? 'var(--border-soft)' : 'var(--border)'}`,
+          borderLeft: '2px solid var(--border)',
+          borderRadius: 8,
+          background: 'var(--bg-card)',
+          cursor: 'pointer', transition: 'border-color 0.1s',
         }}
       >
         {/* Avatar */}
@@ -141,7 +157,7 @@ export default function SocialCard({ post }: { post: SocialPost }) {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
             <span
               onClick={e => { e.stopPropagation(); navigate(`/profile/${post.user.id}`); }}
-              style={{ fontSize: 14, fontWeight: 600, color: '#e0e0e0', cursor: 'pointer' }}
+              style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}
               onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}
               onMouseLeave={e => (e.currentTarget.style.textDecoration = 'none')}
             >
@@ -160,9 +176,9 @@ export default function SocialCard({ post }: { post: SocialPost }) {
             <span style={{ fontSize: 13, color: 'var(--text-3)' }}>·</span>
             <span style={{ fontSize: 13, color: 'var(--text-3)' }}>{post.createdAt}</span>
             <span style={{
-              fontSize: 10, fontWeight: 500, color: '#555',
+              fontSize: 10, fontWeight: 500, color: 'var(--text-muted)',
               padding: '1px 6px', borderRadius: 4,
-              background: '#161616', border: '0.5px solid #222',
+              background: 'var(--surface2)', border: '0.5px solid var(--border-emphasis)',
               marginLeft: 6,
             }}>
               SOCIAL
@@ -197,7 +213,7 @@ export default function SocialCard({ post }: { post: SocialPost }) {
           )}
 
           {/* Body */}
-          <p style={{ fontSize: 14, color: '#c0c0c0', lineHeight: 1.6, margin: '0 0 12px 0', whiteSpace: 'pre-wrap' }}>
+          <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6, margin: '0 0 12px 0', whiteSpace: 'pre-wrap' }}>
             {renderBody(post.body)}
           </p>
 
@@ -270,6 +286,22 @@ export default function SocialCard({ post }: { post: SocialPost }) {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
               </svg>
+            </button>
+
+            <button
+              onClick={handleShareCard}
+              onMouseEnter={() => setShareCardHov(true)}
+              onMouseLeave={() => setShareCardHov(false)}
+              style={{
+                fontSize: 11, fontWeight: 500,
+                padding: '3px 9px', borderRadius: 4,
+                border: '0.5px solid var(--border-hard)',
+                background: 'transparent',
+                color: shareCopied ? 'var(--green)' : shareCardHov ? 'var(--text-2)' : 'var(--text-3)',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              {shareCopied ? 'Copied ✓' : 'Share ↗'}
             </button>
           </div>
         </div>

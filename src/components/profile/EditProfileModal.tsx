@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { User } from '../../types';
+import type { MethodologyKey, MarketKey } from '../../hooks/useBadges';
+import { METHODOLOGY_LABELS, MARKET_LABELS } from '../../hooks/useBadges';
 
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -43,6 +45,24 @@ export default function EditProfileModal({
   const [privacyPublic, setPrivacyPublic] = useState(true);
   const [showSectors, setShowSectors] = useState(true);
   const [allowMessages, setAllowMessages] = useState(false);
+  const [methodologies, setMethodologies] = useState<MethodologyKey[]>([]);
+  const [markets, setMarkets] = useState<MarketKey[]>([]);
+
+  function toggleMethodology(key: MethodologyKey) {
+    setMethodologies(prev => {
+      if (prev.includes(key)) return prev.filter(m => m !== key)
+      if (prev.length >= 2) return prev
+      return [...prev, key]
+    })
+  }
+
+  function toggleMarket(key: MarketKey) {
+    setMarkets(prev => {
+      if (prev.includes(key)) return prev.filter(m => m !== key)
+      if (prev.length >= 2) return prev
+      return [...prev, key]
+    })
+  }
 
 
   function removeTag(tag: string) {
@@ -271,6 +291,78 @@ export default function EditProfileModal({
                   ))}
                 </select>
               </div>
+            </div>
+          </div>
+
+          {/* TRADING STYLE */}
+          <div style={sectionStyle}>
+            <div style={sectionHeaderStyle}>Trading style</div>
+            <div style={sectionBodyStyle}>
+
+              {/* Methodology picker */}
+              <div style={{ marginBottom: 18 }}>
+                <label style={{ ...labelStyle, marginBottom: 8, display: 'block' }}>
+                  Your methodology (up to 2)
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {(Object.keys(METHODOLOGY_LABELS) as MethodologyKey[]).map(key => {
+                    const active = methodologies.includes(key)
+                    const disabled = !active && methodologies.length >= 2
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => !disabled && toggleMethodology(key)}
+                        style={{
+                          padding: '5px 12px', borderRadius: 6,
+                          border: '0.5px solid var(--border-hard)',
+                          background: active ? 'var(--bg-surface)' : 'transparent',
+                          color: active ? 'var(--text-1, var(--text))' : 'var(--text-3)',
+                          fontWeight: active ? 500 : 400,
+                          fontSize: 12, cursor: disabled ? 'not-allowed' : 'pointer',
+                          fontFamily: 'Inter, sans-serif',
+                          opacity: disabled ? 0.4 : 1,
+                          transition: 'all 0.1s',
+                        }}
+                      >
+                        {METHODOLOGY_LABELS[key]}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Markets picker */}
+              <div>
+                <label style={{ ...labelStyle, marginBottom: 8, display: 'block' }}>
+                  Markets you trade (up to 2)
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {(Object.keys(MARKET_LABELS) as MarketKey[]).map(key => {
+                    const active = markets.includes(key)
+                    const disabled = !active && markets.length >= 2
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => !disabled && toggleMarket(key)}
+                        style={{
+                          padding: '5px 12px', borderRadius: 6,
+                          border: '0.5px solid var(--border-hard)',
+                          background: active ? 'var(--bg-surface)' : 'transparent',
+                          color: active ? 'var(--text-1, var(--text))' : 'var(--text-3)',
+                          fontWeight: active ? 500 : 400,
+                          fontSize: 12, cursor: disabled ? 'not-allowed' : 'pointer',
+                          fontFamily: 'Inter, sans-serif',
+                          opacity: disabled ? 0.4 : 1,
+                          transition: 'all 0.1s',
+                        }}
+                      >
+                        {MARKET_LABELS[key]}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
             </div>
           </div>
 

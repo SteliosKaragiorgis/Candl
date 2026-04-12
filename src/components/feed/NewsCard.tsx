@@ -40,11 +40,12 @@ export default function NewsCard({ item }: { item: NewsItem }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', gap: 12,
-        paddingTop: '14px', paddingBottom: '14px', paddingRight: '16px', paddingLeft: '12px',
+        padding: '14px 16px 14px 12px',
+        border: `0.5px solid ${hovered ? 'var(--border-soft)' : 'var(--border)'}`,
         borderLeft: '2px solid #1d9bf0',
-        borderBottom: '0.5px solid #1e1e1e',
-        background: hovered ? 'var(--surface)' : 'transparent',
-        transition: 'background 0.1s',
+        borderRadius: 8,
+        background: 'var(--bg-card)',
+        transition: 'border-color 0.1s',
       }}
     >
       {/* System "News" avatar */}
@@ -116,7 +117,7 @@ export default function NewsCard({ item }: { item: NewsItem }) {
             borderBottom: '0.5px solid var(--border)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.04em', color: '#555555', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.04em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                 IMPACT
               </span>
               <span style={{ fontSize: 13, fontWeight: 500, color: '#1d9bf0', fontVariantNumeric: 'tabular-nums' }}>
@@ -172,7 +173,7 @@ export default function NewsCard({ item }: { item: NewsItem }) {
                   <div style={{ position: 'absolute', left: '65%', top: 0, bottom: 0 }}>
                     <div style={{
                       position: 'absolute', top: 0, left: 5,
-                      fontSize: 9, fontWeight: 500, color: '#f59e0b',
+                      fontSize: 10, fontWeight: 500, color: '#f59e0b',
                       whiteSpace: 'nowrap', letterSpacing: 0.2,
                     }}>
                       News drop

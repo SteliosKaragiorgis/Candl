@@ -1,10 +1,16 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { DEMO_POSTS, COMMENTS, currentUser } from '../data/demo';
 import type { Comment } from '../data/demo';
-import type { TradePost, InvestmentPost, CommentaryPost, SocialPost } from '../types';
+import type { TradePost as LegacyTradePost, InvestmentPost, CommentaryPost as LegacyCommentaryPost, SocialPost } from '../types';
+import type { Post as LegacyPost } from '../types';
+import type { Post } from '../types/post';
+import type { PostAuthor } from '../types/post';
 import { useMobile } from '../hooks/useMobile';
+import { usePublishedPosts } from '../hooks/usePublishedPosts';
 import ShareDropdown from '../components/feed/ShareDropdown';
+import PostCard from '../components/feed/PostCard';
+import FeedErrorBoundary from '../components/feed/FeedErrorBoundary';
 
 const CONVICTION_COLOR: Record<string, string> = {
   High: 'var(--green)', Medium: 'var(--gold)', Speculative: 'var(--red)',
@@ -13,6 +19,78 @@ const ACCENT: Record<string, string> = {
   BUY: 'var(--green)', SELL: 'var(--red)', SHORT: 'var(--red)',
 };
 
+// ── New typed demo posts (shared with FeedPage) ──────────────────────────────
+// In a real app these would come from a shared store / API.
+
+const DEMO_NEW_POSTS: Post[] = [
+  {
+    id: 'np-1', type: 'TRADE',
+    author: { id: 'u1', displayName: 'Alex Kim', handle: 'alexkim', avatarInitials: 'AK', bio: 'Swing trader · FTMO funded', isVerified: true, isMT5Connected: true, winRate: 74, totalTrades: 312, avgRR: 2.1 },
+    body: '$NVDA pre-earnings momentum play. **Textbook RSI reset** off the 50-day. Entered on the re-test of $858 with tight risk.',
+    createdAt: new Date(Date.now() - 8 * 60000).toISOString(),
+    likes: 412, comments: 58, isLiked: false,
+    tradeData: { symbol: 'NVDA', direction: 'LONG', entry: 858.40, exit: 924.60, stopLoss: 836.00, takeProfit: 930.00, pnl: 662.00, rMultiple: 2.9, timeframe: 'Daily', duration: '3d 4h', source: 'MT5' },
+    lesson: 'Patience at key levels pays. Waited 2 days for the re-test instead of chasing.',
+  },
+  {
+    id: 'np-2', type: 'TRADE',
+    author: { id: 'u2', displayName: 'Sara R', handle: 'sarar_fx', avatarInitials: 'SR', bio: 'Forex · Price action', isVerified: true, isMT5Connected: true },
+    body: 'Shorted $EURUSD on the London open rejection. Clean bearish engulfing at the H4 resistance zone.',
+    createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
+    likes: 89, comments: 12, isLiked: true,
+    tradeData: { symbol: 'EURUSD', direction: 'SHORT', entry: 1.08540, exit: 1.08210, stopLoss: 1.08720, takeProfit: 1.07800, pnl: 330.00, rMultiple: 1.8, timeframe: 'H4', duration: '4h 20m', source: 'MT5' },
+  },
+  {
+    id: 'np-3', type: 'TRADE',
+    author: { id: 'u3', displayName: 'Mike W', handle: 'mikew_trades', avatarInitials: 'MW', bio: 'Day trader · Indices', isVerified: false, isMT5Connected: false },
+    body: 'Long $NAS100 on the 9:30 open surge. Stopped out — volume dried up faster than expected.',
+    createdAt: new Date(Date.now() - 5 * 3600000).toISOString(),
+    likes: 34, comments: 7, isLiked: false,
+    tradeData: { symbol: 'NAS100', direction: 'LONG', entry: 17840, exit: 17795, stopLoss: 17790, takeProfit: 17960, pnl: -450.00, rMultiple: -0.9, timeframe: 'M15', duration: '42m', source: 'MANUAL' },
+    lesson: 'Never trade the first 5 minutes of the open. Wait for a clear direction before entering.',
+    rule: 'No trades in the first 5 minutes after market open.',
+  },
+  {
+    id: 'np-4', type: 'INVEST',
+    author: { id: 'u4', displayName: 'Jamie T', handle: 'jamiet_inv', avatarInitials: 'JT', bio: 'Growth investor · Tech focus', isVerified: true, isMT5Connected: false },
+    body: 'Adding to my $MSFT position after the Azure beat. AI infrastructure spend is just getting started.',
+    createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+    likes: 201, comments: 33, isLiked: false,
+    investData: { symbol: 'MSFT', stance: 'BULLISH', entry: 384.50, target: 440.00, stop: 360.00, horizon: '12-18m', thesis: 'Azure AI workloads are growing at 3x the rate of the broader cloud market.' },
+  },
+  {
+    id: 'np-5', type: 'COMMENTARY',
+    author: { id: 'u5', displayName: 'Kay L', handle: 'kayl_macro', avatarInitials: 'KL', bio: 'Macro · Global markets', isVerified: false, isMT5Connected: false },
+    body: 'Friday CPI came in hot at 3.5%. Fed rate cut expectations for June are now effectively priced out. Watch $DXY strength and its impact on $EURUSD and $GLD.',
+    createdAt: new Date(Date.now() - 3 * 3600000).toISOString(),
+    likes: 178, comments: 44, isLiked: false,
+  },
+  {
+    id: 'np-6', type: 'PROP_FIRM',
+    author: { id: 'u6', displayName: 'Ryan C', handle: 'ryanc_props', avatarInitials: 'RC', bio: 'Full-time trader · FTMO funded', isVerified: true, isMT5Connected: true },
+    body: 'Stayed disciplined for 18 days. No revenge trades, stuck to my A-setups only.',
+    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+    likes: 540, comments: 81, isLiked: false,
+    propFirmData: { firm: 'FTMO', accountSize: '$100k', phase: 'Phase 1', result: 'PASSED', daysUsed: 18, finalPnl: 11200, winRate: 67, avgRR: 2.1, lesson: 'The challenge is won in the planning, not the execution.' },
+  },
+  {
+    id: 'np-7', type: 'PROP_FIRM',
+    author: { id: 'u7', displayName: 'Jordan B', handle: 'jordan_fx', avatarInitials: 'JB', bio: 'Forex · Learning the hard way', isVerified: false, isMT5Connected: false },
+    body: 'Blew the drawdown limit on day 6. Three consecutive revenge trades after my first loss.',
+    createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
+    likes: 312, comments: 96, isLiked: true,
+    propFirmData: { firm: 'APEX', accountSize: '$50k', phase: 'Phase 1', result: 'FAILED', daysUsed: 6, finalPnl: -2800, winRate: 33, avgRR: 0.6, whatIllDoDifferently: 'Hard stop after 2 losses in a day.' },
+  },
+  {
+    id: 'np-8', type: 'WEEKLY_RECAP',
+    author: { id: 'candl-ai', displayName: 'Candl. AI', handle: 'candl', avatarInitials: 'AI', isVerified: false, isMT5Connected: false },
+    createdAt: new Date(Date.now() - 12 * 3600000).toISOString(),
+    likes: 0, comments: 0, isLiked: false,
+    recapData: { weekOf: 'Apr 1-7', totalPnl: 2340.50, winRate: 64, avgRR: 1.8, tradeCount: 14, generatedAt: new Date(Date.now() - 12 * 3600000).toISOString(), narrative: 'A positive week driven by two high-conviction setups on $NVDA and $EURUSD.' },
+  },
+];
+
+// ── Comment item ─────────────────────────────────────────────────────────────
 
 function CommentItem({
   comment,
@@ -92,7 +170,6 @@ function CommentItem({
           )}
         </div>
 
-        {/* Inline reply form */}
         {replyOpen && (
           <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
             <div style={{
@@ -104,7 +181,7 @@ function CommentItem({
               {currentUser.initials}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: 'var(--text4)', marginBottom: 4 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>
                 Replying to <span style={{ color: 'var(--blue)', fontWeight: 600 }}>{comment.user.handle}</span>
               </div>
               <textarea
@@ -132,7 +209,6 @@ function CommentItem({
           </div>
         )}
 
-        {/* Nested replies */}
         {comment.replies && comment.replies.length > 0 && (
           <div style={{ marginLeft: 10, marginTop: 10, paddingLeft: 18, borderLeft: '2px solid var(--border2)' }}>
             {comment.replies.map(r => <CommentItem key={r.id} comment={r} nested />)}
@@ -143,34 +219,213 @@ function CommentItem({
   );
 }
 
+// ── Legacy post detail (for old demo posts) ──────────────────────────────────
+
+function LegacyPostDetail({ post }: { post: LegacyPost }) {
+  const isMobile = useMobile();
+  const trade      = post.postType === 'trade'      ? post as LegacyTradePost      : null;
+  const invest     = post.postType === 'investment'  ? post as InvestmentPost  : null;
+  const commentary = post.postType === 'commentary'  ? post as LegacyCommentaryPost  : null;
+  const social     = post.postType === 'social'      ? post as SocialPost      : null;
+  const ticker     = trade?.ticker ?? invest?.ticker;
+  const tvSymbol   = trade?.tvSymbol ?? (ticker ? `NASDAQ:${ticker}` : null);
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+  return (
+    <>
+      {/* Post card */}
+      <div style={{
+        background: 'var(--surface)', border: '1px solid var(--border)',
+        borderLeft: `3px solid ${trade ? ACCENT[trade.direction] : invest ? 'var(--blue)' : social ? 'transparent' : 'var(--gold)'}`,
+        borderRadius: 16, overflow: 'hidden', marginBottom: 16,
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '14px 16px 12px' }}>
+          <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${post.user.avatarGradient[0]}, ${post.user.avatarGradient[1]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 700, boxShadow: '0 1px 6px rgba(0,0,0,0.18)' }}>
+            {post.user.initials}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{post.user.name}</span>
+              {trade && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'rgba(234,88,12,0.1)', color: '#ea580c', border: '1px solid rgba(234,88,12,0.2)' }}>TRADE</span>}
+              {invest && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'var(--green-bg)', color: 'var(--green)', border: '1px solid var(--green-border)' }}>INVEST</span>}
+              {commentary && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'var(--gold-bg)', color: 'var(--gold)', border: '1px solid var(--gold-border)' }}>COMMENTARY</span>}
+              {post.user.verified && <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--blue)"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>@{post.user.username} · {post.createdAt}</div>
+          </div>
+          {ticker && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'var(--blue-bg)', border: '1px solid var(--blue-border)', borderRadius: 8, padding: '5px 9px', minWidth: 48, flexShrink: 0 }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700, color: 'var(--blue)' }}>{ticker}</span>
+              <span style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>NASDAQ</span>
+            </div>
+          )}
+        </div>
+
+        {commentary && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, margin: '0 16px 10px', background: 'var(--gold-bg)', border: '1px solid var(--gold-border)', borderRadius: 6, padding: '5px 10px' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#92400e' }}>News: {commentary.newsEvent} · {commentary.newsDate}</span>
+          </div>
+        )}
+
+        <p style={{ padding: '0 16px 12px', fontSize: 14, lineHeight: 1.65, color: 'var(--text)', margin: 0 }}>{post.body}</p>
+
+        {trade && (
+          <div style={{ margin: '0 16px 12px', borderRadius: 10, padding: '10px 12px', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '1.2px', padding: '3px 10px', borderRadius: 5, color: '#fff', background: trade.direction === 'BUY' ? 'var(--green)' : 'var(--red)' }}>{trade.direction}</span>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{trade.ticker}</span>
+              <span style={{ fontSize: 10, color: 'var(--text3)', padding: '1px 7px', borderRadius: 20, background: 'var(--surface2)', border: '1px solid var(--border)' }}>{trade.strategy}</span>
+              <span style={{ fontSize: 10, color: 'var(--text3)', padding: '1px 7px', borderRadius: 20, background: 'var(--surface2)', border: '1px solid var(--border)' }}>{trade.timeframe}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 6 }}>
+              {[
+                { label: 'ENTRY',  value: `$${trade.entry.toFixed(2)}`,  color: 'var(--text)' },
+                { label: 'TARGET', value: `$${trade.target.toFixed(2)}`, color: 'var(--green)' },
+                { label: 'STOP',   value: `$${trade.stop.toFixed(2)}`,   color: 'var(--red)' },
+                { label: 'R:R',    value: trade.rrRatio,                  color: 'var(--blue)' },
+              ].map(({ label, value, color }) => (
+                <div key={label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 3 }}>{label}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700, lineHeight: 1, color }}>{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {trade && (
+          <div style={{ margin: '0 16px 12px' }}>
+            {[
+              { label: 'WHY NOW', value: trade.whyNow, dot: 'var(--blue)' },
+              { label: 'RISK', value: trade.risk, dot: 'var(--red)' },
+              { label: 'INVALIDATION', value: trade.invalidation, dot: 'var(--gold)' },
+            ].map(({ label, value, dot }, i, arr) => (
+              <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border2)' : 'none' }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, marginTop: 5, background: dot }} />
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.8px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5 }}>{value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {invest && (
+          <div style={{ margin: '0 16px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>{invest.ticker}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 2 }}>Conviction</div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: CONVICTION_COLOR[invest.conviction] }}>{invest.conviction}</div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Horizon: <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{invest.horizon}</span></div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Added At: <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{invest.addedAt}</span></div>
+            </div>
+          </div>
+        )}
+
+        {invest && (
+          <div style={{ margin: '0 16px 12px' }}>
+            {[
+              { label: 'CATALYST', value: invest.catalyst, dot: 'var(--blue)' },
+              { label: 'VALUATION', value: invest.valuation, dot: 'var(--green)' },
+              { label: 'RISK', value: invest.risk, dot: 'var(--red)' },
+            ].map(({ label, value, dot }, i, arr) => (
+              <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border2)' : 'none' }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, marginTop: 5, background: dot }} />
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.8px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5 }}>{value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {social?.images && social.images.length > 0 && (
+          <div style={{ padding: '0 16px 12px' }}>
+            <div style={{
+              display: social.images.length === 1 ? 'block' : 'grid',
+              gridTemplateColumns: social.images.length >= 2 ? '1fr 1fr' : undefined,
+              gap: 2, borderRadius: 12, overflow: 'hidden',
+              border: '1px solid var(--border)',
+            }}>
+              {social.images.map((src, i) => (
+                <img key={i} src={src} alt="" style={{ width: '100%', display: 'block', objectFit: 'cover', maxHeight: social.images!.length === 1 ? 400 : 220 }} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 5, padding: '0 16px 14px', flexWrap: 'wrap' }}>
+          {post.hashtags.map(tag => (
+            <span key={tag} style={{ fontSize: 11, color: 'var(--blue)', fontWeight: 500, cursor: 'pointer' }}>{tag}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* TradingView chart */}
+      {tvSymbol && (
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{ticker} · Daily Chart</span>
+            </div>
+          </div>
+          <iframe
+            src={`https://www.tradingview.com/widgetembed/?symbol=${tvSymbol}&interval=D&theme=${isDark ? 'dark' : 'light'}&style=1&locale=en&hide_top_toolbar=0&hide_legend=0&saveimage=0&calendar=0&hide_volume=1`}
+            style={{ width: '100%', height: isMobile ? 280 : 420, border: 'none', display: 'block' }}
+            allowTransparency={true}
+            allowFullScreen={true}
+            title={`${ticker} chart`}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── Main page ────────────────────────────────────────────────────────────────
+
 export default function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const isMobile = useMobile();
+  const { posts: publishedPosts } = usePublishedPosts();
 
-  const post = DEMO_POSTS.find(p => p.id === postId);
+  // Find in legacy DEMO_POSTS
+  const legacyPost = DEMO_POSTS.find(p => p.id === postId);
+  // Find in new typed posts
+  const newPost = DEMO_NEW_POSTS.find(p => p.id === postId);
+  // Find in published MT5 posts
+  const publishedPost = publishedPosts.find(p => p.id === postId);
+
+  const found = !!(legacyPost || newPost || publishedPost);
 
   const [commentText, setCommentText] = useState('');
   const [backHovered, setBackHovered] = useState(false);
   const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(post?.likes ?? 0);
+  const [likeCount, setLikeCount] = useState(
+    legacyPost?.likes ?? newPost?.likes ?? 0
+  );
   const [likeAnim, setLikeAnim] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const shareAnchorRef = useRef<HTMLButtonElement>(null);
   const commentsRef = useRef<HTMLDivElement>(null);
 
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const initComments = COMMENTS[postId ?? ''] ?? [];
   const [localComments, setLocalComments] = useState<Comment[]>(initComments);
 
-  // Scroll to comments section if navigated with #comments hash
   useEffect(() => {
     if (window.location.hash === '#comments' && commentsRef.current) {
       setTimeout(() => commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
     }
   }, []);
 
-  if (!post) {
+  if (!found) {
     return (
       <div style={{ padding: 40, textAlign: 'center' }}>
         <div style={{ fontSize: 32, marginBottom: 12, color: 'var(--text4)' }}>404</div>
@@ -184,13 +439,6 @@ export default function PostDetailPage() {
       </div>
     );
   }
-
-  const trade      = post.postType === 'trade'      ? post as TradePost      : null;
-  const invest     = post.postType === 'investment'  ? post as InvestmentPost  : null;
-  const commentary = post.postType === 'commentary'  ? post as CommentaryPost  : null;
-  const social     = post.postType === 'social'      ? post as SocialPost      : null;
-  const ticker     = trade?.ticker ?? invest?.ticker;
-  const tvSymbol   = trade?.tvSymbol ?? (ticker ? `NASDAQ:${ticker}` : null);
 
   function handleLike() {
     const next = !liked;
@@ -240,6 +488,9 @@ export default function PostDetailPage() {
     ));
   }
 
+  // Determine which share title to use
+  const shareTitle = legacyPost?.body.slice(0, 80) ?? newPost?.body?.slice(0, 80) ?? 'Trade post';
+
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100%', padding: isMobile ? '12px 14px 100px' : '24px 16px 80px', maxWidth: 780, margin: '0 auto' }}>
 
@@ -256,182 +507,19 @@ export default function PostDetailPage() {
         <span style={{ fontSize: 13 }}>Back</span>
       </div>
 
-      {/* Post card */}
-      <div style={{
-        background: 'var(--surface)', border: '1px solid var(--border)',
-        borderLeft: `3px solid ${trade ? ACCENT[trade.direction] : invest ? 'var(--blue)' : social ? 'transparent' : 'var(--gold)'}`,
-        borderRadius: 16, overflow: 'hidden', marginBottom: 16,
-      }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '14px 16px 12px' }}>
-          <div
-            onClick={() => navigate(`/profile/${post.user.id}`)}
-            style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${post.user.avatarGradient[0]}, ${post.user.avatarGradient[1]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 700, boxShadow: '0 1px 6px rgba(0,0,0,0.18)', cursor: 'pointer' }}
-          >
-            {post.user.initials}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
-              <span onClick={() => navigate(`/profile/${post.user.id}`)} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', cursor: 'pointer' }}>{post.user.name}</span>
-              {trade && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'rgba(234,88,12,0.1)', color: '#ea580c', border: '1px solid rgba(234,88,12,0.2)' }}>TRADE</span>}
-              {invest && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'var(--green-bg)', color: 'var(--green)', border: '1px solid var(--green-border)' }}>INVEST</span>}
-              {commentary && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: 'var(--gold-bg)', color: 'var(--gold)', border: '1px solid var(--gold-border)' }}>COMMENTARY</span>}
-              {social?.sentiment && (() => {
-                const c = social.sentiment === 'Bullish' ? { bg: 'rgba(22,163,74,0.12)', color: '#16a34a', border: 'rgba(22,163,74,0.35)' }
-                        : social.sentiment === 'Bearish' ? { bg: 'rgba(220,38,38,0.12)', color: '#dc2626', border: 'rgba(220,38,38,0.35)' }
-                        : { bg: 'rgba(217,119,6,0.12)', color: '#d97706', border: 'rgba(217,119,6,0.35)' };
-                return <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', padding: '1px 6px', borderRadius: 20, background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>{social.sentiment!.toUpperCase()}</span>;
-              })()}
-              {post.user.verified && <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--blue)"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>}
-            </div>
-            <div style={{ fontSize: 10, color: 'var(--text4)', fontFamily: 'JetBrains Mono, monospace' }}>@{post.user.username} · {post.createdAt}</div>
-          </div>
-          {ticker && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'var(--blue-bg)', border: '1px solid var(--blue-border)', borderRadius: 8, padding: '5px 9px', minWidth: 48, flexShrink: 0 }}>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700, color: 'var(--blue)' }}>{ticker}</span>
-              <span style={{ fontSize: 7, color: 'var(--text4)', marginTop: 1 }}>NASDAQ</span>
-            </div>
-          )}
+      {/* Post content — new type or legacy */}
+      {newPost ? (
+        <div style={{ marginBottom: 16 }}>
+          <FeedErrorBoundary>
+            <PostCard post={newPost} />
+          </FeedErrorBoundary>
         </div>
-
-        {/* Commentary news tag */}
-        {commentary && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, margin: '0 16px 10px', background: 'var(--gold-bg)', border: '1px solid var(--gold-border)', borderRadius: 6, padding: '5px 10px' }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: '#92400e' }}>📰 {commentary.newsEvent} · {commentary.newsDate}</span>
-          </div>
-        )}
-
-        {/* Body */}
-        <p style={{ padding: '0 16px 12px', fontSize: 14, lineHeight: 1.65, color: 'var(--text)', margin: 0 }}>{post.body}</p>
-
-        {/* Trade block */}
-        {trade && (
-          <div style={{ margin: '0 16px 12px', borderRadius: 10, padding: '10px 12px', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '1.2px', padding: '3px 10px', borderRadius: 5, color: '#fff', background: trade.direction === 'BUY' ? 'var(--green)' : 'var(--red)' }}>{trade.direction}</span>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{trade.ticker}</span>
-              <span style={{ fontSize: 9, color: 'var(--text3)', padding: '1px 7px', borderRadius: 20, background: 'var(--surface2)', border: '1px solid var(--border)' }}>{trade.strategy}</span>
-              <span style={{ fontSize: 9, color: 'var(--text3)', padding: '1px 7px', borderRadius: 20, background: 'var(--surface2)', border: '1px solid var(--border)' }}>{trade.timeframe}</span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 6 }}>
-              {[
-                { label: 'ENTRY',  value: `$${trade.entry.toFixed(2)}`,  color: 'var(--text)' },
-                { label: 'TARGET', value: `$${trade.target.toFixed(2)}`, color: 'var(--green)' },
-                { label: 'STOP',   value: `$${trade.stop.toFixed(2)}`,   color: 'var(--red)' },
-                { label: 'R:R',    value: trade.rrRatio,                  color: 'var(--blue)' },
-              ].map(({ label, value, color }) => (
-                <div key={label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 3 }}>{label}</span>
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700, lineHeight: 1, color }}>{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Trade thesis */}
-        {trade && (
-          <div style={{ margin: '0 16px 12px' }}>
-            {[
-              { label: 'WHY NOW', value: trade.whyNow, dot: 'var(--blue)' },
-              { label: 'RISK', value: trade.risk, dot: 'var(--red)' },
-              { label: 'INVALIDATION', value: trade.invalidation, dot: 'var(--gold)' },
-            ].map(({ label, value, dot }, i, arr) => (
-              <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border2)' : 'none' }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, marginTop: 5, background: dot }} />
-                <div>
-                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>{value}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Investment conviction */}
-        {invest && (
-          <div style={{ margin: '0 16px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>{invest.ticker}</div>
-              <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 1, color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 2 }}>Conviction</div>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: CONVICTION_COLOR[invest.conviction] }}>{invest.conviction}</div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ fontSize: 10, color: 'var(--text3)' }}>Horizon: <span style={{ fontWeight: 600, color: 'var(--text2)' }}>{invest.horizon}</span></div>
-              <div style={{ fontSize: 10, color: 'var(--text3)' }}>Added At: <span style={{ fontWeight: 600, color: 'var(--text2)' }}>{invest.addedAt}</span></div>
-            </div>
-          </div>
-        )}
-
-        {/* Investment thesis */}
-        {invest && (
-          <div style={{ margin: '0 16px 12px' }}>
-            {[
-              { label: 'CATALYST', value: invest.catalyst, dot: 'var(--blue)' },
-              { label: 'VALUATION', value: invest.valuation, dot: 'var(--green)' },
-              { label: 'RISK', value: invest.risk, dot: 'var(--red)' },
-            ].map(({ label, value, dot }, i, arr) => (
-              <div key={label} style={{ display: 'flex', gap: 8, padding: '6px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border2)' : 'none' }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, marginTop: 5, background: dot }} />
-                <div>
-                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.8px', color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>{value}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Social images */}
-        {social?.images && social.images.length > 0 && (
-          <div style={{ padding: '0 16px 12px' }}>
-            <div style={{
-              display: social.images.length === 1 ? 'block' : 'grid',
-              gridTemplateColumns: social.images.length >= 2 ? '1fr 1fr' : undefined,
-              gap: 2, borderRadius: 12, overflow: 'hidden',
-              border: '1px solid var(--border)',
-            }}>
-              {social.images.map((src, i) => (
-                <img key={i} src={src} alt="" style={{ width: '100%', display: 'block', objectFit: 'cover', maxHeight: social.images!.length === 1 ? 400 : 220 }} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Hashtags */}
-        <div style={{ display: 'flex', gap: 5, padding: '0 16px 14px', flexWrap: 'wrap' }}>
-          {post.hashtags.map(tag => (
-            <span key={tag} style={{ fontSize: 11, color: 'var(--blue)', fontWeight: 500, cursor: 'pointer' }}>{tag}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* TradingView chart */}
-      {tvSymbol && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{ticker} · Daily Chart</span>
-            </div>
-            <a href={`https://www.tradingview.com/chart/?symbol=${tvSymbol}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontWeight: 600, color: 'var(--blue)', textDecoration: 'none' }}>
-              Open full chart →
-            </a>
-          </div>
-          <iframe
-            src={`https://www.tradingview.com/widgetembed/?symbol=${tvSymbol}&interval=D&theme=${isDark ? 'dark' : 'light'}&style=1&locale=en&hide_top_toolbar=0&hide_legend=0&saveimage=0&calendar=0&hide_volume=1`}
-            style={{ width: '100%', height: isMobile ? 280 : 420, border: 'none', display: 'block' }}
-            allowTransparency={true}
-            allowFullScreen={true}
-            title={`${ticker} chart`}
-          />
-        </div>
-      )}
+      ) : legacyPost ? (
+        <LegacyPostDetail post={legacyPost} />
+      ) : null}
 
       {/* Stats / action row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', borderTop: '1px solid var(--border2)', borderBottom: '1px solid var(--border2)', marginBottom: 20 }}>
-
-        {/* Like button */}
         <button
           onClick={handleLike}
           style={{
@@ -450,7 +538,6 @@ export default function PostDetailPage() {
           {likeCount.toLocaleString()}
         </button>
 
-        {/* Comments count */}
         <button
           onClick={() => commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           style={{
@@ -467,7 +554,6 @@ export default function PostDetailPage() {
           {localComments.length}
         </button>
 
-        {/* Share button */}
         <div style={{ position: 'relative', marginLeft: 'auto' }}>
           <button
             ref={shareAnchorRef}
@@ -489,8 +575,8 @@ export default function PostDetailPage() {
           </button>
           {shareOpen && (
             <ShareDropdown
-              postId={post.id}
-              title={post.body.slice(0, 80)}
+              postId={postId ?? ''}
+              title={shareTitle}
               anchorRef={shareAnchorRef}
               onClose={() => setShareOpen(false)}
             />
@@ -498,10 +584,9 @@ export default function PostDetailPage() {
         </div>
       </div>
 
-      {/* Comments heading */}
-      <div ref={commentsRef} id="comments" style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'var(--text4)', textTransform: 'uppercase', marginBottom: 14 }}>Comments</div>
+      {/* Comments */}
+      <div ref={commentsRef} id="comments" style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 14 }}>Comments</div>
 
-      {/* Comment input */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, alignItems: 'flex-start' }}>
         <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${currentUser.avatarGradient[0]}, ${currentUser.avatarGradient[1]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, fontWeight: 700 }}>
           {currentUser.initials}
@@ -522,7 +607,6 @@ export default function PostDetailPage() {
         </div>
       </div>
 
-      {/* Comment list */}
       <div>
         {localComments.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '30px 0', fontSize: 13, color: 'var(--text4)' }}>No comments yet. Be the first!</div>

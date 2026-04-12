@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Challenge } from '../../types/propfirm';
+import { publishChallengeToFeed } from '../../hooks/usePropFirmCommunity';
 
 interface Props {
   challenge: Challenge;
@@ -34,8 +35,9 @@ export default function ShareChallengeModal({ challenge, onClose }: Props) {
   const [published, setPublished] = useState(false);
 
   function handlePublish() {
+    publishChallengeToFeed(challenge, caption);
     setPublished(true);
-    setTimeout(onClose, 1200);
+    setTimeout(onClose, 800);
   }
 
   const pnlColor = challenge.total_pnl >= 0 ? '#22c55e' : '#ef4444';
@@ -170,11 +172,23 @@ export default function ShareChallengeModal({ challenge, onClose }: Props) {
               fontWeight: 500,
               cursor: published ? 'default' : 'pointer',
               fontFamily: 'inherit',
-              opacity: published ? 0.7 : 1,
+              opacity: published ? 0.85 : 1,
               transition: 'opacity 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
             }}
           >
-            {published ? 'Published ✓' : 'Publish to feed'}
+            {published ? (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Published
+              </>
+            ) : 'Publish to feed'}
           </button>
         </div>
       </div>
